@@ -1,0 +1,3 @@
+// Punto de entrada global. El orden importa: tokens → temas → base → material.
+// Los tokens reales se extraen de Figma en M01 (marca) y M02 (dashboard). Ver context/02-sistema-de-diseno.md.
+@use 'base/reset';
