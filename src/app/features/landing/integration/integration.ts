@@ -1,66 +1,128 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
+import { Terminal } from '../terminal/terminal';
+import { Shell } from '../terminal/shell-tokens';
+
+interface Session {
+  command: readonly string[];
+  output: readonly string[];
+}
+
 interface Step {
   id: string;
   title: string;
   detail: string;
-  request: string;
-  response: string;
+  sessions: Record<Shell, Session>;
 }
 
+const ID = '3f2b9c1e-7a41-4c0e-9d2b-5e8f1a6c0d47';
+const URL = 'https://gatekeeper.example/v1/files';
+
 /**
- * Integración en su forma de trabajo: las tres llamadas reales del contrato.
- * Los valores (encabezado de la API key, IDs, hashes) son de ejemplo.
+ * Integración en su forma de trabajo: las tres llamadas del contrato, en Bash y PowerShell.
+ * Dominio, encabezado de la API key e IDs son de ejemplo (lo dice la nota de la sección).
  */
 @Component({
   selector: 'gk-integration',
+  imports: [Terminal],
   templateUrl: './integration.html',
   styleUrl: './integration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Integration {
-  protected readonly copiedId = signal<string | null>(null);
-  private resetTimer: ReturnType<typeof setTimeout> | undefined;
+  protected readonly shell = signal<Shell>('bash');
+  protected readonly shells: readonly { id: Shell; label: string }[] = [
+    { id: 'bash', label: 'Bash' },
+    { id: 'powershell', label: 'PowerShell' },
+  ];
 
   protected readonly steps: readonly Step[] = [
     {
       id: 'upload',
       title: 'Envía el archivo',
-      detail: 'La API responde de inmediato con un ID; el análisis corre en segundo plano.',
-      request: `curl -X POST https://gatekeeper.example/v1/files \\
-  -H "X-API-Key: $GATEKEEPER_API_KEY" \\
-  -F "file=@foto.jpg"`,
-      response: `202 Accepted
-{ "id": "3f2b9c1e-7a41-4c0e-9d2b-5e8f1a6c0d47", "status": "pending" }`,
+      detail: 'La API responde al instante con un ID. El análisis corre en segundo plano.',
+      sessions: {
+        bash: {
+          command: [
+            `curl -i -X POST ${URL} \\`,
+            '  -H "X-API-Key: $GATEKEEPER_API_KEY" \\',
+            '  -F "file=@foto.jpg"',
+          ],
+          output: [
+            'HTTP/1.1 202 Accepted',
+            'content-type: application/json',
+            '',
+            `{"id":"${ID}","status":"pending"}`,
+          ],
+        },
+        powershell: {
+          command: [
+            `Invoke-RestMethod -Method Post -Uri ${URL} \``,
+            '  -Headers @{ "X-API-Key" = $env:GATEKEEPER_API_KEY } `',
+            '  -Form @{ file = Get-Item .\\foto.jpg }',
+          ],
+          output: [
+            '',
+            'id                                   status',
+            '--                                   ------',
+            `${ID} pending`,
+            '',
+          ],
+        },
+      },
     },
     {
       id: 'status',
       title: 'Consulta el dictamen',
       detail: 'El estado pasa de pendiente a limpio, en cuarentena o rechazado.',
-      request: `curl https://gatekeeper.example/v1/files/3f2b9c1e-7a41-4c0e-9d2b-5e8f1a6c0d47 \\
-  -H "X-API-Key: $GATEKEEPER_API_KEY"`,
-      response: `200 OK
-{ "id": "3f2b9c1e-…", "status": "clean", "detectedType": "image/jpeg" }`,
+      sessions: {
+        bash: {
+          command: [`curl -s ${URL}/${ID} \\`, '  -H "X-API-Key: $GATEKEEPER_API_KEY" | jq'],
+          output: [
+            '{',
+            `  "id": "${ID}",`,
+            '  "status": "clean",',
+            '  "detectedType": "image/jpeg"',
+            '}',
+          ],
+        },
+        powershell: {
+          command: [
+            `Invoke-RestMethod -Uri ${URL}/${ID} \``,
+            '  -Headers @{ "X-API-Key" = $env:GATEKEEPER_API_KEY }',
+          ],
+          output: [
+            '',
+            'id                                   status detectedType',
+            '--                                   ------ ------------',
+            `${ID} clean  image/jpeg`,
+            '',
+          ],
+        },
+      },
     },
     {
       id: 'content',
       title: 'Descarga la copia reconstruida',
       detail: 'Solo existe cuando el estado es limpio. El original nunca se entrega.',
-      request: `curl https://gatekeeper.example/v1/files/3f2b9c1e-7a41-4c0e-9d2b-5e8f1a6c0d47/content \\
-  -H "X-API-Key: $GATEKEEPER_API_KEY" -o foto-limpia.jpg`,
-      response: `200 OK
-(imagen recodificada desde los píxeles, sin EXIF)`,
+      sessions: {
+        bash: {
+          command: [
+            `curl -s ${URL}/${ID}/content \\`,
+            '  -H "X-API-Key: $GATEKEEPER_API_KEY" \\',
+            '  -o foto-limpia.jpg -w "%{http_code}\\n"',
+          ],
+          output: ['200'],
+        },
+        powershell: {
+          command: [
+            `Invoke-WebRequest -Uri ${URL}/${ID}/content \``,
+            '  -Headers @{ "X-API-Key" = $env:GATEKEEPER_API_KEY } `',
+            '  -OutFile foto-limpia.jpg',
+          ],
+          output: [],
+        },
+      },
     },
   ];
-
-  protected async copy(step: Step): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(step.request);
-      this.copiedId.set(step.id);
-      clearTimeout(this.resetTimer);
-      this.resetTimer = setTimeout(() => this.copiedId.set(null), 2000);
-    } catch {
-      this.copiedId.set(null);
-    }
-  }
 }
