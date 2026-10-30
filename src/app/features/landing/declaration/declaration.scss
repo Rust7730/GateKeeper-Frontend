@@ -27,10 +27,26 @@
   color: var(--gk-text-muted);
 }
 
+.ink-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
 .intro {
+  position: relative;
   display: grid;
   gap: var(--gk-space-20);
   padding: clamp(1.25rem, 3vw, 2rem) var(--gk-landing-gutter);
+  background-image:
+    linear-gradient(var(--gk-form-ruling) var(--gk-form-rule), transparent var(--gk-form-rule)),
+    linear-gradient(
+      90deg,
+      var(--gk-form-ruling) var(--gk-form-rule),
+      transparent var(--gk-form-rule)
+    );
+  background-size: var(--gk-form-cell) var(--gk-form-cell);
+  background-position: -1px -1px;
 }
 
 .intro-foot {
@@ -253,6 +269,7 @@ dd.mono {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transform: rotate(var(--gk-stamp-tilt));
+  filter: url('#gk-ink');
   transition:
     opacity var(--gk-duration-stamp) var(--gk-ease-out),
     transform var(--gk-duration-stamp) var(--gk-ease-out);
