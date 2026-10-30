@@ -1,6 +1,6 @@
 # 02 · Sistema de diseño
 
-> **Estado:** fundamentos (color, tipografía, espaciado, radios) extraídos de Figma el 2026-10-29. Pendiente: pesos tipográficos, elevación y densidad de tabla.
+> **Estado:** fundamentos confirmados con el conector de Figma (`get_variable_defs` sobre `7:29095` Dark y `7:29207` Light) el 2026-10-29: los 19 colores en ambos modos coinciden con lo transcrito desde el navegador. Pendiente: elevación y densidad de tabla.
 
 ## 1. Cómo se convierte Figma en código
 
@@ -21,7 +21,7 @@ Ej.: `Color/Status/Quarantined/Bg` → `--gk-color-status-quarantined-bg`.
 
 ## 2. Tokens
 
-> Fuente: Figma `0:1`, frames **Sistema / Fundamentos / Dark** y **/ Light** (colección de variables "Gatekeeper", modos Dark y Light). Leídos el 2026-10-29 desde el navegador (el conector MCP no estaba disponible, ver E-002 y E-007). Valores transcritos de las etiquetas del archivo; al tener el conector, confirmarlos con `get_variable_defs`.
+> Fuente: Figma `0:1`, frames **Sistema / Fundamentos / Dark** (`7:29095`) y **/ Light** (`7:29207`), colección de variables "Gatekeeper". Confirmado con el conector MCP.
 
 **Principio del sistema (texto del propio Figma):** jerarquía neutra; el color se reserva para estados, severidad y foco. **No hay color de acento de marca**: la acción primaria es casi blanca en Dark y casi negra en Light.
 
@@ -70,7 +70,7 @@ Familias: **Inter** (interfaz) e **IBM Plex Mono** (identificadores, rutas, hash
 | `Gatekeeper/Etiqueta`      | `--gk-text-label`   | Inter         | 12 px (en mayúsculas en el ejemplo) |
 | `Gatekeeper/Monoespaciada` | `--gk-text-mono`    | IBM Plex Mono | 12 px                               |
 
-Pesos e interlineados: ⏳ no visibles en modo solo lectura; confirmar con el conector o Dev Mode.
+Pesos e interlineado (confirmados): **Semi Bold 600** en Display, H1, H2 y H3; **Regular 400** en Cuerpo, Etiqueta y Mono. Interlineado **1.5** y espaciado entre letras 0 en todos. El archivo usa además Inter 10 px Regular y IBM Plex Mono 11 px Regular en componentes pequeños.
 
 ### 2.3 Espaciado, radios y otros
 

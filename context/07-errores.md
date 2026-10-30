@@ -75,6 +75,7 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 - **Qué pasó:** en Claude Code el servidor de Figma seguía "pendiente de autorización" y sus herramientas no aparecían; la extracción de la marca se detuvo. En la sesión de claude.ai tampoco cargaron.
 - **Causa:** el conector está conectado en la cuenta, pero sus herramientas no se habilitan en estas sesiones; además, la cuenta del navegador solo tiene permiso de lectura y comentarios sobre el archivo, por lo que la API de plugins (`window.figma`) no está disponible.
 - **Corrección:** se abrió el archivo en el navegador integrado con la sesión de la persona, se navegó a 100 % por los frames _Sistema / Fundamentos / Dark_ y _Light_ y se transcribieron variables, tipografías, espaciado y radios a `02-sistema-de-diseno.md`.
+- **Seguimiento (2026-10-29):** el conector quedó activo en la sesión de claude.ai; `get_variable_defs` confirmó todos los valores transcritos.
 - **Lección / regla:** si el conector no responde, usar el plan B de `08-figma.md` (navegador a 100 %, frames de Fundamentos) en vez de bloquear el módulo. Lo transcrito se marca como "leído de captura" y se confirma con `get_variable_defs` cuando el conector funcione.
 
 ### E-008
