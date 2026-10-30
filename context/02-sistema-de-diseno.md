@@ -134,6 +134,10 @@ El sistema está abierto a mejoras. Estas se revisan **contra Figma** en M02 y s
 | L4  | Sello con textura de tinta (filtro SVG `gk-ink`)                                                                                        | El dictamen es el momento memorable de la página                                          |
 | L5  | Titulares de sección más grandes (`--gk-landing-heading` hasta 3rem) y la integración en una banda a todo el ancho                      | Ritmo: la integración es el pico del recorrido                                            |
 
+| L6 | Cabecera rediseñada: barra en píldora con marca (cuadro con ranura y punto), titular de hasta 4.5rem (`--gk-hero-display`) y escáner de archivos | Pedido de la persona: cabecera más vistosa y animada |
+| L7 | Movimiento de la cabecera según emil-design-eng: entrada única al cargar, haz con `clip-path` y `transform`, sello desde `scale(1.12)`, curvas `--gk-ease-out`/`--gk-ease-in-out` | Una secuencia orquestada; solo `transform`, `opacity` y `clip-path` |
+| L8 | El formato de declaración deja de ser la primera vista y pasa a la sección «Pruébalo» | La cabecera muestra el mecanismo; el formato permite explorarlo |
+
 ## 5. Decisiones pendientes
 
 Registro de huecos de Figma que bloquean código. Formato: `fecha · módulo · qué falta · qué se decidió`.
