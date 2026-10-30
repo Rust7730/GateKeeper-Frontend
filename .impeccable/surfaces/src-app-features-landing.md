@@ -18,6 +18,12 @@ FIRST VIEWPORT: Un formato de declaración a todo el ancho. Encabezado del forma
 FORM: Aduana, candidato 1 de la lista ordenada (elegido por la persona sobre el asignado, el 6). seed:ed73d116b716c8b6
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
+## Motion (actualizado 2026-10-29, pasada «bolder» pedida por la persona)
+
+- Sello del dictamen: único movimiento por acción de la persona.
+- Riel de inspección: el trazo se dibuja una vez al entrar en pantalla (900 ms, ease-in-out) y los nodos se encienden en secuencia; no se repite.
+- Cursor de la última terminal: parpadeo de terminal real; se detiene con reduced motion.
+
 ## Signature interaction
 
 Cambiar el caso declarado reescribe la columna Inspeccionado y vuelve a sellar el dictamen (opacidad + escala 0.96→1, ~160 ms, ease-out fuerte). Sin animación con reduced motion.

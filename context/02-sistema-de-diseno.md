@@ -124,6 +124,16 @@ El sistema está abierto a mejoras. Estas se revisan **contra Figma** en M02 y s
 | D8  | Estado "conexión SSE": conectado / reconectando / desconectado                                      | Necesario en M11 y no siempre está en el kit                                                 | ⏳       |
 | D9  | Variante de nombre hostil: texto truncado en mono con indicador "contiene caracteres sospechosos"   | Vectores #3 y #12                                                                            | ⏳       |
 
+### Decisiones de la landing (2026-10-29)
+
+| #   | Decisión                                                                                                                                | Motivo                                                                                    |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| L1  | Las terminales usan los tonos de estado y severidad del Figma como colores de sintaxis (`--gk-syntax-*`), solo dentro de las terminales | Que los comandos se vean reales; aprobado por la persona. No se añadió ningún color nuevo |
+| L2  | Encabezado fijo translúcido con desenfoque (`--gk-header-*`)                                                                            | Navegación siempre visible en una página larga                                            |
+| L3  | Retícula de formulario en la primera vista (`--gk-form-ruling`, celda de 24 px)                                                         | Material del mundo «Aduana»                                                               |
+| L4  | Sello con textura de tinta (filtro SVG `gk-ink`)                                                                                        | El dictamen es el momento memorable de la página                                          |
+| L5  | Titulares de sección más grandes (`--gk-landing-heading` hasta 3rem) y la integración en una banda a todo el ancho                      | Ritmo: la integración es el pico del recorrido                                            |
+
 ## 5. Decisiones pendientes
 
 Registro de huecos de Figma que bloquean código. Formato: `fecha · módulo · qué falta · qué se decidió`.
