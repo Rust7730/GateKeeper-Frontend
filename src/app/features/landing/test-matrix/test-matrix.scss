@@ -42,3 +42,23 @@ tbody tr {
 .col-layer {
   color: var(--gk-text-secondary);
 }
+
+.tag {
+  display: inline-block;
+  padding: 0 var(--gk-space-8);
+  border: var(--gk-form-rule) solid var(--gk-border-default);
+  border-radius: var(--gk-radius-999);
+  background: var(--gk-background-surface);
+  font-size: var(--gk-text-label);
+  white-space: nowrap;
+}
+
+tbody tr {
+  transition: background-color var(--gk-duration-press) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  tbody tr:hover {
+    background: var(--gk-background-surface);
+  }
+}

@@ -16,3 +16,4 @@
 | `inspection/`     | Las cuatro capas de inspección, numeradas en orden real             | M01    |
 | `integration/`    | Las tres llamadas de la API con copiar                              | M01    |
 | `test-matrix/`    | Tabla de los 15 vectores de la propuesta                            | M01    |
+| `terminal/`       | Ventana de terminal con sintaxis para la integración                | M01    |

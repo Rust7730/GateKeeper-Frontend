@@ -7,7 +7,7 @@
 
   // Escala tipográfica de titulares, mayor que la del dashboard.
   --gk-landing-display: clamp(2.25rem, 1.5rem + 2.4vw, 3.5rem);
-  --gk-landing-heading: clamp(1.5rem, 1.15rem + 1.5vw, 2.25rem);
+  --gk-landing-heading: clamp(1.75rem, 1.2rem + 2.2vw, 3rem);
   --gk-landing-lead: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem);
 
   // Formato aduanal: casillas y sello de dictamen.
@@ -15,4 +15,25 @@
   --gk-stamp-border: 2px;
   --gk-stamp-tilt: -3deg;
   --gk-stamp-size: clamp(1.25rem, 0.9rem + 1.2vw, 1.75rem);
+  --gk-form-ruling: color-mix(in srgb, var(--gk-border-default) 38%, transparent);
+  --gk-form-cell: 24px;
+
+  // Encabezado fijo translúcido.
+  --gk-header-background: color-mix(in srgb, var(--gk-background-canvas) 78%, transparent);
+  --gk-header-blur: 12px;
+
+  // Terminales: el único lugar de la landing donde el color hace de sintaxis.
+  // Reutiliza los tonos del Figma; no se introduce ningún color nuevo.
+  --gk-terminal-background: var(--gk-background-canvas);
+  --gk-terminal-shadow:
+    0 1px 0 color-mix(in srgb, var(--gk-text-primary) 4%, transparent) inset,
+    0 24px 48px -24px color-mix(in srgb, #000 60%, transparent);
+  --gk-syntax-prompt: var(--gk-status-clean);
+  --gk-syntax-flag: var(--gk-severity-low);
+  --gk-syntax-string: var(--gk-status-pending);
+  --gk-syntax-variable: var(--gk-status-quarantine);
+  --gk-syntax-url: var(--gk-focus-ring);
+  --gk-syntax-key: var(--gk-severity-low);
+  --gk-syntax-status: var(--gk-status-clean);
+  --gk-syntax-number: var(--gk-severity-high);
 }

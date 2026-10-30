@@ -9,7 +9,12 @@
 }
 
 .top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   border-bottom: var(--gk-form-rule) solid var(--gk-border-default);
+  background: var(--gk-header-background);
+  backdrop-filter: blur(var(--gk-header-blur)) saturate(140%);
 }
 
 .top-inner {
@@ -71,7 +76,23 @@ main:focus {
 
 .section {
   padding-top: var(--gk-landing-section-gap);
-  scroll-margin-top: var(--gk-space-24);
+  scroll-margin-top: var(--gk-space-64);
+}
+
+// Banda de la integración: el pico del recorrido, a todo el ancho.
+.band {
+  margin-top: var(--gk-landing-section-gap);
+  padding-block: var(--gk-landing-section-gap);
+  border-block: var(--gk-form-rule) solid var(--gk-border-default);
+  background: var(--gk-background-surface);
+}
+
+.band .section {
+  padding-top: 0;
+}
+
+.band + .section {
+  padding-top: var(--gk-landing-section-gap);
 }
 
 .section-head {
@@ -81,10 +102,10 @@ main:focus {
 }
 
 .section-title {
-  max-width: 22em;
+  max-width: 20em;
   font-size: var(--gk-landing-heading);
-  line-height: 1.15;
-  letter-spacing: -0.015em;
+  line-height: 1.1;
+  letter-spacing: -0.022em;
 }
 
 .section-lead,
