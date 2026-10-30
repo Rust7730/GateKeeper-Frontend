@@ -2,6 +2,10 @@
 
 Landing pública y dashboard SecOps de Gatekeeper (Angular 22 + Angular Material).
 
+## Requisitos
+
+- **Node.js 22.22.3+, 24.15.0+ o 26+** (lo exige Angular CLI 22). Revisa con `node -v`.
+
 ## Primeros pasos (en tu máquina)
 
 ```bash

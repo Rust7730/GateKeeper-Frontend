@@ -16,6 +16,7 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 | E-006 | 2026-10-29 | M00        | regla   | Commits con atribución a la IA (`Co-Authored-By`, `Claude-Session`)                 | Sí · 01-reglas E6                    |
 | E-007 | 2026-10-29 | M01        | diseño  | El conector de Figma tampoco cargó en Claude Code; se leyó Figma desde el navegador | Sí · 08-figma § Plan B               |
 | E-008 | 2026-10-29 | M01        | código  | `module:start` fallaba con archivos sin seguimiento (`.claude/`)                    | No · corregido en scripts/module.mjs |
+| E-009 | 2026-10-29 | M01        | proceso | `npm start` falló en Windows: Node 24.10 es menor al mínimo de Angular 22           | Sí · README § Requisitos             |
 
 ---
 
@@ -85,3 +86,11 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 - **Causa:** `git status --porcelain` incluye archivos sin seguimiento.
 - **Corrección:** se usa `--untracked-files=no` y `.claude/commands/` se ignora en git (se genera con `setup:claude`).
 - **Lección / regla:** las validaciones de estado de git solo deben considerar archivos versionados.
+
+### E-009
+
+- **Fecha:** 2026-10-29 · **Módulo:** M01 · **Tipo:** proceso
+- **Qué pasó:** al correr `npm start` en Windows, Angular CLI se negó a arrancar porque la máquina tiene Node.js v24.10.0 y el mínimo es v24.15.0.
+- **Causa:** el proyecto se verificó en la copia de Linux con Node 22.23 y no se comprobó la versión de Node de la máquina de la persona ni se documentó el requisito.
+- **Corrección:** se añadió la sección «Requisitos» al README; la persona actualiza Node.
+- **Lección / regla:** al crear o actualizar el proyecto, revisar `node -v` en la máquina que lo va a correr y documentar el mínimo de `engines` en el README.
