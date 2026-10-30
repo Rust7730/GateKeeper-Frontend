@@ -1,0 +1,82 @@
+:host {
+  display: block;
+}
+
+.stations {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--gk-form-rule) solid var(--gk-border-default);
+  border-radius: var(--gk-radius-4);
+}
+
+@media (width >= 64rem) {
+  .stations {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.station {
+  display: grid;
+  align-content: start;
+  gap: var(--gk-space-8);
+  padding: var(--gk-space-24) var(--gk-space-20);
+}
+
+.station + .station {
+  border-top: var(--gk-form-rule) solid var(--gk-border-default);
+}
+
+@media (width >= 64rem) {
+  .station + .station {
+    border-top: 0;
+    border-left: var(--gk-form-rule) solid var(--gk-border-default);
+  }
+}
+
+.station-number {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: var(--gk-form-rule) solid var(--gk-text-muted);
+  border-radius: var(--gk-radius-999);
+  font-family: var(--gk-font-mono);
+  font-size: var(--gk-text-mono);
+  color: var(--gk-text-secondary);
+}
+
+.station-name {
+  margin-top: var(--gk-space-8);
+  font-size: var(--gk-text-h2);
+}
+
+.station-tool {
+  font-family: var(--gk-font-mono);
+  font-size: var(--gk-text-mono);
+  color: var(--gk-text-muted);
+}
+
+.station-does {
+  color: var(--gk-text-secondary);
+}
+
+.station-stops {
+  margin-top: var(--gk-space-8);
+  padding-top: var(--gk-space-12);
+  border-top: var(--gk-form-rule) dashed var(--gk-border-default);
+  font-size: var(--gk-text-label);
+  color: var(--gk-text-secondary);
+}
+
+.stops-label {
+  font-weight: var(--gk-weight-semibold);
+  color: var(--gk-text-primary);
+}
+
+.outcome {
+  max-width: 64ch;
+  margin-top: var(--gk-space-24);
+  color: var(--gk-text-secondary);
+}

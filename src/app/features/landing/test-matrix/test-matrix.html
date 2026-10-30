@@ -1,0 +1,20 @@
+<div class="table-wrap" tabindex="0" role="region" aria-label="Matriz de pruebas de seguridad">
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th scope="col" class="col-number">N.º</th>
+        <th scope="col">Vector de ataque</th>
+        <th scope="col">Capa que debe detenerlo</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (v of vectors; track v.attack; let i = $index) {
+        <tr>
+          <td class="col-number">{{ i + 1 }}</td>
+          <td>{{ v.attack }}</td>
+          <td class="col-layer">{{ v.layer }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

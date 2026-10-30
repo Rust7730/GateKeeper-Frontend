@@ -11,7 +11,6 @@
 | ----------------- | -------------------------------------- | ------ |
 | `app.ts`          | Componente raíz `gk-root`              | M00    |
 | `app.html`        | Plantilla raíz (marcador hasta M01)    | M00    |
-| `app.scss`        | Estilos del marcador temporal          | M00    |
 | `app.config.ts`   | Providers globales (router, errores)   | M00    |
 | `app.routes.ts`   | Rutas: `/` landing, `/login`, `/app/*` | M00    |
 | `core/`           | Singletons y contrato con el backend   | M00    |

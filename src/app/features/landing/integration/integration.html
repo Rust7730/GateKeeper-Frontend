@@ -1,0 +1,28 @@
+<ol class="steps">
+  @for (step of steps; track step.id; let i = $index) {
+    <li class="step">
+      <div class="step-text">
+        <span class="step-number" aria-hidden="true">{{ i + 1 }}</span>
+        <h3 class="step-title">{{ step.title }}</h3>
+        <p class="step-detail">{{ step.detail }}</p>
+      </div>
+      <div class="step-code">
+        <div class="code-bar">
+          <span class="code-label">Petición</span>
+          <button type="button" class="copy" (click)="copy(step)">
+            {{ copiedId() === step.id ? 'Copiado' : 'Copiar' }}
+          </button>
+        </div>
+        <pre class="code"><code>{{ step.request }}</code></pre>
+        <div class="code-bar code-bar-response">
+          <span class="code-label">Respuesta</span>
+        </div>
+        <pre class="code code-response"><code>{{ step.response }}</code></pre>
+      </div>
+    </li>
+  }
+</ol>
+<p class="note" aria-live="polite">
+  Ejemplo ilustrativo: el dominio, el encabezado de la API key y los IDs son de muestra. El contrato
+  exacto está en la especificación OpenAPI del servicio.
+</p>

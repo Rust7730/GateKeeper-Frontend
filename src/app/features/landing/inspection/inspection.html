@@ -1,0 +1,15 @@
+<ol class="stations">
+  @for (s of stations; track s.name; let i = $index) {
+    <li class="station">
+      <span class="station-number" aria-hidden="true">{{ i + 1 }}</span>
+      <h3 class="station-name">{{ s.name }}</h3>
+      <p class="station-tool">{{ s.tool }}</p>
+      <p class="station-does">{{ s.does }}</p>
+      <p class="station-stops"><span class="stops-label">Detiene:</span> {{ s.stops }}</p>
+    </li>
+  }
+</ol>
+<p class="outcome">
+  Si las cuatro capas pasan, tu app puede descargar la copia reconstruida. Si alguna falla, el
+  archivo queda rechazado o en cuarentena, y el original nunca se expone por la API.
+</p>

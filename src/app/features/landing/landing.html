@@ -1,0 +1,150 @@
+<a class="gk-skip-link" href="#contenido">Ir al contenido</a>
+
+<header class="top">
+  <div class="container top-inner">
+    <a class="wordmark" href="#contenido">Gatekeeper</a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#integracion">Integración</a>
+      <a href="#pruebas">Pruebas</a>
+      <a href="#limites">Límites</a>
+    </nav>
+    <a class="top-action" routerLink="/login">Entrar al dashboard</a>
+  </div>
+</header>
+
+<main id="contenido" tabindex="-1">
+  <div class="container hero">
+    <gk-declaration />
+  </div>
+
+  <section class="container section" aria-labelledby="problema-title">
+    <div class="split">
+      <div class="prose">
+        <h2 id="problema-title" class="section-title">
+          El nombre y el tipo de un archivo los escribe quien lo sube.
+        </h2>
+        <p>
+          Casi toda app recibe archivos: fotos de perfil, comprobantes de pago, identificaciones,
+          CVs, tareas. La validación típica revisa la extensión o el encabezado Content-Type, y los
+          dos los controla el atacante. Un script renombrado como <code>foto.jpg</code>, o una
+          imagen válida con código incrustado, llega al servidor sin obstáculos.
+        </p>
+        <p>
+          La subida de archivos sin restricciones (CWE-434) es la debilidad número 12 del CWE Top 25
+          de 2025 de MITRE, con cuatro vulnerabilidades en el catálogo de explotación activa de
+          CISA.
+        </p>
+      </div>
+      <dl class="rows">
+        <div class="row">
+          <dt>Ejecución remota de código</dt>
+          <dd>
+            Un ejecutable que llega al servidor le da al atacante el control del servidor y de sus
+            datos.
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Código en el navegador de otros</dt>
+          <dd>
+            Un SVG o un PDF con contenido activo se ejecuta en el equipo de quien lo abre, incluido
+            tu equipo administrativo.
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Metadatos que nadie quiso publicar</dt>
+          <dd>Una foto puede llevar la ubicación GPS de quien la tomó.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="como-funciona" class="container section" aria-labelledby="inspeccion-title">
+    <div class="section-head">
+      <h2 id="inspeccion-title" class="section-title">Cuatro revisiones antes de entregar nada.</h2>
+      <p class="section-lead">
+        Cada archivo pasa por las capas en este orden. Ninguna técnica sola basta; juntas siguen la
+        defensa en profundidad que recomienda OWASP.
+      </p>
+    </div>
+    <gk-inspection />
+  </section>
+
+  <section id="integracion" class="container section" aria-labelledby="integracion-title">
+    <div class="section-head">
+      <h2 id="integracion-title" class="section-title">
+        Una llamada en lugar de reescribir controles.
+      </h2>
+      <p class="section-lead">
+        Tu app envía el archivo con su API key, espera el dictamen y descarga la copia limpia.
+      </p>
+    </div>
+    <gk-integration />
+  </section>
+
+  <section id="garantias" class="container section" aria-labelledby="garantias-title">
+    <div class="split">
+      <h2 id="garantias-title" class="section-title">Lo que Gatekeeper garantiza por diseño.</h2>
+      <dl class="rows">
+        @for (g of guarantees; track g.title) {
+          <div class="row">
+            <dt>{{ g.title }}</dt>
+            <dd>{{ g.text }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section id="pruebas" class="container section" aria-labelledby="pruebas-title">
+    <div class="section-head">
+      <h2 id="pruebas-title" class="section-title">
+        Quince ataques, y la capa que debe detener cada uno.
+      </h2>
+      <p class="section-lead">
+        La matriz con la que se valida el sistema antes de liberarlo, junto con la auditoría de la
+        API con OWASP ZAP y Trivy.
+      </p>
+    </div>
+    <gk-test-matrix />
+  </section>
+
+  <section id="limites" class="container section" aria-labelledby="limites-title">
+    <div class="split">
+      <div class="prose">
+        <h2 id="limites-title" class="section-title">Lo que no hace.</h2>
+        <p>
+          Estos límites están declarados desde el diseño, para que sepas qué cubrir por tu cuenta.
+        </p>
+      </div>
+      <ul class="limits">
+        @for (l of limits; track l) {
+          <li>{{ l }}</li>
+        }
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p class="wordmark">Gatekeeper</p>
+    <ul class="footer-links" aria-label="Fuentes">
+      <li>
+        <a href="https://cwe.mitre.org/top25/" rel="noopener noreferrer" target="_blank">
+          MITRE · CWE Top 25
+        </a>
+      </li>
+      <li>
+        <a
+          href="https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          OWASP · File Upload Cheat Sheet
+        </a>
+      </li>
+      <li><a routerLink="/login">Entrar al dashboard</a></li>
+    </ul>
+  </div>
+</footer>
