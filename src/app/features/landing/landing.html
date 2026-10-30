@@ -1,9 +1,17 @@
 <a class="gk-skip-link" href="#contenido">Ir al contenido</a>
 
 <header class="top">
-  <div class="container top-inner">
-    <a class="wordmark" href="#contenido">Gatekeeper</a>
+  <div class="top-bar">
+    <a class="brand" href="#contenido" aria-label="Gatekeeper, inicio">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+        <path d="M12 6.5v11" />
+        <circle class="brand-dot" cx="12" cy="12" r="1.75" />
+      </svg>
+      <span class="brand-name">Gatekeeper</span>
+    </a>
     <nav class="nav" aria-label="Secciones">
+      <a href="#demo">Pruébalo</a>
       <a href="#como-funciona">Cómo funciona</a>
       <a href="#integracion">Integración</a>
       <a href="#pruebas">Pruebas</a>
@@ -14,9 +22,13 @@
 </header>
 
 <main id="contenido" tabindex="-1">
-  <div class="container hero">
-    <gk-declaration />
+  <div class="container">
+    <gk-hero />
   </div>
+
+  <section id="demo" class="container demo" aria-label="Prueba la inspección">
+    <gk-declaration />
+  </section>
 
   <section class="container section" aria-labelledby="problema-title">
     <div class="split">

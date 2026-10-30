@@ -10,39 +10,113 @@
 
 .top {
   position: sticky;
-  top: 0;
+  top: var(--gk-space-12);
   z-index: 5;
-  border-bottom: var(--gk-form-rule) solid var(--gk-border-default);
-  background: var(--gk-header-background);
-  backdrop-filter: blur(var(--gk-header-blur)) saturate(140%);
+  padding-inline: var(--gk-landing-gutter);
+  animation: drop-in 600ms var(--gk-ease-out) both;
 }
 
-.top-inner {
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+.top-bar {
   display: flex;
   align-items: center;
   gap: var(--gk-space-24);
-  min-height: 3.5rem;
+  width: min(100%, var(--gk-landing-measure));
+  margin-inline: auto;
+  padding: var(--gk-space-8) var(--gk-space-8) var(--gk-space-8) var(--gk-space-16);
+  border: var(--gk-form-rule) solid transparent;
+  border-radius: var(--gk-radius-999);
 }
 
-.wordmark {
+// Al hacer scroll la barra se vuelve sólida. Animación ligada al scroll: sin JavaScript.
+@supports (animation-timeline: scroll()) {
+  .top-bar {
+    animation: solidify linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 120px;
+  }
+}
+
+@supports not (animation-timeline: scroll()) {
+  .top-bar {
+    border-color: var(--gk-border-default);
+    background: var(--gk-header-background);
+    backdrop-filter: blur(var(--gk-header-blur));
+  }
+}
+
+@keyframes solidify {
+  to {
+    border-color: var(--gk-border-default);
+    background: var(--gk-header-background);
+    box-shadow: var(--gk-header-shadow);
+    backdrop-filter: blur(var(--gk-header-blur)) saturate(140%);
+  }
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gk-space-8);
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: var(--gk-text-primary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.brand-dot {
+  fill: var(--gk-status-clean);
+  stroke: none;
+  transition: transform 450ms var(--gk-ease-in-out);
+}
+
+.brand-name {
   font-weight: var(--gk-weight-semibold);
   font-size: var(--gk-text-h3);
-  text-decoration: none;
+  letter-spacing: -0.01em;
 }
 
 .nav {
   display: none;
-  gap: var(--gk-space-24);
+  gap: var(--gk-space-4);
   margin-left: auto;
   font-size: var(--gk-text-label);
 }
 
 .nav a {
+  position: relative;
+  padding: var(--gk-space-8) var(--gk-space-12);
   color: var(--gk-text-secondary);
   text-decoration: none;
+  transition: color var(--gk-duration-press) ease;
 }
 
-@media (width >= 56rem) {
+.nav a::after {
+  content: '';
+  position: absolute;
+  right: var(--gk-space-12);
+  bottom: var(--gk-space-4);
+  left: var(--gk-space-12);
+  height: var(--gk-form-rule);
+  background: currentcolor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 220ms var(--gk-ease-out);
+}
+
+@media (width >= 60rem) {
   .nav {
     display: flex;
   }
@@ -50,11 +124,24 @@
 
 .top-action {
   margin-left: auto;
+  padding: var(--gk-space-8) var(--gk-space-16);
+  border: var(--gk-form-rule) solid var(--gk-border-default);
+  border-radius: var(--gk-radius-999);
+  background: var(--gk-background-surface);
   font-size: var(--gk-text-label);
   font-weight: var(--gk-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform var(--gk-duration-press) var(--gk-ease-out),
+    border-color var(--gk-duration-press) ease;
 }
 
-@media (width >= 56rem) {
+.top-action:active {
+  transform: scale(0.97);
+}
+
+@media (width >= 60rem) {
   .top-action {
     margin-left: 0;
   }
@@ -64,14 +151,33 @@
   .nav a:hover {
     color: var(--gk-text-primary);
   }
+
+  .nav a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .top-action:hover {
+    border-color: var(--gk-text-muted);
+  }
+
+  .brand:hover .brand-dot {
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top {
+    animation: none;
+  }
 }
 
 main:focus {
   outline: none;
 }
 
-.hero {
-  padding-block: var(--gk-space-16) 0;
+.demo {
+  scroll-margin-top: var(--gk-space-64);
 }
 
 .section {

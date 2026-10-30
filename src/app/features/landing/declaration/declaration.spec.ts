@@ -17,7 +17,7 @@ describe('Declaration', () => {
 
   it('muestra el primer caso con su dictamen', async () => {
     const { el } = await render();
-    expect(el.querySelector('h1')?.textContent).toContain('Gatekeeper revisa lo que es');
+    expect(el.querySelector('h2')?.textContent).toContain('Pruébalo');
     expect(el.textContent).toContain('foto.jpg');
     expect(el.querySelector('.stamp')?.getAttribute('data-verdict')).toBe('rejected');
   });

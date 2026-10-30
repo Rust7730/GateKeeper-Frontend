@@ -6,6 +6,7 @@
   --gk-landing-section-gap: clamp(4rem, 10vw, 8rem);
 
   // Escala tipográfica de titulares, mayor que la del dashboard.
+  --gk-hero-display: clamp(2.375rem, 1.2rem + 4.2vw, 4.5rem);
   --gk-landing-display: clamp(2.25rem, 1.5rem + 2.4vw, 3.5rem);
   --gk-landing-heading: clamp(1.75rem, 1.2rem + 2.2vw, 3rem);
   --gk-landing-lead: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem);
@@ -20,7 +21,9 @@
 
   // Encabezado fijo translúcido.
   --gk-header-background: color-mix(in srgb, var(--gk-background-canvas) 78%, transparent);
-  --gk-header-blur: 12px;
+  --gk-header-blur: 14px;
+  --gk-header-shadow: 0 12px 32px -16px color-mix(in srgb, #000 70%, transparent);
+  --gk-beam-glow: 0 0 18px 2px;
 
   // Terminales: el único lugar de la landing donde el color hace de sintaxis.
   // Reutiliza los tonos del Figma; no se introduce ningún color nuevo.

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { Declaration } from './declaration/declaration';
+import { Hero } from './hero/hero';
 import { Inspection } from './inspection/inspection';
 import { Integration } from './integration/integration';
 import { TestMatrix } from './test-matrix/test-matrix';
@@ -9,7 +10,7 @@ import { TestMatrix } from './test-matrix/test-matrix';
 /** Landing pública en «/» (M01, dirección «Aduana»). */
 @Component({
   selector: 'gk-landing',
-  imports: [RouterLink, Declaration, Inspection, Integration, TestMatrix],
+  imports: [RouterLink, Hero, Declaration, Inspection, Integration, TestMatrix],
   templateUrl: './landing.html',
   styleUrl: './landing.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
