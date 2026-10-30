@@ -1,0 +1,18 @@
+// Expansión del mundo para la landing (M01, dirección «Aduana»).
+// Solo la landing usa estos tokens; el dashboard conserva la escala del Figma.
+:root {
+  --gk-landing-measure: 72rem;
+  --gk-landing-gutter: clamp(1rem, 4vw, 2rem);
+  --gk-landing-section-gap: clamp(4rem, 10vw, 8rem);
+
+  // Escala tipográfica de titulares, mayor que la del dashboard.
+  --gk-landing-display: clamp(2.25rem, 1.5rem + 2.4vw, 3.5rem);
+  --gk-landing-heading: clamp(1.5rem, 1.15rem + 1.5vw, 2.25rem);
+  --gk-landing-lead: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem);
+
+  // Formato aduanal: casillas y sello de dictamen.
+  --gk-form-rule: 1px;
+  --gk-stamp-border: 2px;
+  --gk-stamp-tilt: -3deg;
+  --gk-stamp-size: clamp(1.25rem, 0.9rem + 1.2vw, 1.75rem);
+}

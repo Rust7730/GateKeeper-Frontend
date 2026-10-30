@@ -1,3 +1,9 @@
-// Punto de entrada global. El orden importa: tokens → temas → base → material.
-// Los tokens reales se extraen de Figma en M01 (marca) y M02 (dashboard). Ver context/02-sistema-de-diseno.md.
+// Punto de entrada global. Orden: tokens → temas → base.
+// Las fuentes (Inter, IBM Plex Mono) se empaquetan desde @fontsource en angular.json (S9: sin CDN).
+@use 'tokens/foundation';
+@use 'tokens/motion';
+@use 'tokens/landing';
+@use 'themes/dark';
+@use 'themes/light';
 @use 'base/reset';
+@use 'base/document';

@@ -1,0 +1,36 @@
+// Tokens de Figma que no cambian entre modos: tipografía, espacio y radios.
+// Estilos de texto "Gatekeeper/UI/*" y "Gatekeeper/Mono/*": interlineado 1.5, tracking 0.
+:root {
+  --gk-font-ui: 'Inter', system-ui, sans-serif;
+  --gk-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --gk-weight-regular: 400;
+  --gk-weight-medium: 500;
+  --gk-weight-semibold: 600;
+  --gk-line-height: 1.5;
+  --gk-text-display: 2.5rem; // 40
+  --gk-text-h1: 1.75rem; // 28
+  --gk-text-h2: 1.25rem; // 20
+  --gk-text-h3: 1rem; // 16
+  --gk-text-body: 0.875rem; // 14
+  --gk-text-label: 0.75rem; // 12
+  --gk-text-mono: 0.75rem; // 12
+  --gk-text-mono-sm: 0.6875rem; // 11
+  --gk-text-xs: 0.625rem; // 10
+  --gk-space-0: 0;
+  --gk-space-4: 0.25rem;
+  --gk-space-8: 0.5rem;
+  --gk-space-12: 0.75rem;
+  --gk-space-16: 1rem;
+  --gk-space-20: 1.25rem;
+  --gk-space-24: 1.5rem;
+  --gk-space-32: 2rem;
+  --gk-space-40: 2.5rem;
+  --gk-space-48: 3rem;
+  --gk-space-64: 4rem;
+  --gk-radius-0: 0;
+  --gk-radius-4: 4px;
+  --gk-radius-8: 8px;
+  --gk-radius-12: 12px;
+  --gk-radius-999: 999px;
+  --gk-focus-width: 2px; // nota de accesibilidad del Figma
+}

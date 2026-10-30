@@ -1,0 +1,24 @@
+// Modo Light de la colección de variables "Gatekeeper" (Figma 7:29207).
+[data-theme='light'] {
+  color-scheme: light;
+
+  --gk-background-canvas: #f4f5f7;
+  --gk-background-surface: #fff;
+  --gk-background-elevated: #fff;
+  --gk-background-subtle: #eaedf1;
+  --gk-text-primary: #171b22;
+  --gk-text-secondary: #505c6d;
+  --gk-text-muted: #5e6a7c;
+  --gk-border-default: #d0d6df;
+  --gk-action-background: #222832;
+  --gk-action-foreground: #fff;
+  --gk-focus-ring: #244fc7;
+  --gk-status-pending: #7d5705;
+  --gk-status-clean: #146748;
+  --gk-status-quarantine: #8c470a;
+  --gk-status-rejected: #ab2534;
+  --gk-severity-low: #285c9c;
+  --gk-severity-medium: #7d5705;
+  --gk-severity-high: #94450d;
+  --gk-severity-critical: #ab2534;
+}

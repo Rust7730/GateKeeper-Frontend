@@ -1,0 +1,11 @@
+// Movimiento (emil-design-eng). El Figma no define movimiento: sus interacciones son estáticas.
+:root {
+  --gk-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --gk-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --gk-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --gk-duration-press: 160ms;
+  --gk-duration-tooltip: 150ms;
+  --gk-duration-menu: 200ms;
+  --gk-duration-modal: 250ms;
+  --gk-duration-stamp: 180ms;
+}
