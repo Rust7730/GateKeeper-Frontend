@@ -1,6 +1,6 @@
 # M01 · Brief de la landing
 
-> **Estado:** borrador para confirmación (salida de `/impeccable shape landing`, 2026-10-29). Al confirmarse, se registra como _Direction contract_ con `impeccable surface-brief write` y empieza la construcción.
+> **Estado:** confirmado el 2026-10-29. El _Direction contract_ está en `.impeccable/surfaces/src-app-features-landing.md`.
 > Tirada de impeccable degradada (sin retadores de catálogo; servicio no alcanzable). Seed: `seed:ed73d116b716c8b6`. Sin generación de imágenes: construcción guiada por código.
 
 ## 1. Trabajo y audiencia
@@ -55,4 +55,4 @@ Movimiento (emil-design-eng): solo el sello del dictamen anima (opacidad + escal
 - Fuentes empaquetadas (S9); sin CDN.
 - **Logotipo:** el Figma no tiene logotipo gráfico, solo el texto «Gatekeeper». Se usa el texto hasta que exista uno.
 - **Destino de «Ver la integración»:** la sección 4 de la misma página (no hay sitio de documentación).
-- **Acceso al dashboard:** enlace a `/login`, que no existe hasta M05. ¿Se muestra igual o se oculta hasta entonces?
+- **Acceso al dashboard (decidido):** el enlace se muestra y lleva a `/login`, que presenta una página «Próximamente» hasta que exista el login (M05).
