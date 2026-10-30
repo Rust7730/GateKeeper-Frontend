@@ -1,7 +1,6 @@
 # 02 · Sistema de diseño
 
-> **Estado:** estructura definida, **valores pendientes de extraer de Figma** (nodo `0:1`). Ver [E-002](07-errores.md#e-002).
-> Ningún valor de esta página se usa en código hasta que la columna "Valor Figma" esté llena.
+> **Estado:** fundamentos (color, tipografía, espaciado, radios) extraídos de Figma el 2026-10-29. Pendiente: pesos tipográficos, elevación y densidad de tabla.
 
 ## 1. Cómo se convierte Figma en código
 
@@ -22,62 +21,70 @@ Ej.: `Color/Status/Quarantined/Bg` → `--gk-color-status-quarantined-bg`.
 
 ## 2. Tokens
 
-### 2.1 Color · base
+> Fuente: Figma `0:1`, frames **Sistema / Fundamentos / Dark** y **/ Light** (colección de variables "Gatekeeper", modos Dark y Light). Leídos el 2026-10-29 desde el navegador (el conector MCP no estaba disponible, ver E-002 y E-007). Valores transcritos de las etiquetas del archivo; al tener el conector, confirmarlos con `get_variable_defs`.
 
-| Token                       | Uso                   | Valor Figma (Dark) | Valor Figma (Light) |
-| --------------------------- | --------------------- | ------------------ | ------------------- |
-| `--gk-color-bg`             | Fondo de la app       | ⏳                 | ⏳                  |
-| `--gk-color-surface`        | Tarjetas, tablas      | ⏳                 | ⏳                  |
-| `--gk-color-surface-raised` | Modales, menús        | ⏳                 | ⏳                  |
-| `--gk-color-border`         | Bordes y divisores    | ⏳                 | ⏳                  |
-| `--gk-color-text`           | Texto principal       | ⏳                 | ⏳                  |
-| `--gk-color-text-muted`     | Texto secundario      | ⏳                 | ⏳                  |
-| `--gk-color-accent`         | Acción primaria, foco | ⏳                 | ⏳                  |
-| `--gk-color-focus-ring`     | Anillo de foco        | ⏳                 | ⏳                  |
+**Principio del sistema (texto del propio Figma):** jerarquía neutra; el color se reserva para estados, severidad y foco. **No hay color de acento de marca**: la acción primaria es casi blanca en Dark y casi negra en Light.
 
-### 2.2 Color · estados de archivo (fondo / texto / borde / ícono)
+### 2.1 Color
 
-| Estado        | `-bg` | `-fg` | `-border` | Ícono |
-| ------------- | ----- | ----- | --------- | ----- |
-| `pending`     | ⏳    | ⏳    | ⏳        | ⏳    |
-| `clean`       | ⏳    | ⏳    | ⏳        | ⏳    |
-| `quarantined` | ⏳    | ⏳    | ⏳        | ⏳    |
-| `rejected`    | ⏳    | ⏳    | ⏳        | ⏳    |
+Nombre en código = nombre de la variable en Figma con prefijo `--gk-` y `/` → `-`.
 
-### 2.3 Color · severidad
+| Variable Figma        | Token CSS                  | Dark      | Light     |
+| --------------------- | -------------------------- | --------- | --------- |
+| `background/canvas`   | `--gk-background-canvas`   | `#101215` | `#F4F5F7` |
+| `background/surface`  | `--gk-background-surface`  | `#181B20` | `#FFFFFF` |
+| `background/elevated` | `--gk-background-elevated` | `#20242B` | `#FFFFFF` |
+| `background/subtle`   | `--gk-background-subtle`   | `#252A32` | `#EAEDF1` |
+| `text/primary`        | `--gk-text-primary`        | `#F2F4F7` | `#171B22` |
+| `text/secondary`      | `--gk-text-secondary`      | `#B0B8C5` | `#505C6D` |
+| `text/muted`          | `--gk-text-muted`          | `#929DAD` | `#5E6A7C` |
+| `border/default`      | `--gk-border-default`      | `#343B46` | `#D0D6DF` |
+| `action/background`   | `--gk-action-background`   | `#E7EBF1` | `#222832` |
+| `action/foreground`   | `--gk-action-foreground`   | `#161B22` | `#FFFFFF` |
+| `focus/ring`          | `--gk-focus-ring`          | `#B6CDF9` | `#244FC7` |
+| `status/pending`      | `--gk-status-pending`      | `#E9C46A` | `#7D5705` |
+| `status/clean`        | `--gk-status-clean`        | `#75D6AD` | `#146748` |
+| `status/quarantine`   | `--gk-status-quarantine`   | `#F6BB73` | `#8C470A` |
+| `status/rejected`     | `--gk-status-rejected`     | `#FF9198` | `#AB2534` |
+| `severity/low`        | `--gk-severity-low`        | `#93B9E8` | `#285C9C` |
+| `severity/medium`     | `--gk-severity-medium`     | `#E9C46A` | `#7D5705` |
+| `severity/high`       | `--gk-severity-high`       | `#F6AA72` | `#94450D` |
+| `severity/critical`   | `--gk-severity-critical`   | `#FF9198` | `#AB2534` |
 
-| Severidad            | `-bg` | `-fg` |
-| -------------------- | ----- | ----- |
-| `low` · Baja         | ⏳    | ⏳    |
-| `medium` · Media     | ⏳    | ⏳    |
-| `high` · Alta        | ⏳    | ⏳    |
-| `critical` · Crítica | ⏳    | ⏳    |
+Observaciones para decidir (ver § 4):
 
-### 2.4 Tipografía
+- `severity/medium` = `status/pending` y `severity/critical` = `status/rejected` en ambos modos (relacionado con la mejora D1).
+- `background/surface` y `background/elevated` son iguales en Light (`#FFFFFF`): la elevación en claro depende solo de borde o sombra.
 
-| Token               | Estilo Figma | Familia | Tamaño / interlineado | Peso |
-| ------------------- | ------------ | ------- | --------------------- | ---- |
-| `--gk-text-display` | ⏳           | ⏳      | ⏳                    | ⏳   |
-| `--gk-text-h1`      | ⏳           | ⏳      | ⏳                    | ⏳   |
-| `--gk-text-h2`      | ⏳           | ⏳      | ⏳                    | ⏳   |
-| `--gk-text-h3`      | ⏳           | ⏳      | ⏳                    | ⏳   |
-| `--gk-text-body`    | ⏳           | ⏳      | ⏳                    | ⏳   |
-| `--gk-text-body-sm` | ⏳           | ⏳      | ⏳                    | ⏳   |
-| `--gk-text-label`   | ⏳           | ⏳      | ⏳                    | ⏳   |
-| `--gk-text-mono`    | ⏳           | ⏳      | ⏳                    | ⏳   |
+### 2.2 Tipografía
 
-Las fuentes se **empaquetan** en `src/assets/fonts/` (woff2), nunca desde Google Fonts en runtime (regla S9).
+Familias: **Inter** (interfaz) e **IBM Plex Mono** (identificadores, rutas, hashes e IP). Se empaquetan en `src/assets/fonts/` (S9).
 
-### 2.5 Espaciado, radios, elevación, movimiento
+| Estilo Figma               | Token               | Familia       | Tamaño                              |
+| -------------------------- | ------------------- | ------------- | ----------------------------------- |
+| `Gatekeeper/Display`       | `--gk-text-display` | Inter         | 40 px                               |
+| `Gatekeeper/H1`            | `--gk-text-h1`      | Inter         | 28 px                               |
+| `Gatekeeper/H2`            | `--gk-text-h2`      | Inter         | 20 px                               |
+| `Gatekeeper/H3`            | `--gk-text-h3`      | Inter         | 16 px                               |
+| `Gatekeeper/Cuerpo`        | `--gk-text-body`    | Inter         | 14 px                               |
+| `Gatekeeper/Etiqueta`      | `--gk-text-label`   | Inter         | 12 px (en mayúsculas en el ejemplo) |
+| `Gatekeeper/Monoespaciada` | `--gk-text-mono`    | IBM Plex Mono | 12 px                               |
 
-| Grupo                   | Tokens esperados                                                                                                                                                                                                                  | Valores Figma                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Espaciado (escala 4 px) | `--gk-space-1` … `--gk-space-12`                                                                                                                                                                                                  | ⏳                                                              |
-| Radios                  | `--gk-radius-sm`, `-md`, `-lg`, `-full`                                                                                                                                                                                           | ⏳                                                              |
-| Elevación               | `--gk-elevation-1`, `-2`, `-3`                                                                                                                                                                                                    | ⏳                                                              |
-| Movimiento              | `--gk-ease-out: cubic-bezier(0.23,1,0.32,1)`, `--gk-ease-in-out: cubic-bezier(0.77,0,0.175,1)`, `--gk-ease-drawer: cubic-bezier(0.32,0.72,0,1)`; `--gk-duration-press: 160ms`, `-tooltip: 150ms`, `-menu: 200ms`, `-modal: 250ms` | Definidos por emil-design-eng; se ajustan si Figma define otros |
-| Breakpoints             | `mobile` 390, `tablet` 1024, `desktop` 1440                                                                                                                                                                                       | Confirmado por frames                                           |
-| Densidad de tabla       | `--gk-row-height`, `--gk-cell-padding-x`                                                                                                                                                                                          | ⏳                                                              |
+Pesos e interlineados: ⏳ no visibles en modo solo lectura; confirmar con el conector o Dev Mode.
+
+### 2.3 Espaciado, radios y otros
+
+| Grupo             | Variables Figma           | Valores                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Espaciado         | `space/0` … `space/64`    | 0 · 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64 px                                                                                                                                                                                                                                                                                                      |
+| Radios            | `radius/0` … `radius/999` | 0 · 4 · 8 · 12 · 999 px                                                                                                                                                                                                                                                                                                                                   |
+| Foco              | — (nota del Figma)        | Anillo visible de 2 px con `focus/ring`                                                                                                                                                                                                                                                                                                                   |
+| Elevación         | ⏳                        | No documentada en Fundamentos                                                                                                                                                                                                                                                                                                                             |
+| Movimiento        | —                         | El Figma indica que las interacciones son representaciones estáticas. Se usan los tokens de emil-design-eng: `--gk-ease-out: cubic-bezier(0.23,1,0.32,1)`, `--gk-ease-in-out: cubic-bezier(0.77,0,0.175,1)`, `--gk-ease-drawer: cubic-bezier(0.32,0.72,0,1)`; duraciones `--gk-duration-press: 160ms`, `-tooltip: 150ms`, `-menu: 200ms`, `-modal: 250ms` |
+| Breakpoints       | —                         | `mobile` 390, `tablet` 1024, `desktop` 1440 (ancho de los frames: 1440)                                                                                                                                                                                                                                                                                   |
+| Densidad de tabla | ⏳                        | Leer de `Componentes / Fila tabla` en M03                                                                                                                                                                                                                                                                                                                 |
+
+Nota de accesibilidad del Figma: contraste AA; estado con ícono + texto, nunca solo color; foco visible de 2 px; escala de espaciado de 4 px.
 
 ## 3. Inventario de componentes
 

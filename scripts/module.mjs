@@ -30,7 +30,7 @@ if (action === 'start') {
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, '') || 'trabajo';
   const branch = `feat/${tag}-${name}`;
-  const status = shOut('git status --porcelain');
+  const status = shOut('git status --porcelain --untracked-files=no');
   if (status) fail('Hay cambios sin commit. Haz commit o stash antes de iniciar un módulo.');
   sh(`git switch -c ${branch}`);
   let text = updateRow(([mod, , , cierre, t, notas]) => [

@@ -46,3 +46,6 @@ Thumbs.db
 # Proyecto
 .claude/settings.local.json
 .impeccable/cache/
+
+# Comandos de Claude Code instalados desde tools/ con npm run setup:claude
+.claude/commands/

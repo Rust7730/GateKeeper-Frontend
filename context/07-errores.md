@@ -6,14 +6,16 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 
 ## Resumen
 
-| ID    | Fecha      | Módulo     | Tipo    | Título                                                              | ¿Generó regla?                 |
-| ----- | ---------- | ---------- | ------- | ------------------------------------------------------------------- | ------------------------------ |
-| E-001 | 2026-10-29 | planeación | proceso | Archivo escrito en la carpeta de adjuntos en vez del proyecto       | Sí · 01-reglas A4              |
-| E-002 | 2026-10-29 | planeación | diseño  | Figma no se pudo leer al planear; tokens quedaron sin valores       | Sí · 01-reglas D1 (ya existía) |
-| E-003 | 2026-10-29 | M00        | proceso | Comandos de Claude Code rechazados al escribir en `.claude/`        | Sí · 01-reglas A6              |
-| E-004 | 2026-10-29 | M00        | proceso | `npm install` lanzado desde Linux dentro de la carpeta de Windows   | Sí · 01-reglas A5              |
-| E-005 | 2026-10-29 | M00        | regla   | Convención de nombres del plan no coincidía con el CLI 22           | Sí · 01-reglas C6              |
-| E-006 | 2026-10-29 | M00        | regla   | Commits con atribución a la IA (`Co-Authored-By`, `Claude-Session`) | Sí · 01-reglas E6              |
+| ID    | Fecha      | Módulo     | Tipo    | Título                                                                              | ¿Generó regla?                       |
+| ----- | ---------- | ---------- | ------- | ----------------------------------------------------------------------------------- | ------------------------------------ |
+| E-001 | 2026-10-29 | planeación | proceso | Archivo escrito en la carpeta de adjuntos en vez del proyecto                       | Sí · 01-reglas A4                    |
+| E-002 | 2026-10-29 | planeación | diseño  | Figma no se pudo leer al planear; tokens quedaron sin valores                       | Sí · 01-reglas D1 (ya existía)       |
+| E-003 | 2026-10-29 | M00        | proceso | Comandos de Claude Code rechazados al escribir en `.claude/`                        | Sí · 01-reglas A6                    |
+| E-004 | 2026-10-29 | M00        | proceso | `npm install` lanzado desde Linux dentro de la carpeta de Windows                   | Sí · 01-reglas A5                    |
+| E-005 | 2026-10-29 | M00        | regla   | Convención de nombres del plan no coincidía con el CLI 22                           | Sí · 01-reglas C6                    |
+| E-006 | 2026-10-29 | M00        | regla   | Commits con atribución a la IA (`Co-Authored-By`, `Claude-Session`)                 | Sí · 01-reglas E6                    |
+| E-007 | 2026-10-29 | M01        | diseño  | El conector de Figma tampoco cargó en Claude Code; se leyó Figma desde el navegador | Sí · 08-figma § Plan B               |
+| E-008 | 2026-10-29 | M01        | código  | `module:start` fallaba con archivos sin seguimiento (`.claude/`)                    | No · corregido en scripts/module.mjs |
 
 ---
 
@@ -66,3 +68,19 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 - **Causa:** se aplicó la configuración por defecto de la herramienta sin preguntar la preferencia del proyecto.
 - **Corrección:** se reescribió el historial local (aún sin remoto) para quitar esas líneas, se movió el tag `m00` y se añadió `scripts/check-commit-msg.mjs` al hook `commit-msg`.
 - **Lección / regla:** la autoría de commits, tags y PR es solo de la persona. Ver 01-reglas E6.
+
+### E-007
+
+- **Fecha:** 2026-10-29 · **Módulo:** M01 · **Tipo:** diseño
+- **Qué pasó:** en Claude Code el servidor de Figma seguía "pendiente de autorización" y sus herramientas no aparecían; la extracción de la marca se detuvo. En la sesión de claude.ai tampoco cargaron.
+- **Causa:** el conector está conectado en la cuenta, pero sus herramientas no se habilitan en estas sesiones; además, la cuenta del navegador solo tiene permiso de lectura y comentarios sobre el archivo, por lo que la API de plugins (`window.figma`) no está disponible.
+- **Corrección:** se abrió el archivo en el navegador integrado con la sesión de la persona, se navegó a 100 % por los frames _Sistema / Fundamentos / Dark_ y _Light_ y se transcribieron variables, tipografías, espaciado y radios a `02-sistema-de-diseno.md`.
+- **Lección / regla:** si el conector no responde, usar el plan B de `08-figma.md` (navegador a 100 %, frames de Fundamentos) en vez de bloquear el módulo. Lo transcrito se marca como "leído de captura" y se confirma con `get_variable_defs` cuando el conector funcione.
+
+### E-008
+
+- **Fecha:** 2026-10-29 · **Módulo:** M01 · **Tipo:** código
+- **Qué pasó:** `npm run module:start` exigía un árbol de trabajo limpio contando archivos sin seguimiento, y `.claude/` (configuración local) lo hacía fallar siempre.
+- **Causa:** `git status --porcelain` incluye archivos sin seguimiento.
+- **Corrección:** se usa `--untracked-files=no` y `.claude/commands/` se ignora en git (se genera con `setup:claude`).
+- **Lección / regla:** las validaciones de estado de git solo deben considerar archivos versionados.
