@@ -16,10 +16,10 @@ Todo lo que se repite en cada módulo está automatizado para que no dependa de 
 
 ## Hooks de git (husky)
 
-| Hook         | Acción                                                                                   |
-| ------------ | ---------------------------------------------------------------------------------------- |
-| `pre-commit` | `lint-staged` (Prettier + ESLint en archivos tocados) · `check:index` · `check:security` |
-| `commit-msg` | `commitlint`: Conventional Commits con scope obligatorio `mNN`, `context`, `deps` o `ci` |
+| Hook         | Acción                                                                                                                                          |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | `lint-staged` (Prettier + ESLint en archivos tocados) · `check:index` · `check:security`                                                        |
+| `commit-msg` | `commitlint`: Conventional Commits con scope obligatorio `mNN`, `context`, `deps` o `ci` · `check-commit-msg.mjs`: rechaza atribución a IA (E6) |
 
 ## Comandos de Claude Code (`.claude/commands/`)
 

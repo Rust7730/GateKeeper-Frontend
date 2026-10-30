@@ -6,13 +6,14 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 
 ## Resumen
 
-| ID    | Fecha      | Módulo     | Tipo    | Título                                                            | ¿Generó regla?                 |
-| ----- | ---------- | ---------- | ------- | ----------------------------------------------------------------- | ------------------------------ |
-| E-001 | 2026-10-29 | planeación | proceso | Archivo escrito en la carpeta de adjuntos en vez del proyecto     | Sí · 01-reglas A4              |
-| E-002 | 2026-10-29 | planeación | diseño  | Figma no se pudo leer al planear; tokens quedaron sin valores     | Sí · 01-reglas D1 (ya existía) |
-| E-003 | 2026-10-29 | M00        | proceso | Comandos de Claude Code rechazados al escribir en `.claude/`      | Sí · 01-reglas A6              |
-| E-004 | 2026-10-29 | M00        | proceso | `npm install` lanzado desde Linux dentro de la carpeta de Windows | Sí · 01-reglas A5              |
-| E-005 | 2026-10-29 | M00        | regla   | Convención de nombres del plan no coincidía con el CLI 22         | Sí · 01-reglas C6              |
+| ID    | Fecha      | Módulo     | Tipo    | Título                                                              | ¿Generó regla?                 |
+| ----- | ---------- | ---------- | ------- | ------------------------------------------------------------------- | ------------------------------ |
+| E-001 | 2026-10-29 | planeación | proceso | Archivo escrito en la carpeta de adjuntos en vez del proyecto       | Sí · 01-reglas A4              |
+| E-002 | 2026-10-29 | planeación | diseño  | Figma no se pudo leer al planear; tokens quedaron sin valores       | Sí · 01-reglas D1 (ya existía) |
+| E-003 | 2026-10-29 | M00        | proceso | Comandos de Claude Code rechazados al escribir en `.claude/`        | Sí · 01-reglas A6              |
+| E-004 | 2026-10-29 | M00        | proceso | `npm install` lanzado desde Linux dentro de la carpeta de Windows   | Sí · 01-reglas A5              |
+| E-005 | 2026-10-29 | M00        | regla   | Convención de nombres del plan no coincidía con el CLI 22           | Sí · 01-reglas C6              |
+| E-006 | 2026-10-29 | M00        | regla   | Commits con atribución a la IA (`Co-Authored-By`, `Claude-Session`) | Sí · 01-reglas E6              |
 
 ---
 
@@ -57,3 +58,11 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 - **Causa:** la arquitectura se escribió antes de crear el proyecto, con convenciones de versiones anteriores de Angular.
 - **Corrección:** se actualizaron `03-arquitectura.md` y `01-reglas.md` a lo que genera el CLI.
 - **Lección / regla:** cuando el plan y la herramienta discrepan en convenciones, manda la herramienta y se corrige el plan en el mismo módulo.
+
+### E-006
+
+- **Fecha:** 2026-10-29 · **Módulo:** M00 · **Tipo:** regla
+- **Qué pasó:** los 4 commits de M00 se crearon con las líneas `Co-Authored-By: Claude…` y `Claude-Session: …`. La persona no quiere atribución a la IA en ningún commit.
+- **Causa:** se aplicó la configuración por defecto de la herramienta sin preguntar la preferencia del proyecto.
+- **Corrección:** se reescribió el historial local (aún sin remoto) para quitar esas líneas, se movió el tag `m00` y se añadió `scripts/check-commit-msg.mjs` al hook `commit-msg`.
+- **Lección / regla:** la autoría de commits, tags y PR es solo de la persona. Ver 01-reglas E6.

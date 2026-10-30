@@ -18,6 +18,10 @@ Punto de entrada para cualquier agente o persona que trabaje en este repositorio
 - Se construye **por módulos** (M00 → M15). **Prioridad: la landing (M01)** antes que el dashboard. Cada módulo termina en un commit/tag servible y comprobable.
 - Diseño con las skills **impeccable** (en `.claude/skills/`) y **emil-design-eng** (movimiento). Reglas en `context/01-reglas.md § D2`.
 
+## Commits
+
+**Nunca** agregues `Co-Authored-By`, `Claude-Session`, "Generated with Claude Code" ni ninguna mención a Claude o Anthropic en commits, tags o PR. La autoría es solo de la persona (regla E6). El hook `commit-msg` rechaza esos mensajes.
+
 ## Flujo de trabajo por sesión
 
 ```

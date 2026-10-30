@@ -69,6 +69,7 @@ Reglas de convivencia:
 3. Cada commit compila (`npm run build` pasa). No hay commits "WIP" en la rama principal.
 4. Al cerrar un módulo: `npm run module:close -- mNN` (corre `verify`, actualiza `progreso.md`, crea el tag). Luego merge a `main`.
 5. Los cambios de documentación del contexto van en commits `docs(context): ...` separados.
+6. **Ningún commit, tag ni PR lleva atribución a una IA o herramienta**: sin `Co-Authored-By`, `Claude-Session`, "Generated with…", emojis de robot ni menciones a Claude o Anthropic. La autoría es solo de la persona. `scripts/check-commit-msg.mjs` lo bloquea en el hook `commit-msg`. `[E-006]`
 
 ## F. Índices
 
