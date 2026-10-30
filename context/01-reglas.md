@@ -10,6 +10,7 @@ Si una regla choca con una petición, **se detiene el trabajo y se pregunta**. L
 4. Trabajar en la carpeta del proyecto, nunca editar archivos fuente de solo lectura (adjuntos, `uploads/`). `[E-001]`
 5. `node_modules` se instala **en la máquina de la persona** (`npm install` en Windows). Un agente que trabaje desde otro sistema operativo verifica en una copia aparte y solo sincroniza código fuente y `package-lock.json`, nunca `node_modules`. `[E-004]`
 6. `.claude/` no se escribe desde herramientas remotas: lo que deba vivir ahí se versiona en `tools/` y se instala con `npm run setup:claude`. `[E-003]`
+7. Un agente que trabaje en una copia aparte del repositorio sincroniza en un solo sentido por vez: primero trae los commits de la carpeta de la persona y luego devuelve los suyos. Nunca copia `.git` encima de una historia que no contiene. `[E-010]`
 
 ## B. Seguridad (no negociables)
 

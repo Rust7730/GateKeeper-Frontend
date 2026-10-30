@@ -6,17 +6,18 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 
 ## Resumen
 
-| ID    | Fecha      | Módulo     | Tipo    | Título                                                                              | ¿Generó regla?                       |
-| ----- | ---------- | ---------- | ------- | ----------------------------------------------------------------------------------- | ------------------------------------ |
-| E-001 | 2026-10-29 | planeación | proceso | Archivo escrito en la carpeta de adjuntos en vez del proyecto                       | Sí · 01-reglas A4                    |
-| E-002 | 2026-10-29 | planeación | diseño  | Figma no se pudo leer al planear; tokens quedaron sin valores                       | Sí · 01-reglas D1 (ya existía)       |
-| E-003 | 2026-10-29 | M00        | proceso | Comandos de Claude Code rechazados al escribir en `.claude/`                        | Sí · 01-reglas A6                    |
-| E-004 | 2026-10-29 | M00        | proceso | `npm install` lanzado desde Linux dentro de la carpeta de Windows                   | Sí · 01-reglas A5                    |
-| E-005 | 2026-10-29 | M00        | regla   | Convención de nombres del plan no coincidía con el CLI 22                           | Sí · 01-reglas C6                    |
-| E-006 | 2026-10-29 | M00        | regla   | Commits con atribución a la IA (`Co-Authored-By`, `Claude-Session`)                 | Sí · 01-reglas E6                    |
-| E-007 | 2026-10-29 | M01        | diseño  | El conector de Figma tampoco cargó en Claude Code; se leyó Figma desde el navegador | Sí · 08-figma § Plan B               |
-| E-008 | 2026-10-29 | M01        | código  | `module:start` fallaba con archivos sin seguimiento (`.claude/`)                    | No · corregido en scripts/module.mjs |
-| E-009 | 2026-10-29 | M01        | proceso | `npm start` falló en Windows: Node 24.10 es menor al mínimo de Angular 22           | Sí · README § Requisitos             |
+| ID    | Fecha      | Módulo     | Tipo    | Título                                                                                  | ¿Generó regla?                       |
+| ----- | ---------- | ---------- | ------- | --------------------------------------------------------------------------------------- | ------------------------------------ |
+| E-001 | 2026-10-29 | planeación | proceso | Archivo escrito en la carpeta de adjuntos en vez del proyecto                           | Sí · 01-reglas A4                    |
+| E-002 | 2026-10-29 | planeación | diseño  | Figma no se pudo leer al planear; tokens quedaron sin valores                           | Sí · 01-reglas D1 (ya existía)       |
+| E-003 | 2026-10-29 | M00        | proceso | Comandos de Claude Code rechazados al escribir en `.claude/`                            | Sí · 01-reglas A6                    |
+| E-004 | 2026-10-29 | M00        | proceso | `npm install` lanzado desde Linux dentro de la carpeta de Windows                       | Sí · 01-reglas A5                    |
+| E-005 | 2026-10-29 | M00        | regla   | Convención de nombres del plan no coincidía con el CLI 22                               | Sí · 01-reglas C6                    |
+| E-006 | 2026-10-29 | M00        | regla   | Commits con atribución a la IA (`Co-Authored-By`, `Claude-Session`)                     | Sí · 01-reglas E6                    |
+| E-007 | 2026-10-29 | M01        | diseño  | El conector de Figma tampoco cargó en Claude Code; se leyó Figma desde el navegador     | Sí · 08-figma § Plan B               |
+| E-008 | 2026-10-29 | M01        | código  | `module:start` fallaba con archivos sin seguimiento (`.claude/`)                        | No · corregido en scripts/module.mjs |
+| E-009 | 2026-10-29 | M01        | proceso | `npm start` falló en Windows: Node 24.10 es menor al mínimo de Angular 22               | Sí · README § Requisitos             |
+| E-010 | 2026-10-29 | M01        | proceso | Al sincronizar la copia de trabajo se borró un commit hecho en la carpeta de la persona | Sí · 01-reglas A7                    |
 
 ---
 
@@ -94,3 +95,11 @@ Plantilla: [templates/error-entry.md](templates/error-entry.md).
 - **Causa:** el proyecto se verificó en la copia de Linux con Node 22.23 y no se comprobó la versión de Node de la máquina de la persona ni se documentó el requisito.
 - **Corrección:** se añadió la sección «Requisitos» al README; la persona actualiza Node.
 - **Lección / regla:** al crear o actualizar el proyecto, revisar `node -v` en la máquina que lo va a correr y documentar el mínimo de `engines` en el README.
+
+### E-010
+
+- **Fecha:** 2026-10-29 · **Módulo:** M01 · **Tipo:** proceso
+- **Qué pasó:** el commit del requisito de Node (E-009) se hizo directamente en la carpeta de la persona. Después, al copiar el repositorio desde la copia de trabajo del agente (incluida la carpeta `.git`), ese commit desapareció de la rama.
+- **Causa:** había dos copias del repositorio con historias distintas y la sincronización sobrescribió una con la otra.
+- **Corrección:** se recuperó con `git cherry-pick a492de4` (el objeto seguía en `.git`) y se volvió a alinear la copia de trabajo.
+- **Lección / regla:** una sola fuente de commits. El agente trae primero los commits de la carpeta de la persona a su copia y solo entonces sincroniza de vuelta; nunca copia `.git` encima de una historia que no contiene.
