@@ -1,0 +1,6 @@
+<div #canvas class="canvas" aria-hidden="true"></div>
+<ul class="visually-hidden">
+  @for (point of series(); track point.day) {
+    <li>{{ describe()(point) }}</li>
+  }
+</ul>

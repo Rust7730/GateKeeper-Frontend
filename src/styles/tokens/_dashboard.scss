@@ -1,0 +1,35 @@
+gk-workspace {
+  --canvas: light-dark(#fcfcfd, #151720);
+  --ink: light-dark(#1d2130, #fcfcfd);
+  --muted: light-dark(#474950, #c4c9d7);
+  --line: light-dark(#d5d9e8, #454e65);
+  --signal: light-dark(#164fbd, #9abfff);
+  --surface: light-dark(#fff, #1d2130);
+  --soft: light-dark(#ebeef7, #252d40);
+  --lime: #bfff5a;
+  --cobalt: #1a67fd;
+  --stage: #0a0d16;
+  --warm: #ffb59d;
+  --radius: 1.5rem;
+  --stage-glow: light-dark(#e3edff, #1c315e);
+  --stage-base: light-dark(#fcfcfd, #0a0d16);
+  --stage-line: light-dark(#c3d2ee, #344567);
+  --stage-shadow: light-dark(#1a67fd33, #1a67fd55);
+  --surface-shadow: #0a0d1644;
+  --chart-quarantine: light-dark(#4c7909, #bfff5a);
+  --chart-rejected: light-dark(#bb593e, #ffb59d);
+  --brand-tile: light-dark(#fcfcfd, transparent);
+  --action-outline: #0b3d28;
+  --terminal-line: #34435f;
+  --terminal-top: #202d46;
+  --terminal-ink: #e1e7f5;
+  --terminal-blue: #b8d0ff;
+  --terminal-muted: #c4c9d7;
+  --status-quarantine-surface: light-dark(#fff0cf, #3b2e18);
+  --status-quarantine-ink: light-dark(#684100, #ffdb93);
+  --status-blocked-surface: light-dark(#ffe9e6, #442626);
+  --status-blocked-ink: light-dark(#912c25, #ffbeb2);
+  --post-surface: light-dark(#e1f6e6, #193b2b);
+  --post-ink: light-dark(#176035, #a7e9bc);
+  --dialog-scrim: #0a0d16b3;
+}

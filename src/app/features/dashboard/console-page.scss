@@ -1,0 +1,6 @@
+// Los estilos del dashboard viven en styles/base/_dashboard-ui.scss (bajo <gk-dashboard-shell>).
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gk-space-24);
+}

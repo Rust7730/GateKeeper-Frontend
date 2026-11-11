@@ -1,19 +1,30 @@
-import { Routes } from '@angular/router';
+import { Route, Routes } from '@angular/router';
+import { WorkspaceView } from './features/overview/workspace-data';
 
-// Landing pública en "/" (M01). Login en "/login" (marcador «Próximamente» hasta M05).
-// El dashboard vivirá bajo "/app" (M06+).
+const title = (section: string) => `Gatekeeper · ${section}`;
+
+const workspace = (path: string, view: WorkspaceView, section: string): Route => ({
+  path,
+  title: title(section),
+  data: { view },
+  loadComponent: () => import('./features/overview/workspace').then((m) => m.Workspace),
+});
+
+// Dashboard en "/app": barra superior + menú lateral, una página por sección.
+// "/" y "/dashboard" llevan al resumen. La landing pública vive en Astro (/landing).
 export const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    title: 'Gatekeeper · Inspección de archivos antes de tu almacenamiento',
-    loadComponent: () => import('./features/landing/landing').then((m) => m.Landing),
-  },
-  {
-    path: 'login',
-    title: 'Gatekeeper · Próximamente',
-    loadComponent: () =>
-      import('./features/auth/coming-soon/coming-soon').then((m) => m.ComingSoon),
-  },
-  { path: '**', redirectTo: '' },
+  { path: '', pathMatch: 'full', redirectTo: 'app' },
+  { path: 'dashboard', redirectTo: 'app', pathMatch: 'full' },
+  workspace('login', 'login', 'Acceso'),
+  { ...workspace('app', 'summary', 'Resumen'), pathMatch: 'full' },
+  workspace('app/archivos', 'files', 'Archivos'),
+  workspace('app/archivos/:id', 'detail', 'Detalle del archivo'),
+  workspace('app/cuarentena', 'quarantine', 'Cuarentena'),
+  workspace('app/alertas', 'alerts', 'Alertas'),
+  workspace('app/auditoria', 'audit', 'Auditoría'),
+  workspace('app/claves', 'keys', 'Obtener clave API'),
+  workspace('app/explorador', 'explorer', 'Consola de pruebas'),
+  workspace('app/documentacion', 'docs', 'Documentación'),
+  workspace('app/**', 'missing', 'Página no encontrada'),
+  { path: '**', redirectTo: 'app' },
 ];

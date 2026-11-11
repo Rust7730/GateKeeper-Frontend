@@ -1,0 +1,201 @@
+@if (showHead()) {
+  <header class="page-head">
+    <p class="eyebrow">{{ eyebrow() }}</p>
+    <h1>
+      {{ heading() }}<span class="brush">{{ accent() }}</span
+      >{{ tail() }}
+    </h1>
+    <p class="page-lead">{{ lead() }}</p>
+  </header>
+}
+
+<section class="workspace-section" [attr.aria-label]="heading() + accent()">
+  <aside class="tree-panel" aria-label="API resource tree">
+    <div class="panel-header">
+      <span class="panel-heading">API RESOURCE TREE</span>
+      <span class="strong-badge blue">v1.4 SPEC</span>
+    </div>
+
+    <div class="tree-container">
+      <ul>
+        <li class="tree-item">
+          <input type="checkbox" id="folder-api" class="tree-toggle" checked />
+          <label for="folder-api" class="tree-label">
+            <svg
+              class="icon folder-closed-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 2H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"
+              />
+            </svg>
+            <svg
+              class="icon folder-open-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 2H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"
+              />
+              <path d="M2 10h20" />
+            </svg>
+            api / v1
+          </label>
+
+          <div class="tree-children-wrapper">
+            <ul class="tree-children">
+              @for (group of groups(); track group.folder) {
+                <li class="tree-item">
+                  <input
+                    type="checkbox"
+                    [id]="'folder-' + group.folder"
+                    class="tree-toggle"
+                    checked
+                  />
+                  <label [for]="'folder-' + group.folder" class="tree-label">
+                    <svg
+                      class="icon folder-closed-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 2H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"
+                      />
+                    </svg>
+                    <svg
+                      class="icon folder-open-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 2H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"
+                      />
+                      <path d="M2 10h20" />
+                    </svg>
+                    {{ group.folder }}
+                  </label>
+                  <div class="tree-children-wrapper">
+                    <ul class="tree-children">
+                      @for (endpoint of group.items; track endpoint.id) {
+                        <li class="tree-item">
+                          <button
+                            type="button"
+                            class="file-item"
+                            [class.is-selected]="selectedEndpoint().id === endpoint.id"
+                            [attr.aria-current]="
+                              selectedEndpoint().id === endpoint.id ? 'true' : null
+                            "
+                            (click)="selectEndpoint(endpoint)"
+                          >
+                            <span [class]="'method-tag ' + endpoint.method.toLowerCase()">{{
+                              endpoint.method
+                            }}</span>
+                            <span class="file-name">{{ endpointLabel(endpoint) }}</span>
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="playground-panel">
+    <div class="endpoint-header-card">
+      <div class="endpoint-title-row">
+        <span
+          class="method-badge"
+          [class.post]="selectedEndpoint().method === 'POST'"
+          [class.get]="selectedEndpoint().method === 'GET'"
+        >
+          {{ selectedEndpoint().method }}
+        </span>
+        <code class="endpoint-path">{{ requestPath() }}</code>
+      </div>
+      <h2 class="endpoint-summary">{{ selectedEndpoint().summary }}</h2>
+      <p class="endpoint-desc">{{ selectedEndpoint().description }}</p>
+    </div>
+
+    <!-- Snippet de Código del Playground -->
+    <div class="code-terminal-card">
+      <div class="terminal-topbar">
+        <span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div class="lang-selector">
+          <button
+            type="button"
+            class="lang-pill"
+            [class.is-active]="selectedSnippetLang() === 'curl'"
+            (click)="setSnippetLang('curl')"
+          >
+            cURL
+          </button>
+          <button
+            type="button"
+            class="lang-pill"
+            [class.is-active]="selectedSnippetLang() === 'ts'"
+            (click)="setSnippetLang('ts')"
+          >
+            TypeScript
+          </button>
+          <button
+            type="button"
+            class="lang-pill"
+            [class.is-active]="selectedSnippetLang() === 'python'"
+            (click)="setSnippetLang('python')"
+          >
+            Python
+          </button>
+        </div>
+
+        <button
+          type="button"
+          class="send-request-btn"
+          [disabled]="isRunningRequest()"
+          (click)="executeRequest()"
+        >
+          @if (isRunningRequest()) {
+            <span>Enviando...</span>
+          } @else {
+            <span class="play-symbol">▶</span>
+            <span>Ejecutar Petición</span>
+          }
+        </button>
+      </div>
+
+      <pre class="terminal-body"><code>{{ getSnippetCode() }}</code></pre>
+    </div>
+
+    <!-- Respuesta en Vivo del Servidor -->
+    <div class="response-terminal-card">
+      <div class="terminal-topbar">
+        <span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div class="response-status-group">
+          <span class="status-indicator"></span>
+          <span class="status-code">{{ responseStatusCode() }} OK</span>
+          <span class="latency-pill">{{ actualLatency() }} ms</span>
+        </div>
+        <span class="format-indicator">application/json</span>
+      </div>
+
+      <pre class="terminal-body response-body"><code>{{ formattedResponse() }}</code></pre>
+    </div>
+  </div>
+</section>
