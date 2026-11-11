@@ -7,13 +7,12 @@
 
 ## Contenido
 
-| Archivo / carpeta | Qué es                                 | Módulo |
-| ----------------- | -------------------------------------- | ------ |
-| `app.ts`          | Componente raíz `gk-root`              | M00    |
-| `app.html`        | Plantilla raíz (marcador hasta M01)    | M00    |
-| `app.scss`        | Estilos del marcador temporal          | M00    |
-| `app.config.ts`   | Providers globales (router, errores)   | M00    |
-| `app.routes.ts`   | Rutas: `/` landing, `/login`, `/app/*` | M00    |
-| `core/`           | Singletons y contrato con el backend   | M00    |
-| `shared/`         | Piezas reutilizables                   | M00    |
-| `features/`       | Pantallas                              | M00    |
+| Archivo / carpeta | Qué es                                   | Módulo |
+| ----------------- | ---------------------------------------- | ------ |
+| `app.ts`          | Componente raíz `gk-root`                | M00    |
+| `app.html`        | Plantilla raíz (marcador hasta M01)      | M00    |
+| `app.config.ts`   | Providers globales (router, errores)     | M00    |
+| `app.routes.ts`   | Rutas: `/` dashboard, `/dashboard`, etc. | M00    |
+| `core/`           | Singletons y contrato con el backend     | M00    |
+| `shared/`         | Piezas reutilizables                     | M00    |
+| `features/`       | Pantallas                                | M00    |

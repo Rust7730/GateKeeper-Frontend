@@ -1,0 +1,26 @@
+// Modo Dark de la colección de variables "Gatekeeper" (Figma 7:29095).
+// Es el tema por defecto. Valores confirmados con get_variable_defs el 2026-10-29.
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --gk-background-canvas: #101215;
+  --gk-background-surface: #181b20;
+  --gk-background-elevated: #20242b;
+  --gk-background-subtle: #252a32;
+  --gk-text-primary: #f2f4f7;
+  --gk-text-secondary: #b0b8c5;
+  --gk-text-muted: #929dad;
+  --gk-border-default: #343b46;
+  --gk-action-background: #e7ebf1;
+  --gk-action-foreground: #161b22;
+  --gk-focus-ring: #b6cdf9;
+  --gk-status-pending: #e9c46a;
+  --gk-status-clean: #75d6ad;
+  --gk-status-quarantine: #f6bb73;
+  --gk-status-rejected: #ff9198;
+  --gk-severity-low: #93b9e8;
+  --gk-severity-medium: #e9c46a;
+  --gk-severity-high: #f6aa72;
+  --gk-severity-critical: #ff9198;
+}

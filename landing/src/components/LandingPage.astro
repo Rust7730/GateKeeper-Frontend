@@ -1,0 +1,442 @@
+---
+import '../styles/global.css';
+import FileStory from './FileStory.astro';
+import LimitCards from './LimitCards.astro';
+import { englishData, type Language } from '../data/english';
+
+interface Props { lang: Language }
+
+const { lang } = Astro.props;
+const t = (es: string, en: string) => lang === 'en' ? en : es;
+const localize = (value: string) => lang === 'en' ? englishData[value] ?? value : value;
+import {
+  DECLARATION_CASES,
+  GUARANTEES,
+  INTEGRATION_STEPS,
+  LIMITS,
+  STATIONS,
+  VECTOR_GROUPS,
+  VECTORS,
+} from '../data/gatekeeper';
+
+const dashboardUrl = import.meta.env.PUBLIC_DASHBOARD_URL ||
+  (import.meta.env.DEV ? 'http://localhost:4200/' : '/dashboard');
+
+const shells = [
+  { id: 'bash', label: 'Bash' },
+  { id: 'powershell', label: 'PowerShell' },
+] as const;
+
+const outcomes = {
+  clean: t('Copia reconstruida', 'Reconstructed copy'),
+  quarantined: t('Archivo en cuarentena', 'File quarantined'),
+  rejected: t('Archivo bloqueado', 'File blocked'),
+};
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="alternate" hreflang="es" href="/" />
+    <link rel="alternate" hreflang="en" href="/en/" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>{t("Gatekeeper — Inspección y reconstrucción de archivos", "Gatekeeper — File inspection and reconstruction")}</title>
+    <meta name="description" content={t("API que verifica el tipo real de cada archivo, elimina contenido activo y entrega una copia reconstruida.", "An API that verifies the real file type, removes active content and delivers a reconstructed copy.")} />
+  </head>
+  <body>
+    <div id="arriba" class="sr-only" tabindex="-1"></div>
+    <a href="#inicio" class="skip-link">{t("Ir al contenido", "Skip to content")}</a>
+    <header class="site-header" data-site-header>
+      <div class="wrap nav-inner">
+        <a href="#arriba" class="brand" aria-label={t("Gatekeeper, inicio", "Gatekeeper, home")}>
+          <img src="/logo.png" alt="" width="32" height="32" class="brand-logo" aria-hidden="true" />
+          Gatekeeper
+        </a>
+        <nav aria-label={t("Secciones de la landing", "Landing page sections")}>
+          <a href="#como-funciona">{t("Cómo funciona", "How it works")}</a>
+          <a href="#integracion">{t("Integración", "Integration")}</a>
+          <a href="#pruebas">{t("Pruebas", "Test cases")}</a>
+          <a href={dashboardUrl} class="nav-dashboard">Dashboard</a>
+        </nav>
+        <div class="header-tools">
+          <a class="language-link" href={lang === 'es' ? '/en/' : '/'} hreflang={t('en', 'es')} lang={t('en', 'es')}>
+            <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.6 4 5.7 4 9s-1.4 6.4-4 9c-2.6-2.6-4-5.7-4-9s1.4-6.4 4-9Z" /></svg>
+            {t('English', 'Español')}
+          </a>
+          <details class="preferences" data-preferences hidden>
+            <summary>
+              <svg class="icon icon-gear" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
+              {t('Ajustes', 'Settings')}
+            </summary>
+            <div class="preferences-panel">
+              <span id="theme-label" class="pref-label">
+                <span class="theme-icon" data-theme-icon aria-hidden="true">
+                  <svg class="icon icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+                  <svg class="icon icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg>
+                </span>
+                {t('Tema', 'Theme')}
+              </span>
+              <div class="theme-switch" role="radiogroup" aria-labelledby="theme-label" data-theme-switch data-value="system">
+                <span class="theme-thumb" aria-hidden="true"></span>
+                <label title={t('Del sistema', 'System')}>
+                  <input type="radio" name="theme" value="system" checked />
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></svg>
+                  <span>{t('Sistema', 'System')}</span>
+                </label>
+                <label title={t('Claro', 'Light')}>
+                  <input type="radio" name="theme" value="light" />
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+                  <span>{t('Claro', 'Light')}</span>
+                </label>
+                <label title={t('Oscuro', 'Dark')}>
+                  <input type="radio" name="theme" value="dark" />
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg>
+                  <span>{t('Oscuro', 'Dark')}</span>
+                </label>
+              </div>
+              <label class="motion-control"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4" /></svg><input type="checkbox" data-motion-toggle /> {t('Reducir movimiento', 'Reduce motion')}</label>
+            </div>
+          </details>
+          <a class="button button-primary" href={dashboardUrl}>Dashboard <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </header>
+
+    <main id="inicio" tabindex="-1">
+      <FileStory lang={lang} />
+
+      <section id="como-funciona" class="process section-space">
+        <div class="wrap two-column">
+          <div class="section-heading">
+            <p class="eyebrow">{t("Cómo funciona", "How it works")}</p>
+            <h2 data-scroll-title>{t("Del archivo original a una ", "From the original file to a ")}<span class="brush">{t("copia", "copy")}</span>{t(" lista para usar.", " you can use.")}</h2>
+            <p>{t('Quien sube un archivo controla su extensión y el encabezado', 'The uploader controls the file extension and the')} <code>Content-Type</code>{t('. Gatekeeper comprueba el contenido antes de permitir una descarga.', ' header. Gatekeeper checks the contents before allowing a download.')}</p>
+          </div>
+          <ol class="pipeline">
+            {STATIONS.map((station, index) => (
+              <li>
+                <span class="pipeline-number" aria-hidden="true">0{index + 1}</span>
+                <div>
+                  <h3>{localize(station.name)}</h3>
+                  <p>{localize(station.does)}</p>
+                </div>
+                <code>{localize(station.tool)}</code>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="demo" class="section-space">
+        <div class="wrap two-column">
+          <div class="section-heading">
+            <p class="eyebrow">{t("Pruébalo", "Try it")}</p>
+            <h2 data-scroll-title>{t("¿Qué pasa con otros ", "What about other ")}<span class="brush">{t("archivos", "files")}</span>?</h2>
+            <p>{t("Abre un ejemplo para ver qué detecta Gatekeeper y por qué bloquea el archivo o permite descargar una copia.", "Open an example to see what Gatekeeper detects and why it blocks the file or makes a copy available.")}</p>
+          </div>
+          <div class="sample-list">
+            {DECLARATION_CASES.map((sample) => (
+              <details>
+                <summary>
+                  <span>{localize(sample.label)}</span>
+                  <code>{sample.declared.name}</code>
+                </summary>
+                <div class="sample-content">
+                  <code class="sample-signature">{sample.inspected.signature}</code>
+                  <p>{localize(sample.inspected.signatureNote)}</p>
+                  <p><strong>{outcomes[sample.verdict]}.</strong> {localize(sample.reason)}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="integracion" class="integration section-space">
+        <div class="wrap">
+          <div class="integration-heading">
+            <div class="section-heading">
+              <p class="eyebrow">{t("Integración", "Integration")}</p>
+              <h2 data-scroll-title>{t("Sube, consulta y ", "Upload, check and ")}<span class="brush">{t("descarga", "download")}</span>.</h2>
+              <p>{t("Envía un archivo con tu API key, consulta el estado del análisis y descarga la copia cuando esté lista.", "Send a file with your API key, check the scan status and download the copy when it is ready.")}</p>
+            </div>
+            <div class="shell-switch" role="group" aria-label={t("Lenguaje de terminal", "Shell language")} hidden data-shell-controls data-active="bash">
+              <span class="shell-thumb" aria-hidden="true"></span>              {shells.map((shell) => (
+                <button type="button" data-shell={shell.id} aria-pressed={shell.id === 'bash'}>{shell.label}</button>
+              ))}
+            </div>
+          </div>
+          <ol class="api-steps">
+            {INTEGRATION_STEPS.map((step) => (
+              <li>
+                <div class="api-description">
+                  <p class="endpoint"><strong>{step.method}</strong> <code>{step.route}</code></p>
+                  <h3>{localize(step.title)}</h3>
+                  <p>{localize(step.detail)}</p>
+                </div>
+                <div class="api-code">
+                  {shells.map((shell) => (
+                    <div data-session={shell.id} hidden={shell.id !== 'bash'}>
+                      <div class="code-bar">
+                        <span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span class="shell-title"><span aria-hidden="true">›_</span> {shell.label}</span>
+                        <button type="button" data-copy={step.sessions[shell.id].command.join('\n')} hidden>{t("Copiar", "Copy")}</button>
+                      </div>
+                      <div class="code-command">
+                        <span class="terminal-prompt" aria-hidden="true">{shell.id === 'bash' ? '$' : 'PS>'}</span>
+                        <pre tabindex="0"><code>{step.sessions[shell.id].command.join('\n')}</code></pre>
+                      </div>
+                      {step.sessions[shell.id].output.length > 0 && (
+                        <div class="code-output">
+                          <p>{t('Respuesta de ejemplo', 'Example response')}</p>
+                          <pre tabindex="0"><code>{step.sessions[shell.id].output.join('\n').trim()}</code></pre>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p class="sr-only" role="status" data-copy-status></p>
+        </div>
+      </section>
+
+      <section id="garantias" class="guarantees section-space">
+        <div class="wrap">
+          <div class="section-heading">
+            <p class="eyebrow">{t("Garantías", "Guarantees")}</p>
+            <h2 data-scroll-title>{t("Cómo se ", "How files are ")}<span class="brush">{t("aíslan", "isolated")}</span>{t(" los archivos.", ".")}</h2>
+          </div>
+          <dl>
+            {GUARANTEES.map((item) => (
+              <div>
+                <dt>{localize(item.title)}</dt>
+                <dd>{localize(item.text)}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section id="pruebas" class="section-space">
+        <div class="wrap">
+          <div class="section-heading">
+            <p class="eyebrow">{t("Pruebas", "Tests")}</p>
+            <h2 data-scroll-title>{t("15 ", "15 attack ")}<span class="brush">{t("escenarios", "scenarios")}</span>{t(" de ataque.", ".")}</h2>
+            <p>{t("La matriz relaciona cada ataque con la capa que debe detenerlo.", "The matrix pairs each attack with the layer designed to stop it.")}</p>
+          </div>
+          <div class="vector-filters" role="group" aria-label={t("Filtrar escenarios", "Filter test cases")} hidden data-vector-controls>
+            {VECTOR_GROUPS.map((group) => (
+              <button type="button" data-vector-filter={group.id} aria-pressed={group.id === 'all'}>{localize(group.label)}</button>
+            ))}
+          </div>
+          <div class="matrix">
+            <table>
+              <thead><tr><th scope="col">{t("Escenario", "Scenario")}</th><th scope="col">{t("Capa de protección", "Protection layer")}</th></tr></thead>
+              <tbody>
+                {VECTORS.map((vector) => (
+                  <tr data-vector-group={vector.group}><td>{localize(vector.attack)}</td><td>{localize(vector.layer)}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="limites" class="limits section-space">
+        <div class="wrap limits-layout">
+          <div class="section-heading">
+            <p class="eyebrow">{t("Límites", "Limits")}</p>
+            <h2 data-scroll-title>{t("Límites de la ", "")}<span class="brush">{t("inspección", "Inspection")}</span>{t(".", " limits.")}</h2>
+            <p>{t("Qué cubre Gatekeeper y qué debes gestionar en tu aplicación.", "What Gatekeeper covers and what your application needs to handle.")}</p>
+          </div>
+          <LimitCards
+            label={t('Límite', 'Limit')}
+            hint={t('Pasa el cursor o pulsa una card para detenerla y leerla.', 'Hover or press a card to pause and read it.')}
+            release={t('Card fijada. Pulsa la X para reanudar.', 'Card pinned. Press the X to resume.')}
+            close={t('Cerrar y reanudar', 'Close and resume')}
+            items={[
+              { title: t('Formatos admitidos', 'Supported formats'), text: localize(LIMITS[0]) },
+              { title: t('Análisis por firmas', 'Signature scanning'), text: localize(LIMITS[1]) },
+              { title: t('Lector de PDF', 'PDF reader'), text: localize(LIMITS[2]) },
+            ]}
+          />
+          <p class="limits-extra-title">{t('También ten en cuenta', 'Also keep in mind')}</p>
+          <ul class="limits-extra">
+            {LIMITS.slice(3).map((limit) => <li>{localize(limit)}</li>)}
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="wrap footer-inner">
+        <div>
+          <a class="brand" href="#arriba">
+            <img src="/logo.png" alt="" width="28" height="28" class="brand-logo" aria-hidden="true" />
+            Gatekeeper
+          </a>
+          <p>{t("Inspección y reconstrucción de archivos para aplicaciones.", "File inspection and reconstruction for applications.")}</p>
+        </div>
+        <nav aria-label={t("Recursos", "Resources")}>
+          <a href="https://cwe.mitre.org/top25/">MITRE CWE Top 25</a>
+          <a href="https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html">{t("Guía de OWASP", "OWASP guide")}</a>
+          <a href={dashboardUrl}>{t('Entrar al dashboard', 'Open dashboard')} <span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+    </footer>
+
+    <a href="#arriba" class="back-to-top" aria-label={t('Volver arriba', 'Back to top')} title={t('Volver arriba', 'Back to top')}>
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+    </a>
+
+    <script>
+      import '../scripts/preferences';
+
+      const header = document.querySelector<HTMLElement>('[data-site-header]');
+      if (header) {
+        new ResizeObserver(([entry]) => {
+          const height = entry.borderBoxSize[0].blockSize;
+          document.documentElement.style.setProperty('--header-offset', `${height}px`);
+        }).observe(header);
+
+        let scrolled = false;
+        const syncHeaderScroll = () => {
+          const y = window.scrollY;
+          if (!scrolled && y > 36) {
+            scrolled = true;
+            header.dataset.scrolled = 'true';
+          } else if (scrolled && y < 12) {
+            scrolled = false;
+            delete header.dataset.scrolled;
+          }
+        };
+        syncHeaderScroll();
+        window.addEventListener('scroll', syncHeaderScroll, { passive: true });
+      }
+
+      // Pestaña activa del menú según la sección visible.
+      const navLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.nav-inner nav a[href^="#"]'));
+      const spied = navLinks
+        .map((link) => document.querySelector<HTMLElement>(link.getAttribute('href') ?? ''))
+        .filter((section): section is HTMLElement => section !== null);
+      if (spied.length) {
+        const spy = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            navLinks.forEach((link) => {
+              if (link.getAttribute('href') === `#${entry.target.id}`) link.setAttribute('aria-current', 'true');
+              else link.removeAttribute('aria-current');
+            });
+          });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        spied.forEach((section) => spy.observe(section));
+        window.addEventListener('scroll', () => {
+          if (window.scrollY < 200) navLinks.forEach((link) => link.removeAttribute('aria-current'));
+        }, { passive: true });
+      }
+
+      const english = document.documentElement.lang === 'en';
+      const shellControls = document.querySelector<HTMLElement>('[data-shell-controls]');
+      const shellButtons = document.querySelectorAll<HTMLButtonElement>('[data-shell]');
+      const sessions = document.querySelectorAll<HTMLElement>('[data-session]');
+
+      if (shellControls) shellControls.hidden = false;
+
+      const motionOff = () =>
+        document.documentElement.dataset.motion === 'reduce' ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Cada línea del comando se escribe como en una terminal real.
+      const termLines = new WeakMap<HTMLElement, HTMLElement[]>();
+      sessions.forEach((session) => {
+        session.querySelectorAll<HTMLElement>('.code-command code, .code-output code').forEach((code) => {
+          const lines = (code.textContent ?? '').split('\n').map((text, i) => {
+            const line = document.createElement('span');
+            line.className = 'term-line';
+            line.textContent = text || ' ';
+            line.style.setProperty('--n', String(text.length));
+            line.style.setProperty('--i', String(i));
+            return line;
+          });
+          code.replaceChildren(...lines);
+          termLines.set(code, lines);
+        });
+      });
+
+      const play = (session: HTMLElement) => {
+        session.classList.remove('is-live');
+        if (motionOff()) return;
+        void session.offsetWidth;
+        session.classList.add('is-live');
+      };
+
+      const visible = new Set<HTMLElement>();
+      const watcher = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const session = entry.target as HTMLElement;
+          if (entry.isIntersecting && !session.dataset.played) {
+            session.dataset.played = 'true';
+            play(session);
+          }
+          if (!entry.isIntersecting) delete session.dataset.played;
+          if (entry.isIntersecting) visible.add(session); else visible.delete(session);
+        });
+      }, { threshold: 0.4 });
+      sessions.forEach((session) => watcher.observe(session));
+
+      shellButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          shellControls?.setAttribute('data-active', button.dataset.shell ?? 'bash');
+          shellButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+          sessions.forEach((session) => {
+            const show = session.dataset.session === button.dataset.shell;
+            session.hidden = !show;
+            if (show) play(session);
+          });
+        });
+      });
+
+      const copyStatus = document.querySelector<HTMLElement>('[data-copy-status]');
+      document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
+        if (!navigator.clipboard) return;
+        button.hidden = false;
+        let reset: number;
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(button.dataset.copy ?? '');
+            button.textContent = english ? 'Copied' : 'Copiado';
+            if (copyStatus) copyStatus.textContent = english ? 'Command copied to the clipboard.' : 'Comando copiado al portapapeles.';
+          } catch {
+            button.textContent = english ? 'Copy failed' : 'No se pudo copiar';
+            if (copyStatus) copyStatus.textContent = english ? 'Could not copy the command.' : 'No se pudo copiar el comando.';
+          }
+          window.clearTimeout(reset);
+          reset = window.setTimeout(() => {
+            button.textContent = english ? 'Copy' : 'Copiar';
+            if (copyStatus) copyStatus.textContent = '';
+          }, 1800);
+        });
+      });
+
+      const vectorControls = document.querySelector<HTMLElement>('[data-vector-controls]');
+      const filters = document.querySelectorAll<HTMLButtonElement>('[data-vector-filter]');
+      const vectors = document.querySelectorAll<HTMLTableRowElement>('[data-vector-group]');
+
+      if (vectorControls) vectorControls.hidden = false;
+      filters.forEach((button) => {
+        button.addEventListener('click', () => {
+          const group = button.dataset.vectorFilter;
+          filters.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+          vectors.forEach((row) => { row.hidden = group !== 'all' && row.dataset.vectorGroup !== group; });
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -19,6 +19,8 @@
     "module:start": "node scripts/module.mjs start",
     "module:close": "node scripts/module.mjs close",
     "setup:claude": "node scripts/setup-claude.mjs",
+    "landing:dev": "npm --prefix landing run dev",
+    "landing:build": "npm --prefix landing run build",
     "prepare": "husky"
   },
   "private": true,
@@ -32,6 +34,10 @@
     "@angular/material": "^22.2.5",
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "echarts": "^6.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

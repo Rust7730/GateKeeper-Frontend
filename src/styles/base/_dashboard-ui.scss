@@ -1,0 +1,744 @@
+// Dashboard · lenguaje Buddy compartido con la landing.
+// Papel claro plano (sin cuadrícula), tinta casi negra, un solo acento lima en las acciones
+// y trazos de color reservados a tarjetas y subrayados. Claro y oscuro con light-dark().
+gk-dashboard-shell,
+gk-workspace .console-host {
+  // Tokens semánticos: los de ajustes (--line, --surface, --signal...) los lee WorkspaceSettings.
+  --canvas: light-dark(#fcfcfd, #151720);
+  --ink: light-dark(#1d2130, #fcfcfd);
+  --ink-strong: light-dark(#0a0d16, #fcfcfd);
+  --muted: light-dark(#474950, #c4c9d7);
+  --pewter: light-dark(#6b6d72, #a4abbf);
+  --line: light-dark(#d5d9e8, #454e65);
+  --hair: light-dark(rgb(29 33 48 / 8%), rgb(255 255 255 / 10%));
+  --soft: light-dark(#ebeef7, #252d40);
+  --surface: light-dark(#ebeef7, #1d2130);
+  --signal: light-dark(#164fbd, #9abfff);
+  --lime: #bfff5a;
+  --action-outline: #0b3d28;
+  --stage: #0a0d16;
+  --dialog-scrim: light-dark(rgb(10 13 22 / 20%), rgb(0 0 0 / 60%));
+  --tone-green-bg: light-dark(#d8fbed, rgb(25 247 154 / 16%));
+  --tone-green-fg: light-dark(#0b3d28, #7dffc6);
+  --tone-blue-bg: light-dark(rgb(26 103 253 / 10%), rgb(154 191 255 / 16%));
+  --tone-blue-fg: light-dark(#164fbd, #9abfff);
+  --tone-red-bg: light-dark(rgb(255 128 110 / 18%), rgb(255 128 110 / 20%));
+  --tone-red-fg: light-dark(#9c2e1a, #ffb0a3);
+  --tone-amber-bg: light-dark(rgb(255 198 80 / 28%), rgb(255 198 80 / 18%));
+  --tone-amber-fg: light-dark(#6b4300, #ffd888);
+  --d-out: var(--gk-ease-out);
+  --d-arc: var(--gradient-cyan-beam);
+  --d-glow: rgb(70 216 255 / 12%);
+  --d-card-shadow:
+    0 0 0 1px var(--hair), rgb(29 33 48 / 4%) 0 1px 1px -1px, rgb(29 33 48 / 4%) 0 2px 2px -1px,
+    rgb(29 33 48 / 4%) 0 5px 5px -2.5px, var(--d-glow) 0 10px 10px -5px,
+    var(--d-glow) 0 24px 24px -8px;
+
+  display: block;
+  min-height: 100vh;
+  background: var(--canvas);
+  color: var(--ink);
+  color-scheme: light dark;
+  font-family: var(--gk-font-ui);
+  font-feature-settings: 'liga' 0;
+
+  &[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  &[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  // Saltar al contenido: igual que en la landing
+  // Utilidades de maquetación
+  .panel-header,
+  .tree-label,
+  .file-item,
+  .endpoint-title-row,
+  .terminal-topbar,
+  .response-status-group,
+  .send-request-btn {
+    display: flex;
+    align-items: center;
+  }
+
+  // Etiqueta de sección: mono, mayúsculas, espaciado ancho
+  .eyebrow {
+    margin: 0;
+    color: var(--pewter);
+    font-family: var(--gk-font-mono);
+    font-size: 0.6875rem;
+    font-weight: var(--gk-weight-medium);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+  }
+
+  // Subrayado multicolor bajo una palabra clave
+  .brush {
+    position: relative;
+    display: inline-block;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -0.06em;
+      left: 3%;
+      width: 78%;
+      height: clamp(3px, 0.065em, 6px);
+      border-radius: 99px;
+      background: var(--gk-brushstroke);
+      transform: rotate(-0.8deg);
+      transform-origin: left center;
+      animation: gk-brush-in 900ms var(--d-out) 300ms both;
+    }
+  }
+
+  // 1. Barra lateral
+  // Encabezado como el de la landing: marca + ajustes de accesibilidad
+  // Selector de entorno: cápsula de pestañas
+  // Etiquetas: píldoras con fondo suave y texto oscuro
+  .strong-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    background: var(--soft);
+    color: var(--ink);
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-xs);
+    font-weight: var(--gk-weight-medium);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    &.active,
+    &.green {
+      background: var(--tone-green-bg);
+      color: var(--tone-green-fg);
+    }
+
+    &.test,
+    &.blue {
+      background: var(--tone-blue-bg);
+      color: var(--tone-blue-fg);
+    }
+
+    &.red {
+      background: var(--tone-red-bg);
+      color: var(--tone-red-fg);
+    }
+
+    &.amber {
+      background: var(--tone-amber-bg);
+      color: var(--tone-amber-fg);
+    }
+  }
+
+  .status-indicator {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: #19f79a;
+    box-shadow: 0 0 0 3px rgb(25 247 154 / 22%);
+  }
+
+  // 2. Área principal
+  .icon,
+  .format-indicator {
+    color: var(--pewter);
+  }
+
+  .panel-heading,
+  .endpoint-path {
+    color: var(--ink-strong);
+  }
+
+  .page-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gk-space-8);
+    padding-bottom: var(--gk-space-8);
+
+    h1 {
+      color: var(--ink-strong);
+      font-size: clamp(2.25rem, 1.4rem + 2.6vw, 3.25rem);
+      font-weight: var(--gk-weight-bold);
+      letter-spacing: -0.045em;
+      line-height: 1;
+    }
+  }
+
+  .page-lead {
+    max-width: 38rem;
+    color: var(--muted);
+    font-size: var(--gk-text-h3);
+    line-height: 1.55;
+  }
+
+  // Tarjetas: 24px, hairline, brillo del tono y trazo de arco superior
+  .tree-panel,
+  .endpoint-header-card {
+    position: relative;
+    border-radius: 24px;
+    background: var(--canvas);
+    box-shadow: var(--d-card-shadow);
+  }
+
+  // Gráficas
+  // Espacio de trabajo de la consola
+  .workspace-section {
+    display: grid;
+    grid-template-columns: 20rem minmax(0, 1fr);
+    gap: var(--gk-space-16);
+    align-items: start;
+  }
+
+  .tree-panel {
+    display: flex;
+    flex-direction: column;
+    padding: var(--gk-space-20);
+  }
+
+  .panel-header {
+    justify-content: space-between;
+    margin-bottom: var(--gk-space-12);
+  }
+
+  .tree-container {
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
+      ul {
+        margin-left: 0.9rem;
+        padding-left: 0.6rem;
+        border-left: 1px solid var(--soft);
+      }
+    }
+  }
+
+  .tree-item {
+    position: relative;
+    margin-top: 0.15rem;
+  }
+
+  .tree-label,
+  .file-item {
+    gap: var(--gk-space-8);
+    width: 100%;
+    min-height: 2.1rem;
+    padding: 0.25rem 0.6rem;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-mono);
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 160ms var(--d-out),
+      transform 160ms var(--d-out);
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &.is-selected {
+      background: var(--soft);
+      box-shadow: inset 0 0 0 1px var(--line);
+      color: var(--ink-strong);
+      font-weight: var(--gk-weight-semibold);
+    }
+  }
+
+  .icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  .folder-open-icon {
+    display: none;
+  }
+
+  .folder-closed-icon {
+    display: block;
+  }
+
+  .tree-toggle:checked ~ .tree-label {
+    .folder-open-icon {
+      display: block;
+      color: var(--signal);
+    }
+
+    .folder-closed-icon {
+      display: none;
+    }
+  }
+
+  // Casilla oculta pero alcanzable con teclado
+  .tree-toggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+
+    &:checked ~ .tree-children-wrapper {
+      grid-template-rows: 1fr;
+    }
+
+    &:focus-visible ~ .tree-label {
+      outline: 2px solid var(--signal);
+      outline-offset: 2px;
+    }
+  }
+
+  .tree-children-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 250ms var(--d-out);
+  }
+
+  .tree-children {
+    overflow: hidden;
+  }
+
+  // Métodos HTTP: píldoras con tono suave
+  .method-tag,
+  .method-badge {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-family: var(--gk-font-mono);
+    font-weight: var(--gk-weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    &.post {
+      background: var(--tone-green-bg);
+      color: var(--tone-green-fg);
+    }
+
+    &.get {
+      background: var(--tone-blue-bg);
+      color: var(--tone-blue-fg);
+    }
+
+    &.put {
+      background: var(--tone-amber-bg);
+      color: var(--tone-amber-fg);
+    }
+
+    &.delete {
+      background: var(--tone-red-bg);
+      color: var(--tone-red-fg);
+    }
+  }
+
+  .method-tag {
+    min-width: 2.9rem;
+    font-size: var(--gk-text-xs);
+    text-align: center;
+  }
+
+  .method-badge {
+    padding: 0.25rem 0.8rem;
+    font-size: var(--gk-text-label);
+  }
+
+  // Playground
+  .playground-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gk-space-16);
+    min-width: 0;
+  }
+
+  .endpoint-header-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gk-space-8);
+    padding: var(--gk-space-24);
+  }
+
+  .endpoint-title-row {
+    flex-wrap: wrap;
+    gap: var(--gk-space-12);
+  }
+
+  .endpoint-path {
+    font-family: var(--gk-font-mono);
+    font-size: 1.25rem;
+    font-weight: var(--gk-weight-semibold);
+    overflow-wrap: anywhere;
+  }
+
+  .endpoint-summary {
+    margin: var(--gk-space-4) 0 0;
+    color: var(--ink-strong);
+    font-size: 1.5rem;
+    font-weight: var(--gk-weight-bold);
+    letter-spacing: -0.021em;
+  }
+
+  .endpoint-desc {
+    max-width: 46rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--gk-text-body);
+    line-height: 1.6;
+  }
+
+  // Terminales: tarjetas oscuras de 24px (oscuras también en tema claro, como en la landing)
+  .code-terminal-card,
+  .response-terminal-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 24px;
+    background: #0a0d16;
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 8%) inset,
+      var(--shadow-screenshot),
+      rgb(26 103 253 / 14%) 0 28px 40px -24px;
+    overflow: hidden;
+  }
+
+  .terminal-topbar {
+    justify-content: space-between;
+    gap: var(--gk-space-12);
+    padding: var(--gk-space-12) var(--gk-space-20);
+    border-bottom: 1px solid rgb(255 255 255 / 10%);
+    background: linear-gradient(105deg, #202d46, #151c2d 75%);
+  }
+
+  .terminal-dots {
+    display: inline-flex;
+    flex: none;
+    gap: 0.35rem;
+
+    i {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 50%;
+      background: #ff6b6b;
+    }
+
+    i:nth-child(2) {
+      background: #ffd24a;
+    }
+
+    i:nth-child(3) {
+      background: #5df7b6;
+    }
+  }
+
+  .lang-selector {
+    display: flex;
+    flex: 1;
+    gap: var(--gk-space-4);
+  }
+
+  .lang-pill {
+    padding: 0.3rem 0.8rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #d6d6d7;
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-xs);
+    cursor: pointer;
+    transition:
+      background-color 160ms var(--d-out),
+      color 160ms var(--d-out),
+      transform 160ms var(--d-out);
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    &.is-active {
+      background: #fcfcfd;
+      color: #0a0d16;
+      font-weight: var(--gk-weight-semibold);
+    }
+  }
+
+  // CTA principal: lima en píldora con relieve de cuenta de vidrio
+  .send-request-btn {
+    gap: var(--gk-space-8);
+    min-height: 2.25rem;
+    padding: 0.4rem 1.1rem;
+    border: 0;
+    border-radius: 56px;
+    background: var(--color-lime-spark);
+    box-shadow: var(--shadow-lime-cta);
+    color: #0a0d16;
+    font-family: inherit;
+    font-size: var(--gk-text-label);
+    font-weight: var(--gk-weight-medium);
+    cursor: pointer;
+    transition:
+      transform 160ms var(--d-out),
+      box-shadow 200ms var(--d-out);
+
+    &:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  }
+
+  .play-symbol {
+    font-size: 0.65rem;
+  }
+
+  .terminal-body {
+    margin: 0;
+    padding: var(--gk-space-20);
+    color: #fcfcfd;
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-mono);
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+
+  .response-terminal-card {
+    background: #0c111b;
+
+    .response-body {
+      max-height: 16rem;
+      color: #b8d0ff;
+    }
+  }
+
+  .response-status-group {
+    flex: 1;
+    gap: var(--gk-space-8);
+  }
+
+  .status-code {
+    color: #19f79a;
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-mono);
+    font-weight: var(--gk-weight-semibold);
+  }
+
+  .latency-pill {
+    padding: 0.1rem 0.6rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 10%);
+    color: #d6d6d7;
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-xs);
+  }
+
+  .format-indicator {
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-xs);
+  }
+
+  // Solo con puntero fino: los toques disparan :hover al tocar
+  @media (hover: hover) and (pointer: fine) {
+    .tree-label:hover,
+    .file-item:not(.is-selected):hover {
+      background: var(--soft);
+    }
+
+    .lang-pill:not(.is-active):hover {
+      background: rgb(255 255 255 / 10%);
+    }
+
+    .send-request-btn:hover:not(:disabled) {
+      box-shadow: var(--shadow-lime-cta-hover);
+    }
+  }
+
+  @media (width <= 64rem) {
+    .workspace-section {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // Reducir movimiento: preferencia del sistema o ajuste del menú
+  @media (prefers-reduced-motion: reduce) {
+    .brush::after {
+      animation: none;
+    }
+  }
+
+  &[data-motion='reduce'] {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+@keyframes gk-brush-in {
+  from {
+    transform: rotate(-0.8deg) scaleX(0);
+  }
+}
+
+// ── Capa minimalista ─────────────────────────────────────────────────────────
+// Misma información, menos decoración: superficies planas con línea fina, tipografía contenida,
+// color solo donde informa (estado, método) y un único acento (el botón lima).
+gk-dashboard-shell,
+gk-workspace .console-host {
+  --d-card-shadow: 0 0 0 1px var(--hair);
+
+  .brush::after {
+    display: none;
+  }
+
+  .page-head {
+    gap: var(--gk-space-4);
+    padding-bottom: 0;
+
+    h1 {
+      font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.25rem);
+      letter-spacing: -0.03em;
+    }
+  }
+
+  .page-lead {
+    font-size: var(--gk-text-body);
+  }
+
+  // Tarjetas: 14px, solo línea fina
+  .tree-panel,
+  .endpoint-header-card {
+    border-radius: 14px;
+    box-shadow: var(--d-card-shadow);
+  }
+
+  .tree-panel,
+  .endpoint-header-card {
+    padding: var(--gk-space-20);
+  }
+
+  // Etiquetas y contadores: texto mono sin relleno
+  .strong-badge {
+    padding: 0;
+    background: none;
+    letter-spacing: 0.04em;
+  }
+
+  .strong-badge.green {
+    color: var(--tone-green-fg);
+  }
+
+  .strong-badge.blue {
+    color: var(--tone-blue-fg);
+  }
+
+  .strong-badge {
+    background: none;
+  }
+
+  .method-tag,
+  .method-badge {
+    padding: 0;
+    background: none !important;
+  }
+
+  .method-tag {
+    min-width: 2.6rem;
+    text-align: left;
+  }
+
+  .method-badge {
+    font-size: var(--gk-text-body);
+  }
+
+  // Barra lateral y superior más quietas
+  .latency-pill {
+    padding: 0;
+    background: none;
+  }
+
+  .tree-container ul ul {
+    border-left-color: var(--hair);
+  }
+
+  // Terminales claras: mismo papel que el resto de la interfaz
+  .code-terminal-card,
+  .response-terminal-card {
+    border-radius: 14px;
+    background: var(--soft);
+    box-shadow: 0 0 0 1px var(--hair);
+  }
+
+  .response-terminal-card {
+    background: var(--soft);
+
+    .response-body {
+      color: var(--ink);
+    }
+  }
+
+  .terminal-topbar {
+    padding: var(--gk-space-8) var(--gk-space-16);
+    border-bottom: 1px solid var(--hair);
+    background: none;
+  }
+
+  .terminal-dots {
+    display: none;
+  }
+
+  .terminal-body {
+    color: var(--ink);
+  }
+
+  .lang-pill {
+    color: var(--muted);
+
+    &.is-active {
+      background: var(--ink);
+      color: var(--canvas);
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lang-pill:not(.is-active):hover {
+      background: var(--hair);
+    }
+  }
+
+  .latency-pill,
+  .format-indicator {
+    color: var(--pewter);
+  }
+
+  .status-code {
+    color: var(--tone-green-fg);
+  }
+}
+
+// La consola también vive dentro del Workspace (Consola de pruebas): hereda tema y fondo de allí.
+gk-workspace .console-host {
+  min-height: 0;
+  background: none;
+  color-scheme: inherit;
+}

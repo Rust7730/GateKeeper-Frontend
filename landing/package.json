@@ -1,0 +1,22 @@
+{
+  "name": "gatekeeper-landing-buddy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 4321",
+    "build": "astro build",
+    "preview": "astro preview --port 4321"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.2.5",
+    "@fontsource/ibm-plex-sans": "^5.2.5",
+    "astro": "^5.7.5"
+  },
+  "devDependencies": {
+    "rollup": "npm:@rollup/wasm-node@4.68.2"
+  },
+  "overrides": {
+    "rollup": "$rollup"
+  }
+}

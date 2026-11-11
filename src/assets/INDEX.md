@@ -7,8 +7,9 @@
 
 ## Contenido
 
-| Archivo / carpeta | Qué es         | Módulo |
-| ----------------- | -------------- | ------ |
-| `fonts/`          | Fuentes        | M01    |
-| `icons/`          | Íconos SVG     | M01    |
-| `brand/`          | Logo y favicon | M01    |
+| Archivo / carpeta | Qué es                     | Módulo |
+| ----------------- | -------------------------- | ------ |
+| `fonts/`          | Fuentes                    | M01    |
+| `icons/`          | Íconos SVG                 | M01    |
+| `brand/`          | Logo y favicon             | M01    |
+| `logo.png`        | Isotipo oficial Gatekeeper | M01    |

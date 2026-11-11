@@ -1,0 +1,236 @@
+---
+interface Item { title: string; text: string }
+interface Props { items: Item[]; label: string; hint: string; release: string; close: string }
+
+const { items, label, hint, release, close } = Astro.props;
+
+// Formatos admitidos (documento con verificación), análisis por firmas (lupa con pulso) y lector de PDF (documento con alerta).
+const icons = [
+  ['M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z', 'M14 3v5h5', 'M9 14.5l2 2 4-4.5'],
+  ['M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13z', 'M15.5 15.5L21 21', 'M6.8 10.8h1.9l1-2.4 1.5 4.6 1-2.2h1.5'],
+  ['M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z', 'M14 3v5h5', 'M12 11.5v3.5', 'M12 18v.01'],
+];
+---
+
+<div class="limit-cards" data-limit-cards>
+  <div class="wrap_card">
+    {items.slice(0, 3).map((item, index) => (
+      <div class="card" tabindex="0" data-card={index} data-selected="false">
+        <div class="content">
+          <div class="card-top">
+            <span class="card-actions">
+              <svg fill="none" viewBox="0 0 24 24" class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                {icons[index].map((d) => <path d={d} />)}
+              </svg>
+              <button type="button" class="card-close" aria-label={close} title={close} data-close>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+              </button>
+            </span>
+          </div>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+  <p class="cards-hint" data-cards-hint data-hint={hint} data-release={release}>{hint}</p>
+</div>
+
+<style>
+  .limit-cards { display: grid; justify-items: center; gap: 1rem; margin-top: 2.5rem; width: 100%; }
+
+  .wrap_card {
+    position: relative;
+    width: min(100%, 46rem);
+    height: calc(var(--h-card) + var(--t-card) + 1rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    --w-card: min(21rem, 80%);
+    --h-card: 17.5rem;
+    --rotate-card: 4deg;
+    --insetX-card: 1.25rem;
+    --t-card: calc(var(--insetX-card) * 1.25);
+    --w-wrap-card: 100%;
+    --cycle: 27s;
+  }
+
+  /* Cards con el lenguaje de la landing: papel, borde hairline, arco de color y sombras apiladas. */
+  .card {
+    position: absolute;
+    display: flex;
+    overflow: hidden;
+    cursor: pointer;
+    animation: rotating var(--cycle) cubic-bezier(0.75, 0, 0, 1.01) infinite 0s;
+    border-radius: 1.5rem;
+    background: var(--paper);
+    box-shadow:
+      0 0 0 1px var(--line),
+      0 3px 3px -1px #1d213014,
+      0 12px 12px -6px #1d213014,
+      0 28px 32px -16px var(--glow);
+    order: var(--order);
+    width: var(--w-card);
+    height: var(--h-card);
+    z-index: var(--z1);
+    top: var(--t1);
+    left: var(--l1);
+    transform: var(--trans1);
+    --x1: var(--insetX-card);
+    --x2: calc(var(--w-wrap-card) - var(--w-card) - var(--insetX-card));
+    --to-left: rotate(calc(var(--rotate-card) * -1));
+    --to-center: calc((var(--w-wrap-card) - var(--w-card)) / 2);
+    --to-right: rotate(var(--rotate-card));
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: .3rem;
+    background: var(--arc);
+  }
+  .card:focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
+
+  .content {
+    display: grid;
+    align-content: start;
+    gap: .6rem;
+    width: 100%;
+    padding: 1.4rem 1.5rem 1.25rem;
+    text-align: left;
+    color: var(--ink);
+  }
+  .card-top { display: flex; align-items: center; justify-content: flex-end; min-height: 2rem; margin-bottom: .25rem; }
+  .card-actions { display: inline-flex; align-items: center; gap: .5rem; }
+  .icon { flex: none; width: 1.7rem; height: 1.7rem; color: var(--ink); }
+  .card-close {
+    display: none;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink);
+    transition: background 200ms, transform 200ms var(--ease);
+  }
+  .card-close:hover { background: var(--lime); transform: rotate(90deg); }
+  .card[data-selected='true'] .card-close { display: inline-grid; animation: close-in 300ms var(--ease) both; }
+  @keyframes close-in { from { opacity: 0; transform: scale(.4) rotate(-90deg); } }
+  .content h3 {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.3vw, 1.6rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -.03em;
+  }
+  .content p {
+    margin: 0;
+    font-size: .92rem;
+    font-weight: 450;
+    line-height: 1.58;
+    color: var(--muted);
+  }
+
+  .card:nth-child(1) { --order: 2; --arc: radial-gradient(100% 100% at 50% 0, #7ae3ff, #46d8ff); --glow: #46d8ff40; }
+  .card:nth-child(2) { --order: 3; --arc: radial-gradient(100% 100% at 50% 0, #ffb5f1, #ff9dec); --glow: #ff9dec40; }
+  .card:nth-child(3) { --order: 1; --arc: radial-gradient(100% 100% at 50% 0, #ecf174, #e5ed38); --glow: #e5ed3855; }
+
+  /* Mientras lees: al pasar el cursor, enfocar o fijar una card, la animación se detiene. */
+  .wrap_card:hover .card,
+  .wrap_card:focus-within .card,
+  .limit-cards[data-pinned] .card { animation-play-state: paused; }
+  .card[data-selected='true'] { box-shadow: 0 0 0 2px #0b3d28, 0 0 0 5px var(--lime), 0 1.5rem 2.5rem -1rem var(--glow); }
+
+
+  .card:nth-child(1) {
+    --z1: 2; --t1: 0; --l1: var(--to-center); --trans1: rotate(0deg);
+    --z2: 0; --t2: var(--t-card); --l2: var(--x1); --trans2: var(--to-left);
+    --z3: 0; --t3: var(--t-card); --l3: var(--x2); --trans3: var(--to-right);
+  }
+  .card:nth-child(2) {
+    --z1: 0; --t1: var(--t-card); --l1: var(--x2); --trans1: var(--to-right);
+    --z2: 2; --t2: 0; --l2: var(--to-center); --trans2: rotate(0deg);
+    --z3: 0; --t3: var(--t-card); --l3: var(--x1); --trans3: var(--to-left);
+  }
+  .card:nth-child(3) {
+    --z1: 0; --t1: var(--t-card); --l1: var(--x1); --trans1: var(--to-left);
+    --z2: 0; --t2: var(--t-card); --l2: var(--x2); --trans2: var(--to-right);
+    --z3: 2; --t3: 0; --l3: var(--to-center); --trans3: rotate(0deg);
+  }
+
+  @keyframes rotating {
+    0%, 99.99% { z-index: var(--z1); top: var(--t1); left: var(--l1); transform: var(--trans1); }
+    33.33% { z-index: var(--z2); top: var(--t2); left: var(--l2); transform: var(--trans2); }
+    66.66% { z-index: var(--z3); top: var(--t3); left: var(--l3); transform: var(--trans3); }
+  }
+
+  .cards-hint {
+    margin: 0;
+    padding: .35rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: .85rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 560px) {
+    .wrap_card { --w-card: 86%; --h-card: 22rem; --insetX-card: .5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; }
+  }
+  :global(:root[data-motion='reduce']) .card { animation: none; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-limit-cards]').forEach((root) => {
+    const cards = [...root.querySelectorAll<HTMLElement>('.card')];
+    const hint = root.querySelector<HTMLElement>('[data-cards-hint]');
+
+    const release = () => {
+      delete root.dataset.pinned;
+      cards.forEach((card) => {
+        card.dataset.selected = 'false';
+        card.getAnimations().forEach((animation) => animation.play());
+      });
+      if (hint) hint.textContent = hint.dataset.hint ?? '';
+    };
+
+    const pin = (index: number) => {
+      root.dataset.pinned = 'true';
+      cards.forEach((card, i) => {
+        card.dataset.selected = String(i === index);
+        card.getAnimations().forEach((animation) => {
+          const duration = Number(animation.effect?.getComputedTiming().duration ?? 0);
+          animation.pause();
+          // Cada card está al frente en el keyframe (índice / n) del ciclo.
+          animation.currentTime = (duration * index) / cards.length;
+        });
+      });
+      if (hint) hint.textContent = hint.dataset.release ?? '';
+    };
+
+    cards.forEach((card, index) => {
+      card.addEventListener('click', (event) => {
+        if ((event.target as HTMLElement).closest('[data-close]')) {
+          release();
+          card.focus();
+        } else if (card.dataset.selected !== 'true') {
+          pin(index);
+        }
+      });
+      card.addEventListener('keydown', (event) => {
+        if (event.target !== card) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          if (card.dataset.selected !== 'true') pin(index);
+        } else if (event.key === 'Escape' && root.dataset.pinned) {
+          release();
+        }
+      });
+    });
+  });
+</script>

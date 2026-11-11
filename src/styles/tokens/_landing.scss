@@ -1,0 +1,631 @@
+// Buddy — Style Reference (Engineering blueprint on graph paper).
+// Aplicado exclusivamente a la landing (M01); el dashboard conserva los tokens del Figma.
+:root {
+  // Paleta Buddy (blueprint claro + tinta noche + acento lima y trazos iridiscentes).
+  --color-lime-spark: #bfff5a;
+  --color-cobalt-signal: #1a67fd;
+  --color-forest-depth: #0b3d28;
+  --color-paper-white: #fcfcfd;
+  --color-midnight-ink: #1d2130;
+  --color-carbon: #151720;
+  --color-obsidian: #0a0d16;
+  --color-mist-gray: #ebeef7;
+  --color-slate-edge: #d5d9e8;
+  --color-silver-wash: #d6d6d7;
+  --color-pewter: #6b6d72;
+  --color-graphite: #474950;
+  --color-mint-tint: #d8fbed;
+  --color-rose-tint: #fff1f3;
+  --color-rose-ink: #be123c;
+  --color-amber-tint: #fff8eb;
+  --color-amber-ink: #92400e;
+
+  // Colores Fuertes y Sólidos (No pasteles) para etiquetas y bordes de alta definición
+  --color-vivid-post: #059669;
+  --color-vivid-post-text: #fff;
+  --color-vivid-get: #1d4ed8;
+  --color-vivid-get-text: #fff;
+  --color-vivid-delete: #dc2626;
+  --color-vivid-delete-text: #fff;
+  --color-vivid-put: #d97706;
+  --color-vivid-put-text: #fff;
+  --color-vivid-clean: #059669;
+  --color-vivid-danger: #dc2626;
+  --color-vivid-cobalt: #1a67fd;
+  --color-vivid-lime: #84cc16;
+  --color-sharp-border: #94a3b8;
+  --color-sharp-border-dark: #334155;
+
+  // Gradientes radiales de arco superior y subrayado multicolor (Buddy).
+  --gradient-cyan-beam: radial-gradient(
+    100% 100% at 50% 0px,
+    rgb(122 227 255) 0%,
+    rgb(70 216 255) 100%
+  );
+  --gradient-mint-pulse: radial-gradient(
+    100% 100% at 50% 0px,
+    rgb(93 247 182) 0%,
+    rgb(25 247 154) 100%
+  );
+  --gradient-citron-wave: radial-gradient(
+    100% 100% at 50% 0px,
+    rgb(236 241 116) 0%,
+    rgb(229 237 56) 100%
+  );
+  --gradient-orchid-glaze: radial-gradient(
+    100% 100% at 50% 0px,
+    rgb(255 181 241) 0%,
+    rgb(255 157 236) 100%
+  );
+  --gradient-amber-glow: radial-gradient(
+    100% 100% at 50% 0px,
+    rgb(255 216 136) 0%,
+    rgb(255 198 80) 100%
+  );
+  --gk-brushstroke: linear-gradient(90deg, #46d8ff 0%, #19f79a 35%, #e5ed38 68%, #ff9dec 100%);
+
+  // Dimensiones y escala tipográfica Buddy.
+  --gk-landing-measure: 75rem;
+  --gk-landing-gutter: clamp(1rem, 4vw, 2rem);
+  --gk-landing-section-gap: clamp(4rem, 7vw, 5rem);
+  --gk-hero-display: clamp(2.5rem, 1.4rem + 4.2vw, 5rem);
+  --gk-landing-display: clamp(2.25rem, 1.5rem + 2.4vw, 3.5rem);
+  --gk-landing-heading: clamp(2rem, 1.35rem + 2.2vw, 3rem);
+  --gk-landing-lead: clamp(1.0625rem, 1rem + 0.25vw, 1.125rem);
+
+  // Geometría Buddy: píldoras de 56px / 44px y tarjetas de 24px / 14px.
+  --gk-radius-card: 24px;
+  --gk-radius-inner: 14px;
+  --gk-radius-button: 56px;
+  --gk-radius-nav: 44px;
+
+  // Retícula de papel milimétrico (28px).
+  --gk-form-rule: 1px;
+  --gk-stamp-border: 2px;
+  --gk-stamp-tilt: -2.5deg;
+  --gk-stamp-size: clamp(1.125rem, 0.9rem + 0.9vw, 1.5rem);
+  --gk-form-cell: 28px;
+  --gk-grid-cell: 28px;
+  --gk-grid-line: rgb(235 238 247 / 75%);
+  --gk-form-ruling: rgb(213 217 232 / 45%);
+  --gk-form-grid-bg:
+    repeating-linear-gradient(
+      0deg,
+      var(--gk-form-ruling) 0 var(--gk-form-rule),
+      transparent var(--gk-form-rule) var(--gk-form-cell)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      var(--gk-form-ruling) 0 var(--gk-form-rule),
+      transparent var(--gk-form-rule) var(--gk-form-cell)
+    );
+  --gk-hero-stage-bg:
+    radial-gradient(ellipse 75% 50% at 50% 0%, rgb(191 255 90 / 18%), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 85% 15%, rgb(70 216 255 / 14%), transparent 65%),
+    repeating-linear-gradient(
+      0deg,
+      var(--gk-grid-line) 0 var(--gk-form-rule),
+      transparent var(--gk-form-rule) var(--gk-grid-cell)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      var(--gk-grid-line) 0 var(--gk-form-rule),
+      transparent var(--gk-form-rule) var(--gk-grid-cell)
+    );
+  --gk-band-backdrop:
+    radial-gradient(ellipse 65% 50% at 50% 0%, rgb(26 103 253 / 16%), transparent 70%),
+    var(--color-obsidian);
+
+  // Elevaciones de 5 capas translúcidas Buddy.
+  --shadow-screenshot:
+    rgb(29 33 48 / 4%) 0 3px 3px -1px, rgb(29 33 48 / 4%) 0 6px 6px -3px,
+    rgb(29 33 48 / 4%) 0 12px 12px -6px, rgb(29 33 48 / 4%) 0 24px 24px -12px,
+    rgb(29 33 48 / 4%) 0 32px 32px -16px;
+  --shadow-lime-cta:
+    rgb(255 255 255 / 72%) 0 1px 0 0 inset, rgb(29 33 48 / 12%) 0 -2px 0 0 inset,
+    rgb(29 33 48 / 4%) 0 1px 1px -1px, rgb(29 33 48 / 4%) 0 4px 4px -2px;
+  --shadow-lime-cta-hover:
+    rgb(255 255 255 / 82%) 0 1px 0 0 inset, rgb(29 33 48 / 14%) 0 -2px 0 0 inset,
+    rgb(191 255 90 / 35%) 0 8px 20px -4px, rgb(29 33 48 / 8%) 0 6px 12px -3px;
+  --gk-card-shadow:
+    rgb(255 255 255 / 72%) 0 0 0 1px inset, rgb(213 217 232) 0 0 0 1px,
+    rgb(29 33 48 / 3%) 0 1px 1px -1px, rgb(29 33 48 / 5%) 0 3px 3px -2px,
+    rgb(29 33 48 / 3%) 0 5px 5px -3px, rgb(213 217 232 / 22%) 0 5px 5px -2px;
+  --gk-card-shadow-cyan:
+    rgb(29 33 48 / 8%) 0 0 0 1px, rgb(29 33 48 / 4%) 0 2px 2px -1px,
+    rgb(29 33 48 / 4%) 0 5px 5px -2.5px, rgb(70 216 255 / 14%) 0 10px 14px -5px,
+    rgb(70 216 255 / 12%) 0 24px 28px -8px;
+  --gk-card-shadow-lime:
+    rgb(29 33 48 / 8%) 0 0 0 1px, rgb(29 33 48 / 4%) 0 2px 2px -1px,
+    rgb(29 33 48 / 4%) 0 5px 5px -2.5px, rgb(183 255 90 / 18%) 0 10px 14px -5px,
+    rgb(183 255 90 / 14%) 0 24px 28px -8px;
+  --gk-card-shadow-mint:
+    rgb(29 33 48 / 8%) 0 0 0 1px, rgb(29 33 48 / 4%) 0 2px 2px -1px,
+    rgb(29 33 48 / 4%) 0 5px 5px -2.5px, rgb(25 247 154 / 14%) 0 10px 14px -5px,
+    rgb(25 247 154 / 12%) 0 24px 28px -8px;
+  --gk-card-shadow-orchid:
+    rgb(29 33 48 / 8%) 0 0 0 1px, rgb(29 33 48 / 4%) 0 2px 2px -1px,
+    rgb(29 33 48 / 4%) 0 5px 5px -2.5px, rgb(255 157 236 / 16%) 0 10px 14px -5px,
+    rgb(255 157 236 / 14%) 0 24px 28px -8px;
+  --gk-card-shadow-amber:
+    rgb(17 17 17 / 16%) 0 0 0 1px inset, rgb(29 33 48 / 4%) 0 6px 6px -3px,
+    rgb(29 33 48 / 4%) 0 12px 12px -6px, rgb(255 198 80 / 18%) 0 20px 32px -12px;
+}
+
+// Reasignación de tokens semánticos dentro de gk-landing al universo Buddy (papel #fcfcfd).
+gk-landing {
+  --gk-background-canvas: var(--color-paper-white);
+  --gk-background-surface: #fff;
+  --gk-background-elevated: #fff;
+  --gk-background-subtle: var(--color-mist-gray);
+  --gk-text-primary: var(--color-obsidian);
+  --gk-text-secondary: var(--color-graphite);
+  --gk-text-muted: var(--color-pewter);
+  --gk-border-default: var(--color-mist-gray);
+  --gk-card-border-hover: var(--color-slate-edge);
+  --gk-card-surface: var(--color-paper-white);
+  --gk-card-hover-bg: #fff;
+  --gk-action-background: var(--color-lime-spark);
+  --gk-action-foreground: var(--color-obsidian);
+  --gk-focus-ring: var(--color-cobalt-signal);
+  --gk-status-clean: var(--color-forest-depth);
+  --gk-status-rejected: var(--color-rose-ink);
+  --gk-status-quarantine: var(--color-amber-ink);
+  --gk-clean-tint: var(--color-mint-tint);
+  --gk-clean-border: #86efac;
+  --gk-rejected-tint: var(--color-rose-tint);
+  --gk-rejected-border: #fda4af;
+  --gk-quarantine-tint: var(--color-amber-tint);
+  --gk-quarantine-border: #fcd34d;
+  --gk-header-background: rgb(252 252 253 / 88%);
+  --gk-header-blur: 14px;
+  --gk-header-shadow: var(--gk-card-shadow);
+  --gk-beam-glow: 0 0 16px 2px;
+  --gk-node-glow: 0 0 0 4px rgb(191 255 90 / 45%);
+  --gk-dot-ring: 0 0 0 1px var(--color-obsidian);
+  --gk-terminal-background: var(--color-obsidian);
+  --gk-terminal-shadow: var(--shadow-screenshot);
+  --gk-syntax-prompt: var(--color-lime-spark);
+  --gk-syntax-flag: #7ae3ff;
+  --gk-syntax-string: #ffd888;
+  --gk-syntax-variable: #ff9dec;
+  --gk-syntax-url: #5df7b6;
+  --gk-syntax-key: #7ae3ff;
+  --gk-syntax-status: var(--color-lime-spark);
+  --gk-syntax-number: #ff9dec;
+
+  background-color: var(--color-paper-white);
+  background-image:
+    repeating-linear-gradient(0deg, var(--gk-grid-line) 0 1px, transparent 1px var(--gk-grid-cell)),
+    repeating-linear-gradient(90deg, var(--gk-grid-line) 0 1px, transparent 1px var(--gk-grid-cell));
+  color: var(--color-carbon);
+}
+
+// Fotogramas compartidos por los componentes de la landing (M01).
+@keyframes gk-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes gk-solidify {
+  from {
+    border-color: transparent;
+    background: transparent;
+    backdrop-filter: none;
+  }
+
+  to {
+    border-color: var(--color-mist-gray);
+    background: var(--gk-header-background);
+    box-shadow: var(--gk-header-shadow);
+    backdrop-filter: blur(var(--gk-header-blur)) saturate(140%);
+  }
+}
+
+@keyframes gk-pulse-dot {
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+
+@keyframes gk-rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+
+@keyframes gk-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes gk-settle {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+}
+
+@keyframes gk-scale-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes gk-reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes gk-sweep {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+
+  10%,
+  85% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes gk-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(var(--gk-stamp-tilt)) scale(1.16);
+  }
+}
+
+// Primitivas compartidas de Buddy en gk-landing y gk-hero.
+gk-landing {
+  .reveal-block {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 600ms var(--gk-ease-out),
+      transform 600ms var(--gk-ease-out);
+  }
+
+  .reveal-block.is-in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  // Subrayado pincelada multicolor de Buddy bajo palabras clave de titulares.
+  .line-accent,
+  .brush-underline {
+    position: relative;
+    display: inline-block;
+    color: var(--color-obsidian);
+  }
+
+  .line-accent::after,
+  .brush-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 68%;
+    height: 3.5px;
+    border-radius: var(--gk-radius-999);
+    background: var(--gk-brushstroke);
+  }
+
+  .footer {
+    margin-top: var(--gk-landing-section-gap);
+    border-top: 1px solid var(--color-mist-gray);
+    background: var(--color-obsidian);
+    color: var(--color-paper-white);
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--gk-space-16);
+    padding-block: var(--gk-space-40);
+  }
+
+  .wordmark {
+    color: var(--color-paper-white);
+  }
+
+  .footer-sub {
+    font-size: var(--gk-text-label);
+    color: var(--color-silver-wash);
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gk-space-12) var(--gk-space-24);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--gk-text-label);
+    color: var(--color-silver-wash);
+  }
+
+  .footer-links a:hover {
+    color: var(--color-lime-spark);
+  }
+
+  .band {
+    margin-top: var(--gk-landing-section-gap);
+    padding-block: var(--gk-landing-section-gap);
+    background: var(--gk-band-backdrop);
+    color: var(--color-paper-white);
+  }
+
+  .band .section {
+    padding-top: 0;
+  }
+
+  .band .section-title {
+    color: var(--color-paper-white);
+  }
+
+  .band .section-lead {
+    color: var(--color-silver-wash);
+  }
+
+  .band .section-kicker {
+    color: var(--color-lime-spark);
+  }
+
+  .cwe-callout {
+    display: grid;
+    gap: var(--gk-space-8);
+    padding: var(--gk-space-24);
+    border-radius: var(--gk-radius-card);
+    background: var(--gradient-amber-glow);
+    box-shadow: var(--gk-card-shadow-amber);
+    color: var(--color-obsidian);
+    font-weight: var(--gk-weight-medium);
+  }
+
+  .cwe-badge {
+    justify-self: start;
+    border-color: var(--color-obsidian);
+    background: var(--color-obsidian);
+    color: var(--color-paper-white);
+  }
+
+  .guarantee-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--gk-space-8);
+  }
+
+  .guarantee-num {
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-mono);
+    font-weight: var(--gk-weight-semibold);
+    color: var(--color-forest-depth);
+  }
+
+  .limits li {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--gk-space-16);
+    padding: var(--gk-space-20) var(--gk-space-24);
+    box-shadow: var(--gk-card-shadow);
+  }
+
+  .limit-index {
+    background: var(--color-mist-gray);
+    color: var(--color-midnight-ink);
+  }
+}
+
+gk-declaration {
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gk-space-8);
+    padding: var(--gk-space-8) var(--gk-space-20);
+    border: var(--gk-stamp-border) solid currentcolor;
+    border-radius: var(--gk-radius-999);
+    background: var(--color-paper-white);
+    color: var(--verdict-color);
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-stamp-size);
+    font-weight: var(--gk-weight-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: rotate(var(--gk-stamp-tilt));
+    animation: gk-stamp 240ms var(--gk-ease-out) 80ms both;
+  }
+
+  .stamp-icon {
+    width: 1em;
+    height: 1em;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+gk-hero {
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gk-space-12);
+    margin: var(--gk-space-24) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--gk-text-label);
+    font-weight: var(--gk-weight-medium);
+    color: var(--color-midnight-ink);
+  }
+
+  .pill {
+    position: relative;
+    overflow: hidden;
+    padding: var(--gk-space-8) var(--gk-space-16);
+    border-radius: var(--gk-radius-inner);
+    background: var(--color-paper-white);
+    box-shadow: var(--gk-card-shadow-cyan);
+    animation: gk-fade-up 500ms var(--gk-ease-out) calc(440ms + var(--i) * 55ms) both;
+  }
+
+  .pill::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: var(--gradient-cyan-beam);
+  }
+
+  .pill:nth-child(2)::before {
+    background: var(--gradient-mint-pulse);
+  }
+
+  .pill:nth-child(3)::before {
+    background: var(--gradient-citron-wave);
+  }
+
+  .pill:nth-child(4)::before {
+    background: var(--gradient-orchid-glaze);
+  }
+
+  .dump {
+    position: relative;
+    margin-top: var(--gk-space-16);
+    padding: var(--gk-space-12) var(--gk-space-16);
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: var(--gk-radius-inner);
+    background: var(--color-obsidian);
+    color: var(--color-paper-white);
+    overflow: hidden;
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-mono);
+    line-height: 1.9;
+    font-variant-numeric: tabular-nums;
+    white-space: pre;
+  }
+
+  .rows {
+    animation: gk-reveal var(--scan-duration) var(--gk-ease-in-out) both;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 3.25em minmax(0, 1fr) 8ch;
+    gap: var(--gk-space-12);
+  }
+
+  .offset {
+    color: var(--color-pewter);
+  }
+
+  .finding dt {
+    color: var(--color-pewter);
+  }
+
+  .hex {
+    color: var(--color-silver-wash);
+    overflow: hidden;
+  }
+
+  .ascii {
+    color: var(--color-lime-spark);
+  }
+
+  .scan[data-verdict='rejected'] .ascii {
+    color: #ff9198;
+  }
+
+  .beam {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: gk-sweep var(--scan-duration) var(--gk-ease-in-out) both;
+  }
+
+  .beam::before {
+    content: '';
+    display: block;
+    height: 2px;
+    background: var(--gk-brushstroke);
+    box-shadow: 0 0 18px 2px rgb(70 216 255 / 45%);
+  }
+
+  .result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--gk-space-16);
+    margin-top: var(--gk-space-20);
+    padding-top: var(--gk-space-16);
+    border-top: 1px dashed var(--color-slate-edge);
+  }
+
+  .finding {
+    display: grid;
+    gap: var(--gk-space-4);
+    margin: 0;
+    font-size: var(--gk-text-label);
+    animation: gk-fade-up 400ms var(--gk-ease-out) calc(var(--scan-duration) - 300ms) both;
+  }
+
+  .finding div {
+    display: flex;
+    gap: var(--gk-space-8);
+  }
+
+  .finding dt {
+    min-width: 5.5rem;
+  }
+
+  .finding dd {
+    margin: 0;
+    font-weight: var(--gk-weight-semibold);
+    color: var(--color-obsidian);
+  }
+
+  .stamp {
+    padding: var(--gk-space-4) var(--gk-space-16);
+    border: var(--gk-stamp-border) solid var(--verdict);
+    border-radius: var(--gk-radius-999);
+    background: var(--verdict-bg, var(--color-mint-tint));
+    color: var(--verdict);
+    font-family: var(--gk-font-mono);
+    font-size: var(--gk-text-mono);
+    font-weight: var(--gk-weight-semibold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transform: rotate(var(--gk-stamp-tilt));
+    white-space: nowrap;
+    animation: gk-stamp 240ms var(--gk-ease-out) var(--scan-duration) both;
+  }
+
+  .scan[data-verdict='rejected'] .stamp {
+    --verdict-bg: var(--color-rose-tint);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .beam {
+      display: none;
+    }
+  }
+}

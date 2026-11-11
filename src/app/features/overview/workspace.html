@@ -1,0 +1,627 @@
+<ng-template #statusChip let-status>
+  <span class="chip" [attr.data-status]="status">{{ t(status) }}</span>
+</ng-template>
+
+<ng-template #fileList let-rows let-allowRelease="allowRelease">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">{{ t('Archivo') }}</th>
+          <th scope="col">{{ t('Estado') }}</th>
+          <th scope="col">{{ t('Tamaño') }}</th>
+          <th scope="col">{{ t('Hora') }}</th>
+          @if (allowRelease) {
+            <th scope="col">{{ t('Acción') }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (file of rows; track file.id) {
+          <tr>
+            <td>
+              <a class="file-link" [routerLink]="['/app/archivos', file.id]">{{ file.name }}</a
+              ><small>{{ file.id }} · {{ file.type }}</small>
+            </td>
+            <td>
+              <ng-container
+                [ngTemplateOutlet]="statusChip"
+                [ngTemplateOutletContext]="{ $implicit: file.status }"
+              />
+            </td>
+            <td class="mono">{{ file.size }}</td>
+            <td class="mono">{{ file.time }}</td>
+            @if (allowRelease) {
+              <td>
+                <button
+                  type="button"
+                  class="button"
+                  [disabled]="!administrator()"
+                  (click)="releaseTarget.set(file.id); releaseDialog.showModal()"
+                >
+                  {{ t('Liberar') }}
+                </button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td [attr.colspan]="allowRelease ? 5 : 4" class="empty">
+              {{ t('No hay archivos para mostrar.') }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</ng-template>
+
+@if (view === 'login') {
+  <main class="access">
+    <gk-workspace-settings />
+    <div class="access-intro">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <h1>Gatekeeper</h1>
+      <p>{{ t('Un espacio de trabajo para revisar qué ocurre con cada archivo.') }}</p>
+    </div>
+    <section class="panel access-card" aria-labelledby="access-title">
+      <span class="demo-label"> {{ t('Demostración') }} </span>
+      <h2 id="access-title">{{ t('Acceso al dashboard') }}</h2>
+      <p>{{ t('Explora el panel con datos de ejemplo.') }}</p>
+      <a routerLink="/app" class="button primary"> {{ t('Abrir demostración') }} </a>
+      <a href="http://localhost:4321/" class="file-link"> {{ t('Volver al sitio público') }} </a>
+    </section>
+  </main>
+} @else {
+  <div class="workspace">
+    <a
+      href="#contenido-dashboard"
+      class="skip"
+      (click)="$event.preventDefault(); content.focus(); content.scrollIntoView()"
+    >
+      {{ t('Ir al contenido') }}
+    </a>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" routerLink="/app"
+          ><span class="brand-mark" aria-hidden="true"></span> Gatekeeper</a
+        >
+        <span class="demo-label"> {{ t('Datos de ejemplo') }} </span>
+        <div class="top-actions">
+          <gk-workspace-settings class="in-header" />
+          <label class="role-control">
+            <span> {{ t('Rol de ejemplo') }} </span>
+            <select
+              [attr.aria-label]="t('Rol de ejemplo')"
+              [value]="administrator() ? 'admin' : 'analyst'"
+              (change)="administrator.set($any($event.target).value === 'admin')"
+            >
+              <option value="analyst">{{ t('Analista') }}</option>
+              <option value="admin">{{ t('Administrador') }}</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout" [class.collapsed]="collapsed()">
+      <aside class="section-nav" id="menu-lateral">
+        <button
+          type="button"
+          class="rail-toggle"
+          [attr.aria-expanded]="!collapsed()"
+          aria-controls="menu-lateral"
+          [attr.title]="collapsed() ? t('Expandir menú') : t('Contraer menú')"
+          (click)="toggleSidebar()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="19"
+            height="19"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.65"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 5h16v14H4zM9 5v14" />
+            <path class="chevron" d="M15 9l-3 3 3 3" />
+          </svg>
+          <span class="nav-label">{{ collapsed() ? t('Expandir menú') : t('Contraer menú') }}</span>
+        </button>
+        <nav [attr.aria-label]="t('Secciones del dashboard')">
+          @for (item of nav; track item.path) {
+            <a
+              [routerLink]="item.path"
+              [attr.title]="collapsed() ? t(item.label) : null"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: item.path === '/app' }"
+              [ariaCurrentWhenActive]="
+                item.path === '/app/archivos' && view === 'detail' ? 'location' : 'page'
+              "
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="19"
+                height="19"
+                aria-hidden="true"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.65"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path [attr.d]="item.icon" />
+              </svg>
+              <span class="nav-label">{{ t(item.label) }}</span>
+            </a>
+          }
+        </nav>
+        <a class="site-link" href="http://localhost:4321/"
+          ><span class="nav-label">{{ t('Sitio público') }}</span>
+          <span aria-hidden="true">↗</span></a
+        >
+      </aside>
+      <main #content id="contenido-dashboard" tabindex="-1" class="content">
+        <header class="page-head" [class.summary-head]="view === 'summary'">
+          <div class="page-intro">
+            @if (view === 'detail') {
+              <a class="file-link" routerLink="/app/archivos"> {{ t('← Volver a archivos') }} </a>
+            }
+            <h1>{{ t(page.title) }}</h1>
+            <p>{{ t(page.description) }}</p>
+            @if (view === 'summary') {
+              <div class="summary-actions">
+                <a class="button primary" routerLink="/app/archivos"
+                  >{{ t('Ver archivos') }} <span aria-hidden="true">↗</span></a
+                >
+                <a class="file-link" routerLink="/app/explorador">{{
+                  t('Abrir consola', 'Open console')
+                }}</a>
+              </div>
+            }
+          </div>
+          @if (view === 'summary') {
+            <section class="chart" aria-labelledby="trend-title">
+              <div class="chart-frame">
+                <span>{{ t('Actividad de inspección', 'Inspection activity') }}</span
+                ><span>{{ t('Últimos 7 días', 'Last 7 days') }}</span>
+              </div>
+              <div class="chart-head">
+                <div>
+                  <h2 id="trend-title">{{ t('Amenazas por día') }}</h2>
+                </div>
+                <div class="legend">
+                  <span>
+                    {{ t('Cuarentena') }} <b>{{ totals.quarantined }}</b> </span
+                  ><span>
+                    {{ t('Rechazos') }} <b>{{ totals.rejected }}</b>
+                  </span>
+                </div>
+              </div>
+              <gk-threat-chart
+                [series]="series"
+                [labels]="chartLabels()"
+                [describe]="describeDay"
+              />
+              <div class="chart-footer">{{ t('Datos de ejemplo') }}</div>
+            </section>
+          }
+        </header>
+
+        @if (notice()) {
+          <p class="notice" role="status">{{ t(notice()) }}</p>
+        }
+
+        @switch (view) {
+          @case ('summary') {
+            <dl class="metrics" [attr.aria-label]="t('Archivos de ejemplo')">
+              <div>
+                <dt>{{ t('Archivos recibidos') }}</dt>
+                <dd>{{ files().length }}</dd>
+              </div>
+              <div>
+                <dt>{{ t('En cuarentena') }}</dt>
+                <dd>{{ quarantine().length }}</dd>
+              </div>
+              <div>
+                <dt>{{ t('Alertas registradas') }}</dt>
+                <dd>{{ alerts.length }}</dd>
+              </div>
+            </dl>
+            <section class="panel" aria-labelledby="recent-title">
+              <div class="panel-heading">
+                <h2 id="recent-title">{{ t('Inspecciones recientes') }}</h2>
+              </div>
+              <ng-container
+                [ngTemplateOutlet]="fileList"
+                [ngTemplateOutletContext]="{ $implicit: files().slice(0, 4) }"
+              />
+            </section>
+          }
+          @case ('files') {
+            <section class="panel" [attr.aria-label]="t('Lista de archivos')">
+              <div class="toolbar">
+                <label>
+                  {{ t('Buscar archivos') }}
+                  <input
+                    type="search"
+                    [attr.placeholder]="t('Nombre, ID o tipo')"
+                    [value]="query()"
+                    (input)="query.set($any($event.target).value)"
+                /></label>
+                <label>
+                  {{ t('Estado') }}
+                  <select [value]="status()" (change)="status.set($any($event.target).value)">
+                    <option value="">{{ t('Todos los estados') }}</option>
+                    @for (item of statuses; track item) {
+                      <option [value]="item">{{ t(item) }}</option>
+                    }
+                  </select></label
+                >
+              </div>
+              <ng-container
+                [ngTemplateOutlet]="fileList"
+                [ngTemplateOutletContext]="{ $implicit: visibleFiles() }"
+              />
+            </section>
+          }
+          @case ('detail') {
+            @if (selectedFile(); as file) {
+              <section class="panel detail">
+                <ng-container
+                  [ngTemplateOutlet]="statusChip"
+                  [ngTemplateOutletContext]="{ $implicit: file.status }"
+                />
+                <h2>{{ file.name }}</h2>
+                <p>{{ t(file.reason) }}</p>
+                <dl class="properties">
+                  <div>
+                    <dt>ID</dt>
+                    <dd>{{ file.id }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('Tipo detectado') }}</dt>
+                    <dd>{{ file.type }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('Tamaño') }}</dt>
+                    <dd>{{ file.size }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('Hora de recepción') }}</dt>
+                    <dd>{{ file.time }}</dd>
+                  </div>
+                </dl>
+              </section>
+              <section class="panel detail">
+                <h2>{{ t('Cronología') }}</h2>
+                <ol class="timeline">
+                  <li>
+                    <strong> {{ t('Recepción del archivo') }} </strong><span>{{ file.time }}</span>
+                  </li>
+                  <li>
+                    <strong>{{ t(file.status) }}</strong
+                    ><span>{{ t(file.reason) }}</span>
+                  </li>
+                </ol>
+              </section>
+            } @else {
+              <section class="panel empty">
+                {{ t('No encontramos ese archivo en la demostración.') }}
+              </section>
+            }
+          }
+          @case ('quarantine') {
+            <section class="panel" [attr.aria-label]="t('Archivos en cuarentena')">
+              <div class="panel-heading">
+                <h2>{{ t('Archivos aislados') }}</h2>
+                <span>{{ quarantine().length }} {{ t('en cuarentena', 'quarantined') }}</span>
+              </div>
+              @if (!administrator()) {
+                <p class="permission">
+                  {{
+                    t(
+                      'El rol Analista puede consultar los archivos. Selecciona Administrador en el selector de demostración para probar una liberación.'
+                    )
+                  }}
+                </p>
+              }
+              <ng-container
+                [ngTemplateOutlet]="fileList"
+                [ngTemplateOutletContext]="{ $implicit: quarantine(), allowRelease: true }"
+              />
+            </section>
+          }
+          @case ('alerts') {
+            <section class="panel" [attr.aria-label]="t('Actividad de alertas')">
+              <div class="panel-heading">
+                <h2>{{ t('Detecciones recientes') }}</h2>
+                <span class="demo-label"> {{ t('Registro de ejemplo') }} </span>
+              </div>
+              <ul class="activity">
+                @for (file of alerts; track file.id) {
+                  <li>
+                    <div>
+                      <a class="file-link" [routerLink]="['/app/archivos', file.id]">{{
+                        file.name
+                      }}</a>
+                      <p>{{ t(file.reason) }}</p>
+                    </div>
+                    <ng-container
+                      [ngTemplateOutlet]="statusChip"
+                      [ngTemplateOutletContext]="{ $implicit: file.status }"
+                    /><time>{{ file.time }}</time>
+                  </li>
+                } @empty {
+                  <li class="empty">{{ t('No hay detecciones recientes.') }}</li>
+                }
+              </ul>
+            </section>
+          }
+          @case ('audit') {
+            <section class="panel" [attr.aria-label]="t('Registro de auditoría')">
+              <div class="panel-heading">
+                <h2>{{ t('Actividad registrada') }}</h2>
+                <span> {{ t('Solo lectura') }} </span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">{{ t('Acción') }}</th>
+                      <th scope="col">{{ t('Recurso') }}</th>
+                      <th scope="col">{{ t('Origen') }}</th>
+                      <th scope="col">{{ t('Hora') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (event of audit(); track event) {
+                      <tr>
+                        <td>
+                          {{ t(event.action) }}
+                          @if (event.note) {
+                            <small>{{ event.note }}</small>
+                          }
+                        </td>
+                        <td>{{ event.resource }}</td>
+                        <td>{{ t(event.actor) }}</td>
+                        <td>{{ t(event.time) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+          @case ('keys') {
+            <section class="panel" [attr.aria-label]="t('Claves API de ejemplo')">
+              <div class="panel-heading">
+                <h2>{{ t('Claves registradas') }}</h2>
+                <button
+                  class="button primary"
+                  type="button"
+                  (click)="secret.set(''); createDialog.showModal()"
+                >
+                  {{ t('Crear clave') }}
+                </button>
+              </div>
+              @if (!administrator()) {
+                <p class="permission">
+                  {{ t('Selecciona el rol Administrador de ejemplo para revocar claves.') }}
+                </p>
+              }
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">{{ t('Nombre') }}</th>
+                      <th scope="col">{{ t('Prefijo') }}</th>
+                      <th scope="col">{{ t('Estado') }}</th>
+                      <th scope="col">{{ t('Acción') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (key of keys(); track key.id) {
+                      <tr>
+                        <td>{{ key.id.startsWith('demo-') ? t(key.name) : key.name }}</td>
+                        <td>
+                          <code>{{ key.prefix }}…</code>
+                        </td>
+                        <td>
+                          <ng-container
+                            [ngTemplateOutlet]="statusChip"
+                            [ngTemplateOutletContext]="{
+                              $implicit: key.revoked ? 'Revocada' : 'Activa',
+                            }"
+                          />
+                        </td>
+                        <td>
+                          @if (!key.revoked) {
+                            <button
+                              class="button"
+                              type="button"
+                              [disabled]="!administrator()"
+                              (click)="revokeTarget.set(key); revokeDialog.showModal()"
+                            >
+                              {{ t('Revocar') }}
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+          @case ('explorer') {
+            <div class="console-host"><gk-console-page [showHead]="false" /></div>
+          }
+          @case ('docs') {
+            <section
+              class="panel detail docs"
+              [attr.aria-label]="t('Guía de integración', 'Integration guide')"
+            >
+              <h2>{{ t('Inspecciona tu primer archivo', 'Inspect your first file') }}</h2>
+              <p>
+                {{
+                  t(
+                    'Rutas de integración de referencia. La consola usa ejemplos locales con su propio catálogo de rutas.',
+                    'Reference integration routes. The console uses local examples with its own endpoint catalogue.'
+                  )
+                }}
+              </p>
+              <ol class="timeline">
+                <li>
+                  <strong>{{ t('Sube el archivo', 'Upload the file') }}</strong
+                  ><code>POST /v1/files</code
+                  ><span>{{
+                    t(
+                      'Envía el archivo como multipart/form-data. La respuesta 202 devuelve un ID para consultar el análisis.',
+                      'Send the file as multipart/form-data. A 202 response returns an ID for checking the scan.'
+                    )
+                  }}</span>
+                </li>
+                <li>
+                  <strong>{{ t('Consulta el estado', 'Check the status') }}</strong
+                  ><code>GET /v1/files/&#123;id&#125;</code
+                  ><span>{{
+                    t(
+                      'Consulta si la inspección sigue pendiente o si terminó con un resultado.',
+                      'Check whether inspection is still pending or has returned a result.'
+                    )
+                  }}</span>
+                </li>
+                <li>
+                  <strong>{{
+                    t('Descarga la copia reconstruida', 'Download the reconstructed copy')
+                  }}</strong
+                  ><code>GET /v1/files/&#123;id&#125;/content</code
+                  ><span>{{
+                    t(
+                      'Solicita la copia cuando el estado sea clean.',
+                      'Request the copy once the status is clean.'
+                    )
+                  }}</span>
+                </li>
+              </ol>
+              <h2>{{ t('Autenticación', 'Authentication') }}</h2>
+              <p>
+                {{
+                  t(
+                    'La referencia pública usa el encabezado X-API-Key. Las claves de esta demostración sirven para practicar en la consola local.',
+                    'The public reference uses the X-API-Key header. Keys issued here are for practising in the local console.'
+                  )
+                }}
+              </p>
+              <pre
+                class="doc-example"
+                tabindex="0"
+                [attr.aria-label]="t('Ejemplo de cURL', 'cURL example')"
+              ><code>curl -X POST https://gatekeeper.example/v1/files \
+  -H "X-API-Key: $GATEKEEPER_API_KEY" \
+  -F "file=@foto.jpg"</code></pre>
+              <div class="doc-actions">
+                <a class="button primary" routerLink="/app/explorador">{{
+                  t('Abrir consola', 'Open console')
+                }}</a
+                ><a class="button" routerLink="/app/claves">{{ t('Obtener clave API') }}</a>
+              </div>
+            </section>
+          }
+          @case ('missing') {
+            <a class="button primary" routerLink="/app"> {{ t('Volver al resumen') }} </a>
+          }
+        }
+      </main>
+    </div>
+    <button
+      class="back-to-top"
+      type="button"
+      [attr.aria-label]="t('Volver arriba')"
+      (click)="backToTop()"
+    >
+      <svg
+        aria-hidden="true"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+    </button>
+  </div>
+}
+
+<dialog #releaseDialog aria-labelledby="release-title">
+  <form
+    (submit)="
+      $event.preventDefault(); releaseFile(reason.value); reason.value = ''; releaseDialog.close()
+    "
+  >
+    <h2 id="release-title">{{ t('Liberar archivo') }}</h2>
+    <p>{{ t('Registra el motivo de la liberación de ejemplo.') }}</p>
+    <label>
+      {{ t('Motivo') }} <textarea #reason required maxlength="300" rows="3"></textarea>
+    </label>
+    <div class="dialog-actions">
+      <button class="button" type="button" (click)="reason.value = ''; releaseDialog.close()">
+        {{ t('Cancelar') }}</button
+      ><button class="button primary" type="submit">{{ t('Confirmar liberación') }}</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog
+  #createDialog
+  aria-labelledby="create-title"
+  (close)="secret.set(''); copyStatus.set(''); keyName.value = ''"
+>
+  <form (submit)="$event.preventDefault(); createKey(keyName.value)">
+    <h2 id="create-title">{{ secret() ? t('Clave de ejemplo creada') : t('Crear clave API') }}</h2>
+    <label [hidden]="!!secret()">
+      {{ t('Nombre de la clave') }} <input #keyName required maxlength="70"
+    /></label>
+    @if (secret()) {
+      <p>{{ t('Esta clave de ejemplo se muestra solo en este paso.') }}</p>
+      <code class="secret">{{ secret() }}</code>
+      <div class="doc-actions">
+        <button type="button" class="button" (click)="copyKey()">{{ t('Copiar clave') }}</button
+        ><a class="button primary" routerLink="/app/explorador">{{
+          t('Abrir consola', 'Open console')
+        }}</a>
+      </div>
+      <p role="status">{{ t(copyStatus()) }}</p>
+    }
+    <div class="dialog-actions">
+      <button class="button" type="button" (click)="createDialog.close()">
+        {{ secret() ? t('Cerrar') : t('Cancelar') }}
+      </button>
+      @if (!secret()) {
+        <button class="button primary" type="submit">{{ t('Crear clave') }}</button>
+      }
+    </div>
+  </form>
+</dialog>
+
+<dialog #revokeDialog aria-labelledby="revoke-title">
+  <form method="dialog" (submit)="revokeKey()">
+    <h2 id="revoke-title">{{ t('Revocar clave') }}</h2>
+    <p>
+      {{ t('Se revocará esta clave de ejemplo.', 'This demo key will be revoked.') }}
+      {{ revokeTarget()?.name }}
+    </p>
+    <div class="dialog-actions">
+      <button class="button" type="button" (click)="revokeDialog.close()">
+        {{ t('Cancelar') }}</button
+      ><button class="button primary" type="submit">{{ t('Confirmar revocación') }}</button>
+    </div>
+  </form>
+</dialog>
