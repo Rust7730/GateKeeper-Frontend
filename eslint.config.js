@@ -5,7 +5,7 @@ const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 
 module.exports = defineConfig([
-  { ignores: ['scripts/**', 'tools/**', 'dist/**', '.angular/**'] },
+  { ignores: ['scripts/**', 'tools/**', 'dist/**', '.angular/**', 'landing/**'] },
   {
     files: ['**/*.ts'],
     extends: [

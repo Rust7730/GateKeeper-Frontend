@@ -49,3 +49,8 @@ Thumbs.db
 
 # Comandos de Claude Code instalados desde tools/ con npm run setup:claude
 .claude/commands/
+
+# Standalone Astro Landing
+/landing/node_modules
+/landing/dist
+/landing/.astro
