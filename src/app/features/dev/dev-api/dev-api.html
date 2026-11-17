@@ -1,0 +1,87 @@
+<main class="dev-api">
+  <header class="dev-api__header">
+    <h1>API simulada</h1>
+    <p>
+      Archivos del backend mock vistos con el contrato del front. Los archivos sin cuarentena ni
+      malware solo muestran metadatos mínimos (K20).
+    </p>
+  </header>
+
+  <div class="dev-api__toolbar">
+    <label class="dev-api__filter">
+      Estado
+      <select #statusSelect (change)="setStatus(statusSelect.value)">
+        <option value="">Todos</option>
+        @for (option of statusOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </label>
+    <p class="dev-api__count" aria-live="polite">{{ total() }} archivos</p>
+  </div>
+
+  @if (files.error()) {
+    <p class="dev-api__message" role="alert">
+      No se pudo cargar la lista. Reintenta en unos segundos.
+    </p>
+  } @else if (files.isLoading() && !files.hasValue()) {
+    <p class="dev-api__message">Cargando archivos</p>
+  }
+
+  <div class="dev-api__table-wrap">
+    <table class="dev-api__table" [attr.aria-busy]="files.isLoading()">
+      <caption class="dev-api__caption">
+        {{
+          pageLabel()
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Id</th>
+          <th scope="col">Nombre original</th>
+          <th scope="col">Aplicación</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Tipo detectado</th>
+          <th scope="col">Tamaño (bytes)</th>
+          <th scope="col">Bloqueado por</th>
+          <th scope="col">SHA-256</th>
+          <th scope="col">Creado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.file.id) {
+          <tr>
+            <td class="dev-api__mono">{{ row.file.id.slice(0, 8) }}</td>
+            <td class="dev-api__name" [title]="row.name ?? ''">
+              @if (row.file.disclosure === 'full') {
+                {{ row.name ?? 'Sin nombre' }}
+              } @else {
+                <span class="dev-api__muted">Restringido</span>
+              }
+            </td>
+            <td>{{ row.file.appName ?? '—' }}</td>
+            <td>{{ row.status }}</td>
+            <td class="dev-api__mono">{{ row.file.detectedType ?? '—' }}</td>
+            <td class="dev-api__mono">{{ row.file.sizeBytes ?? '—' }}</td>
+            <td>{{ row.blockedBy ?? '—' }}</td>
+            <td class="dev-api__mono">{{ row.sha256 ? row.sha256.slice(0, 12) : '—' }}</td>
+            <td class="dev-api__mono">{{ row.file.createdAt ?? '—' }}</td>
+          </tr>
+        } @empty {
+          @if (!files.isLoading()) {
+            <tr>
+              <td colspan="9">Sin archivos para este filtro</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <nav class="dev-api__pager" aria-label="Paginación">
+    <button type="button" (click)="previous()" [disabled]="page() <= 1">Página anterior</button>
+    <button type="button" (click)="next()" [disabled]="page() >= pageCount()">
+      Página siguiente
+    </button>
+  </nav>
+</main>
