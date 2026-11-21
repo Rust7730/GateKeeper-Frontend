@@ -141,3 +141,39 @@ export interface NuevaApiKeyDto {
 export interface ErrorDto {
   detail: string;
 }
+
+// ---------------------------------------------------------------------------
+// Autenticación (F5.01–F5.04, provisional: la API aún no la implementa)
+// ---------------------------------------------------------------------------
+
+/** POST /v1/auth/login */
+export interface InicioSesionDto {
+  correo: string;
+  contrasena: string;
+}
+
+/** Paso 1 de un usuario con TOTP obligatorio (admin): todavía no hay sesión. */
+export interface DesafioTotpDto {
+  mfa_requerido: true;
+  desafio_id: string;
+}
+
+export interface UsuarioDto {
+  id: string;
+  correo: string;
+  rol: RolDto;
+  mfa_activo: boolean;
+}
+
+/** Sesión abierta: login sin MFA, TOTP correcto o refresh. El refresh va en cookie HttpOnly. */
+export interface SesionDto {
+  token_acceso: string;
+  expira_en: number; // segundos
+  usuario: UsuarioDto;
+}
+
+/** POST /v1/auth/totp. El código va en el cuerpo, nunca en la URL (S10). */
+export interface VerificacionTotpDto {
+  desafio_id: string;
+  codigo: string;
+}

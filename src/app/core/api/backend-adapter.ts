@@ -27,7 +27,7 @@ import {
 import { Metrics, MetricsPeriod } from '../models/metrics.model';
 import { Page } from '../models/page.model';
 import { SecurityEvent, SecurityEventType, Severity } from '../models/security-event.model';
-import { Role } from '../models/session.model';
+import { LoginResult, Role, Session } from '../models/session.model';
 import {
   AccionAuditoriaDto,
   CapaDto,
@@ -456,10 +456,17 @@ export function toAuditEntry(input: unknown): AuditEntry {
   const o = requireObject(input, 'auditoría');
   const actor = requireObject(o['actor'], 'auditoría.actor');
   const ip = o['ip'];
+  const rawId = o['id'];
+  const entryId =
+    uuid(rawId) ?? (typeof rawId === 'string' && /^\d{1,20}$/.test(rawId) ? rawId : null);
+  if (entryId === null) throw new InvalidDtoError('auditoría.id');
+  const rawActorId = actor['id'];
+  const actorId =
+    rawActorId === '' || rawActorId === null ? '' : requireUuid(rawActorId, 'auditoría.actor.id');
   return {
-    id: requireUuid(o['id'], 'auditoría.id'),
+    id: entryId,
     actor: {
-      id: requireUuid(actor['id'], 'auditoría.actor.id'),
+      id: actorId,
       email: text(actor['correo']) ?? '',
       role: lookup<Role | 'unknown'>(ROLE, actor['rol'], 'unknown'),
     },
@@ -520,4 +527,54 @@ export function toApiKeyCreated(input: unknown): ApiKeyCreated {
     throw new InvalidDtoError('api key creada.secreto');
   }
   return { ...toApiKey(o), secret };
+}
+
+// ---------------------------------------------------------------------------
+// Sesión (F5.01–F5.03). Falla cerrado: sin token, expiración o rol válidos no hay sesión.
+// ---------------------------------------------------------------------------
+
+/** Máximo que el front acepta para `expira_en` (el backend fija 15 min, F5.02). */
+const MAX_SESSION_S = 60 * 60;
+/** Token opaco para el front: base64url y puntos (JWT), sin espacios ni comillas. */
+const ACCESS_TOKEN_RE = /^[A-Za-z0-9._~+/=-]{16,4096}$/;
+const CHALLENGE_RE = /^[A-Za-z0-9_-]{8,128}$/;
+
+export function toSession(input: unknown, now: number = Date.now()): Session {
+  const o = requireObject(input, 'sesión');
+  const accessToken = o['token_acceso'];
+  if (typeof accessToken !== 'string' || !ACCESS_TOKEN_RE.test(accessToken)) {
+    throw new InvalidDtoError('sesión.token_acceso');
+  }
+  const expiresIn = count(o['expira_en']);
+  if (expiresIn === null || expiresIn < 1 || expiresIn > MAX_SESSION_S) {
+    throw new InvalidDtoError('sesión.expira_en');
+  }
+  const u = requireObject(o['usuario'], 'sesión.usuario');
+  // Un rol desconocido no abre sesión: nunca se adivina un rol.
+  const role = lookup<Role | null>(ROLE, u['rol'], null);
+  const email = text(u['correo']);
+  if (role === null || email === null) throw new InvalidDtoError('sesión.usuario');
+  return {
+    accessToken,
+    expiresAt: now + expiresIn * 1000,
+    user: {
+      id: requireUuid(u['id'], 'sesión.usuario.id'),
+      email,
+      role,
+      mfaEnabled: u['mfa_activo'] === true,
+    },
+  };
+}
+
+/** Paso 1 del login: desafío TOTP o sesión directa. */
+export function toLoginResult(input: unknown, now: number = Date.now()): LoginResult {
+  const o = requireObject(input, 'login');
+  if (o['mfa_requerido'] === true) {
+    const challengeId = o['desafio_id'];
+    if (typeof challengeId !== 'string' || !CHALLENGE_RE.test(challengeId)) {
+      throw new InvalidDtoError('login.desafio_id');
+    }
+    return { kind: 'mfa', challengeId };
+  }
+  return { kind: 'session', session: toSession(o, now) };
 }

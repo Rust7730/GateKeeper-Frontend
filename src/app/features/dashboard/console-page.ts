@@ -1,16 +1,20 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { WorkspaceDemo } from '../overview/workspace-demo';
+
+import { TokenStore } from '../../core/auth/token-store';
 import { API_ENDPOINTS, ApiEndpoint, groupEndpoints } from './api-endpoints';
 
 interface RequestResult {
   readonly status: number;
-  readonly body: Record<string, unknown>;
+  readonly statusText: string;
+  readonly contentType: string;
+  readonly body: unknown;
   readonly latency: number;
 }
 
 /**
- * Consola de pruebas de la API. Cada sección del menú (Playground, Archivos, Cuarentena...)
- * es una ruta distinta que reutiliza esta página y recibe su carpeta y textos como datos de ruta.
+ * Consola interactiva real contra la API de Gatekeeper:
+ * - Rutas `/v1/files*` usan la API key (`gk_...`) ingresada por el usuario y permiten subir archivos reales.
+ * - Rutas `/v1/admin/*` usan automáticamente el JWT de sesión actual (`TokenStore`).
  */
 @Component({
   selector: 'gk-console-page',
@@ -18,7 +22,7 @@ interface RequestResult {
   styleUrl: './console-page.scss',
 })
 export class ConsolePage {
-  private readonly demo = inject(WorkspaceDemo);
+  private readonly tokens = inject(TokenStore);
 
   // Datos de la ruta (se enlazan por withComponentInputBinding).
   readonly folder = input<string | undefined>(undefined);
@@ -42,22 +46,25 @@ export class ConsolePage {
       API_ENDPOINTS[0],
   );
   readonly selectedSnippetLang = signal<'curl' | 'ts' | 'python'>('curl');
-  readonly parameter = signal('demo-001');
+  readonly apiKeyInput = signal('');
+  readonly parameter = signal('');
+  readonly customBody = signal('');
+  readonly selectedFile = signal<File | null>(null);
   readonly isRunningRequest = signal(false);
 
-  readonly body = computed(() => this.selectedEndpoint().requestBody ?? '');
+  readonly body = computed(() => this.customBody() || this.selectedEndpoint().requestBody || '');
   readonly responseStatusCode = computed(() => this.result()?.status ?? 200);
+  readonly responseStatusText = computed(() => this.result()?.statusText ?? 'OK');
+  readonly responseContentType = computed(() => this.result()?.contentType ?? 'application/json');
   readonly actualLatency = computed(
     () => this.result()?.latency ?? this.selectedEndpoint().latencyMs,
   );
-  readonly currentResponse = computed<Record<string, unknown>>(
+  readonly currentResponse = computed<unknown>(
     () => this.result()?.body ?? this.selectedEndpoint().responseExample,
   );
-  readonly formattedResponse = computed(() => JSON.stringify(this.currentResponse(), null, 2));
-
-  readonly key = computed<string>(() => {
-    const first = this.demo.keys().find((k) => !k.revoked);
-    return first ? this.demo.tokenFor(first.id) : 'gk_live_demo_key';
+  readonly formattedResponse = computed(() => {
+    const resp = this.currentResponse();
+    return typeof resp === 'string' ? resp : JSON.stringify(resp, null, 2);
   });
 
   readonly parameterName = computed<string | null>(() => {
@@ -69,7 +76,10 @@ export class ConsolePage {
     const endpoint = this.selectedEndpoint();
     const param = this.parameterName();
     if (!param) return endpoint.path;
-    return endpoint.path.replace(`:${param}`, this.parameter().trim() || `:${param}`);
+    return endpoint.path.replace(
+      `:${param}`,
+      encodeURIComponent(this.parameter().trim()) || `:${param}`,
+    );
   });
 
   endpointLabel(endpoint: ApiEndpoint): string {
@@ -78,6 +88,7 @@ export class ConsolePage {
 
   selectEndpoint(endpoint: ApiEndpoint): void {
     this.selectedId.set(endpoint.id);
+    this.customBody.set(endpoint.requestBody ?? '');
     this.result.set(null);
   }
 
@@ -85,31 +96,128 @@ export class ConsolePage {
     this.selectedSnippetLang.set(lang);
   }
 
-  executeRequest(): void {
+  onFileSelected(event: Event): void {
+    const inputEl = event.target as HTMLInputElement | null;
+    this.selectedFile.set(inputEl?.files?.[0] ?? null);
+  }
+
+  async executeRequest(): Promise<void> {
     if (this.isRunningRequest()) return;
 
     const endpoint = this.selectedEndpoint();
-    const key = this.key().trim();
-    const body = this.body();
-    const missingParameter = this.parameterName() && !this.parameter().trim();
-    this.isRunningRequest.set(true);
-    setTimeout(() => {
-      if (this.selectedEndpoint() === endpoint) {
-        const latency = endpoint.latencyMs;
-        if (key && !this.demo.acceptsKey(key)) {
-          this.result.set({ status: 401, latency, body: { error: 'invalid_demo_key' } });
-        } else if (missingParameter || (endpoint.requestBody && !this.isJsonObject(body))) {
-          this.result.set({
-            status: 422,
-            latency,
-            body: { error: missingParameter ? 'missing_path_parameter' : 'invalid_json_object' },
-          });
-        } else {
-          this.result.set({ status: 200, latency, body: endpoint.responseExample });
-        }
+    const param = this.parameterName();
+    if (param && !this.parameter().trim()) {
+      this.result.set({
+        status: 422,
+        statusText: 'Unprocessable Entity',
+        contentType: 'application/json',
+        latency: 0,
+        body: { detail: `Falta el parámetro :${param} (UUID del archivo).` },
+      });
+      return;
+    }
+
+    if (endpoint.isMultipart && !this.selectedFile()) {
+      this.result.set({
+        status: 422,
+        statusText: 'Unprocessable Entity',
+        contentType: 'application/json',
+        latency: 0,
+        body: { detail: 'Selecciona un archivo antes de ejecutar POST /v1/files.' },
+      });
+      return;
+    }
+
+    const headers: Record<string, string> = {};
+    if (endpoint.authMode === 'api-key') {
+      const key = this.apiKeyInput().trim();
+      if (key) {
+        headers['Authorization'] = `Bearer ${key}`;
       }
+    } else if (endpoint.authMode === 'jwt') {
+      const jwt = this.tokens.accessToken();
+      if (jwt) {
+        headers['Authorization'] = `Bearer ${jwt}`;
+      }
+    }
+
+    let requestBody: BodyInit | undefined;
+    if (endpoint.isMultipart) {
+      const form = new FormData();
+      const file = this.selectedFile();
+      if (file) form.append('file', file, file.name);
+      requestBody = form;
+    } else if (endpoint.requestBody !== undefined) {
+      const rawBody = this.body();
+      if (!this.isJsonObject(rawBody)) {
+        this.result.set({
+          status: 422,
+          statusText: 'Unprocessable Entity',
+          contentType: 'application/json',
+          latency: 0,
+          body: { detail: 'El cuerpo debe ser un objeto JSON válido.' },
+        });
+        return;
+      }
+      headers['Content-Type'] = 'application/json';
+      requestBody = rawBody;
+    }
+
+    this.isRunningRequest.set(true);
+    const start = performance.now();
+    try {
+      const response = await fetch(this.requestPath(), {
+        method: endpoint.method,
+        headers,
+        body: requestBody,
+      });
+      const latency = Math.max(1, Math.round(performance.now() - start));
+      const contentType = response.headers.get('content-type') ?? 'application/octet-stream';
+
+      let parsedBody: unknown;
+      if (contentType.includes('application/json')) {
+        parsedBody = await response.json();
+        // Auto-rellena :id con el UUID recién subido para probar GET /v1/files/:id enseguida.
+        if (
+          endpoint.id === 'files-upload' &&
+          response.ok &&
+          typeof parsedBody === 'object' &&
+          parsedBody !== null &&
+          'id' in parsedBody &&
+          typeof (parsedBody as Record<string, unknown>)['id'] === 'string'
+        ) {
+          this.parameter.set((parsedBody as Record<string, string>)['id']);
+        }
+      } else if (contentType.startsWith('text/')) {
+        parsedBody = await response.text();
+      } else {
+        const buf = await response.arrayBuffer();
+        parsedBody = {
+          archivo_binario: true,
+          content_type: contentType,
+          tamano_bytes: buf.byteLength,
+          content_disposition: response.headers.get('content-disposition'),
+        };
+      }
+
+      this.result.set({
+        status: response.status,
+        statusText: response.statusText || '',
+        contentType,
+        latency,
+        body: parsedBody,
+      });
+    } catch {
+      this.result.set({
+        status: 0,
+        statusText: 'Network Error',
+        contentType: 'application/json',
+        latency: Math.max(1, Math.round(performance.now() - start)),
+        body: { detail: 'No se pudo completar la petición HTTP.' },
+      });
+    } finally {
       this.isRunningRequest.set(false);
-    }, 380);
+    }
   }
 
   private isJsonObject(body: string): boolean {
@@ -123,41 +231,76 @@ export class ConsolePage {
 
   getSnippetCode(): string {
     const endpoint = this.selectedEndpoint();
-    const domain = 'api.gatekeeper.dev';
-    const url = JSON.stringify(`https://${domain}${this.requestPath()}`);
-    const body = endpoint.requestBody ? this.body() : null;
+    const origin =
+      typeof window !== 'undefined' && window.location?.origin
+        ? window.location.origin
+        : 'https://35-168-228-65.sslip.io';
+    const url = JSON.stringify(`${origin}${this.requestPath()}`);
+    const tokenPlaceholder = endpoint.authMode === 'jwt' ? 'YOUR_JWT_TOKEN' : 'YOUR_API_KEY';
+    const body = endpoint.requestBody !== undefined ? this.body() : null;
 
     switch (this.selectedSnippetLang()) {
-      case 'curl':
-        return [
-          `curl -X ${endpoint.method} ${url}`,
-          "  -H 'Authorization: Bearer YOUR_API_KEY'",
-          ...(body === null
-            ? []
-            : [
-                "  -H 'Content-Type: application/json'",
-                `  --data-raw '${body.replaceAll("'", "'\\''")}'`,
-              ]),
-        ].join(' \\' + '\n');
+      case 'curl': {
+        const lines = [`curl -X ${endpoint.method} ${url}`];
+        if (endpoint.authMode !== 'none') {
+          lines.push(`  -H 'Authorization: Bearer ${tokenPlaceholder}'`);
+        }
+        if (endpoint.isMultipart) {
+          const name = this.selectedFile()?.name ?? 'foto.png';
+          lines.push(`  -F 'file=@${name.replaceAll("'", "'\\''")}'`);
+        } else if (body !== null) {
+          lines.push("  -H 'Content-Type: application/json'");
+          lines.push(`  --data-raw '${body.replaceAll("'", "'\\''")}'`);
+        }
+        return lines.join(' \\' + '\n');
+      }
       case 'ts':
+        if (endpoint.isMultipart) {
+          return `const form = new FormData();
+form.append('file', fileInput.files[0]);
+const response = await fetch(${url}, {
+  method: 'POST',
+  headers: { Authorization: 'Bearer ${tokenPlaceholder}' },
+  body: form,
+});
+console.log(await response.json());`;
+        }
         return `const response = await fetch(${url}, {
-  method: '${endpoint.method}',
-  headers: {
-    Authorization: 'Bearer YOUR_API_KEY'${body === null ? '' : `,\n    'Content-Type': 'application/json'`}
-  }${body === null ? '' : `,\n  body: ${JSON.stringify(body)}`}
+  method: '${endpoint.method}'${
+    endpoint.authMode === 'none' && body === null
+      ? ''
+      : `,
+  headers: {${endpoint.authMode !== 'none' ? `\n    Authorization: 'Bearer ${tokenPlaceholder}'` : ''}${body === null ? '' : `${endpoint.authMode !== 'none' ? ',' : ''}\n    'Content-Type': 'application/json'`}
+  }${body === null ? '' : `,\n  body: ${JSON.stringify(body)}`}`
+  }
 });
 console.log(await response.json());`;
       case 'python':
-        return `import requests
+        if (endpoint.isMultipart) {
+          const name = this.selectedFile()?.name ?? 'foto.png';
+          return `import httpx
 
-response = requests.request(
+with open(${JSON.stringify(name)}, "rb") as f:
+    r = httpx.post(
+        ${url},
+        headers={"Authorization": "Bearer ${tokenPlaceholder}"},
+        files={"file": f},
+    )
+print(r.status_code, r.json())`;
+        }
+        return `import httpx
+
+r = httpx.request(
     "${endpoint.method}",
-    ${url},
-    headers={
-        "Authorization": "Bearer YOUR_API_KEY"${body === null ? '' : ',\n        "Content-Type": "application/json"'}
-    }${body === null ? '' : `,\n    data=${JSON.stringify(body)}`}
+    ${url}${
+      endpoint.authMode === 'none' && body === null
+        ? ''
+        : `,
+    headers={${endpoint.authMode !== 'none' ? `\n        "Authorization": "Bearer ${tokenPlaceholder}"` : ''}${body === null ? '' : `${endpoint.authMode !== 'none' ? ',' : ''}\n        "Content-Type": "application/json"`}
+    }${body === null ? '' : `,\n    content=${JSON.stringify(body)}`}`
+    }
 )
-print(response.json())`;
+print(r.status_code, r.json())`;
     }
   }
 }

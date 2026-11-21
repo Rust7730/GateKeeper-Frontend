@@ -9,7 +9,10 @@
 
 | Archivo / carpeta             | Qué es                                                                                      | Módulo |
 | ----------------------------- | ------------------------------------------------------------------------------------------- | ------ |
-| `provide-api.ts`              | `provideApi()`: HttpClient + `API_BASE_URL`; registra el mock solo con `useMocks`           | M04    |
+| `api-request.ts`              | Helpers `apiPathOf()`, `injectApiPath()` e `isAuthPath()` para aislar peticiones a la API   | M05    |
+| `auth.interceptor.ts`         | Adjunta `Authorization: Bearer` o `withCredentials` + `X-CSRF-Token` solo hacia la API      | M05    |
+| `refresh.interceptor.ts`      | Ante 401 intenta un refresh único deduplicado y reintenta la petición (S4)                  | M05    |
+| `provide-api.ts`              | `provideApi()`: HttpClient + interceptores + `API_BASE_URL`; registra mock con `useMocks`   | M04    |
 | `mock-backend.interceptor.ts` | Backend simulado: DTO del backend, latencia 200–800 ms, paginación, filtros, IDOR y errores | M04    |
 
 ## Notas

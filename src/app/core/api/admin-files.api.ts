@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of, switchMap } from 'rxjs';
 
 import { FileQuery, FileRecord } from '../models/file.model';
 import { Page } from '../models/page.model';
@@ -37,6 +37,13 @@ export class AdminFilesApi {
     if (!isUuid(id)) return invalidIdError();
     return this.http
       .post<unknown>(apiUrl(this.base, 'admin', 'files', id, 'release'), toReleaseBody(reason))
-      .pipe(map(toFileRecord));
+      .pipe(
+        switchMap((body) => {
+          if (typeof body === 'object' && body !== null && 'reencolado' in body) {
+            return this.get(id);
+          }
+          return of(toFileRecord(body));
+        }),
+      );
   }
 }

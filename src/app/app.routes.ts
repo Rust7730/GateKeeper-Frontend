@@ -1,13 +1,20 @@
-import { Route, Routes } from '@angular/router';
+import { CanActivateFn, Route, Routes } from '@angular/router';
 import { environment } from '../environments/environment';
+import { adminGuard, authGuard, loginGuard } from './core/guards/auth.guard';
 import { WorkspaceView } from './features/overview/workspace-data';
 
 const title = (section: string) => `Gatekeeper · ${section}`;
 
-const workspace = (path: string, view: WorkspaceView, section: string): Route => ({
+const workspace = (
+  path: string,
+  view: WorkspaceView,
+  section: string,
+  guards: readonly CanActivateFn[] = [authGuard],
+): Route => ({
   path,
   title: title(section),
   data: { view },
+  canActivate: [...guards],
   loadComponent: () => import('./features/overview/workspace').then((m) => m.Workspace),
 });
 
@@ -24,19 +31,18 @@ const devRoutes: Routes = devTools
     ]
   : [];
 
-// Dashboard en "/app": barra superior + menú lateral, una página por sección.
-// "/" y "/dashboard" llevan al resumen. La landing pública vive en Astro (/landing).
+// Dashboard en "/app": protegido por authGuard (adminGuard en auditoría y claves).
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'app' },
   { path: 'dashboard', redirectTo: 'app', pathMatch: 'full' },
-  workspace('login', 'login', 'Acceso'),
+  workspace('login', 'login', 'Acceso', [loginGuard]),
   { ...workspace('app', 'summary', 'Resumen'), pathMatch: 'full' },
   workspace('app/archivos', 'files', 'Archivos'),
   workspace('app/archivos/:id', 'detail', 'Detalle del archivo'),
   workspace('app/cuarentena', 'quarantine', 'Cuarentena'),
   workspace('app/alertas', 'alerts', 'Alertas'),
-  workspace('app/auditoria', 'audit', 'Auditoría'),
-  workspace('app/claves', 'keys', 'Obtener clave API'),
+  workspace('app/auditoria', 'audit', 'Auditoría', [adminGuard]),
+  workspace('app/claves', 'keys', 'Obtener clave API', [adminGuard]),
   workspace('app/explorador', 'explorer', 'Consola de pruebas'),
   workspace('app/documentacion', 'docs', 'Documentación'),
   workspace('app/**', 'missing', 'Página no encontrada'),
