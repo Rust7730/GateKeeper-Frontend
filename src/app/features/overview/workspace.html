@@ -65,11 +65,51 @@
       <p>{{ t('Un espacio de trabajo para revisar qué ocurre con cada archivo.') }}</p>
     </div>
     <section class="panel access-card" aria-labelledby="access-title">
-      <span class="demo-label"> {{ t('Demostración') }} </span>
       <h2 id="access-title">{{ t('Acceso al dashboard') }}</h2>
-      <p>{{ t('Explora el panel con datos de ejemplo.') }}</p>
-      <a routerLink="/app" class="button primary"> {{ t('Abrir demostración') }} </a>
-      <a href="http://localhost:4321/" class="file-link"> {{ t('Volver al sitio público') }} </a>
+      @if (authError()) {
+        <p class="permission" role="alert">{{ authError() }}</p>
+      }
+      @if (mfaChallengeId()) {
+        <p>{{ t('Ingresa el código de 6 dígitos de tu aplicación autenticadora.') }}</p>
+        <form (submit)="$event.preventDefault(); submitTotp(totpCode.value)">
+          <label>
+            {{ t('Código TOTP') }}
+            <input
+              #totpCode
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="6"
+              minlength="6"
+              required
+              placeholder="000000"
+            />
+          </label>
+          <div class="dialog-actions">
+            <button type="button" class="button" (click)="cancelMfa()">{{ t('Volver') }}</button>
+            <button type="submit" class="button primary" [disabled]="authBusy()">
+              {{ authBusy() ? t('Verificando...') : t('Verificar código') }}
+            </button>
+          </div>
+        </form>
+      } @else {
+        <p>{{ t('Inicia sesión con tu cuenta de Gatekeeper SecOps.') }}</p>
+        <form (submit)="$event.preventDefault(); submitLogin(emailInput.value, passInput.value)">
+          <label>
+            {{ t('Correo electrónico') }}
+            <input #emailInput type="email" autocomplete="username" required />
+          </label>
+          <label>
+            {{ t('Contraseña') }}
+            <input #passInput type="password" autocomplete="current-password" required />
+          </label>
+          <div class="dialog-actions">
+            <button type="submit" class="button primary" [disabled]="authBusy()">
+              {{ authBusy() ? t('Iniciando sesión...') : t('Iniciar sesión') }}
+            </button>
+          </div>
+        </form>
+      }
     </section>
   </main>
 } @else {
@@ -86,20 +126,16 @@
         <a class="brand" routerLink="/app"
           ><span class="brand-mark" aria-hidden="true"></span> Gatekeeper</a
         >
-        <span class="demo-label"> {{ t('Datos de ejemplo') }} </span>
+        @if (user(); as current) {
+          <span class="demo-label">
+            {{ current.email }} · {{ administrator() ? t('Administrador') : t('Analista') }}
+          </span>
+        }
         <div class="top-actions">
           <gk-workspace-settings class="in-header" />
-          <label class="role-control">
-            <span> {{ t('Rol de ejemplo') }} </span>
-            <select
-              [attr.aria-label]="t('Rol de ejemplo')"
-              [value]="administrator() ? 'admin' : 'analyst'"
-              (change)="administrator.set($any($event.target).value === 'admin')"
-            >
-              <option value="analyst">{{ t('Analista') }}</option>
-              <option value="admin">{{ t('Administrador') }}</option>
-            </select>
-          </label>
+          <button type="button" class="button" (click)="logout()">
+            {{ t('Cerrar sesión') }}
+          </button>
         </div>
       </div>
     </header>
@@ -131,7 +167,7 @@
           <span class="nav-label">{{ collapsed() ? t('Expandir menú') : t('Contraer menú') }}</span>
         </button>
         <nav [attr.aria-label]="t('Secciones del dashboard')">
-          @for (item of nav; track item.path) {
+          @for (item of nav(); track item.path) {
             <a
               [routerLink]="item.path"
               [attr.title]="collapsed() ? t(item.label) : null"
@@ -194,18 +230,18 @@
                 </div>
                 <div class="legend">
                   <span>
-                    {{ t('Cuarentena') }} <b>{{ totals.quarantined }}</b> </span
+                    {{ t('Cuarentena') }} <b>{{ totals().quarantined }}</b> </span
                   ><span>
-                    {{ t('Rechazos') }} <b>{{ totals.rejected }}</b>
+                    {{ t('Rechazos') }} <b>{{ totals().rejected }}</b>
                   </span>
                 </div>
               </div>
               <gk-threat-chart
-                [series]="series"
+                [series]="series()"
                 [labels]="chartLabels()"
                 [describe]="describeDay"
               />
-              <div class="chart-footer">{{ t('Datos de ejemplo') }}</div>
+              <div class="chart-footer">{{ t('Datos en vivo') }}</div>
             </section>
           }
         </header>
@@ -213,21 +249,24 @@
         @if (notice()) {
           <p class="notice" role="status">{{ t(notice()) }}</p>
         }
+        @if (loadError()) {
+          <p class="permission" role="alert">{{ loadError() }}</p>
+        }
 
         @switch (view) {
           @case ('summary') {
-            <dl class="metrics" [attr.aria-label]="t('Archivos de ejemplo')">
+            <dl class="metrics" [attr.aria-label]="t('Métricas del periodo')">
               <div>
                 <dt>{{ t('Archivos recibidos') }}</dt>
-                <dd>{{ files().length }}</dd>
+                <dd>{{ totals().totalFiles }}</dd>
               </div>
               <div>
                 <dt>{{ t('En cuarentena') }}</dt>
-                <dd>{{ quarantine().length }}</dd>
+                <dd>{{ totals().quarantined }}</dd>
               </div>
               <div>
                 <dt>{{ t('Alertas registradas') }}</dt>
-                <dd>{{ alerts.length }}</dd>
+                <dd>{{ totals().alertsCount }}</dd>
               </div>
             </dl>
             <section class="panel" aria-labelledby="recent-title">
@@ -236,7 +275,7 @@
               </div>
               <ng-container
                 [ngTemplateOutlet]="fileList"
-                [ngTemplateOutletContext]="{ $implicit: files().slice(0, 4) }"
+                [ngTemplateOutletContext]="{ $implicit: files().slice(0, 6) }"
               />
             </section>
           }
@@ -293,23 +332,56 @@
                     <dt>{{ t('Hora de recepción') }}</dt>
                     <dd>{{ file.time }}</dd>
                   </div>
+                  <div>
+                    <dt>{{ t('Aplicación') }}</dt>
+                    <dd>{{ file.appName }}</dd>
+                  </div>
+                  @if (file.sha256) {
+                    <div>
+                      <dt>SHA-256</dt>
+                      <dd class="mono">{{ file.sha256 }}</dd>
+                    </div>
+                  }
+                  @if (file.quarantineExpiresAt) {
+                    <div>
+                      <dt>{{ t('Caducidad cuarentena') }}</dt>
+                      <dd>{{ file.quarantineExpiresAt }}</dd>
+                    </div>
+                  }
                 </dl>
               </section>
               <section class="panel detail">
-                <h2>{{ t('Cronología') }}</h2>
-                <ol class="timeline">
-                  <li>
-                    <strong> {{ t('Recepción del archivo') }} </strong><span>{{ file.time }}</span>
-                  </li>
-                  <li>
-                    <strong>{{ t(file.status) }}</strong
-                    ><span>{{ t(file.reason) }}</span>
-                  </li>
-                </ol>
+                <h2>{{ t('Capas de análisis') }}</h2>
+                @if (file.layers.length > 0) {
+                  <ol class="timeline">
+                    @for (layer of file.layers; track layer.layer) {
+                      <li>
+                        <strong>{{ layer.layer }} · {{ layer.outcome }}</strong>
+                        <span>
+                          @if (layer.signature) {
+                            {{ layer.signature }}
+                          } @else if (layer.vtDetections) {
+                            {{ layer.vtDetections.positives }}/{{ layer.vtDetections.total }}
+                            motores
+                          } @else if (layer.reason) {
+                            {{ layer.reason }}
+                          } @else {
+                            OK
+                          }
+                          @if (layer.durationMs !== null) {
+                            ({{ layer.durationMs }} ms)
+                          }
+                        </span>
+                      </li>
+                    }
+                  </ol>
+                } @else {
+                  <p>{{ t(file.reason) }}</p>
+                }
               </section>
             } @else {
               <section class="panel empty">
-                {{ t('No encontramos ese archivo en la demostración.') }}
+                {{ loading() ? t('Cargando...') : t('Archivo no encontrado.') }}
               </section>
             }
           }
@@ -338,10 +410,10 @@
             <section class="panel" [attr.aria-label]="t('Actividad de alertas')">
               <div class="panel-heading">
                 <h2>{{ t('Detecciones recientes') }}</h2>
-                <span class="demo-label"> {{ t('Registro de ejemplo') }} </span>
+                <span class="demo-label"> {{ t('SSE en vivo') }} </span>
               </div>
               <ul class="activity">
-                @for (file of alerts; track file.id) {
+                @for (file of alerts(); track file.id) {
                   <li>
                     <div>
                       <a class="file-link" [routerLink]="['/app/archivos', file.id]">{{
@@ -520,8 +592,8 @@
                 class="doc-example"
                 tabindex="0"
                 [attr.aria-label]="t('Ejemplo de cURL', 'cURL example')"
-              ><code>curl -X POST https://gatekeeper.example/v1/files \
-  -H "X-API-Key: $GATEKEEPER_API_KEY" \
+              ><code>curl -X POST https://35-168-228-65.sslip.io/v1/files \
+  -H "Authorization: Bearer $GATEKEEPER_API_KEY" \
   -F "file=@foto.jpg"</code></pre>
               <div class="doc-actions">
                 <a class="button primary" routerLink="/app/explorador">{{
@@ -567,9 +639,16 @@
     "
   >
     <h2 id="release-title">{{ t('Liberar archivo') }}</h2>
-    <p>{{ t('Registra el motivo de la liberación de ejemplo.') }}</p>
+    <p>
+      {{
+        t(
+          'Indica un motivo de al menos 20 caracteres; el archivo pasará por el CDR antes de quedar limpio.'
+        )
+      }}
+    </p>
     <label>
-      {{ t('Motivo') }} <textarea #reason required maxlength="300" rows="3"></textarea>
+      {{ t('Motivo') }}
+      <textarea #reason required minlength="20" maxlength="500" rows="3"></textarea>
     </label>
     <div class="dialog-actions">
       <button class="button" type="button" (click)="reason.value = ''; releaseDialog.close()">

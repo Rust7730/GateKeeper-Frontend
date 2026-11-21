@@ -1,6 +1,39 @@
-// Los estilos del dashboard viven en styles/base/_dashboard-ui.scss (bajo <gk-dashboard-shell>).
+// Los estilos base del dashboard viven en styles/base/_dashboard-ui.scss.
 :host {
   display: flex;
   flex-direction: column;
   gap: var(--gk-space-24);
+}
+
+.console-controls {
+  display: grid;
+  gap: 0.75rem;
+  margin-block-start: 1rem;
+  padding-block-start: 1rem;
+  border-block-start: 1px solid var(--line, var(--gk-border-default));
+}
+
+.console-field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.console-field input,
+.console-field textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line, var(--gk-border-default));
+  border-radius: 0.45rem;
+  background: var(--surface, var(--gk-background-surface));
+  color: inherit;
+  font-family: var(--gk-font-mono, monospace);
+  font-size: 0.82rem;
+}
+
+.console-auth-hint {
+  margin: 0;
+  color: var(--muted, var(--gk-text-muted));
+  font-size: 0.82rem;
 }

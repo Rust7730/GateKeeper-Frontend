@@ -132,6 +132,55 @@
       </div>
       <h2 class="endpoint-summary">{{ selectedEndpoint().summary }}</h2>
       <p class="endpoint-desc">{{ selectedEndpoint().description }}</p>
+
+      <div class="console-controls">
+        @if (selectedEndpoint().authMode === 'api-key') {
+          <label class="console-field">
+            <span>API Key (<code>Authorization: Bearer gk_...</code>)</span>
+            <input
+              type="password"
+              autocomplete="off"
+              placeholder="Pega aquí la API key creada en Obtener clave API (gk_...)"
+              [value]="apiKeyInput()"
+              (input)="apiKeyInput.set($any($event.target).value)"
+            />
+          </label>
+        } @else if (selectedEndpoint().authMode === 'jwt') {
+          <p class="console-auth-hint">Autenticación automática con tu JWT de sesión actual.</p>
+        }
+
+        @if (parameterName(); as param) {
+          <label class="console-field">
+            <span
+              >Parámetro <code>:{{ param }}</code> (UUID)</span
+            >
+            <input
+              type="text"
+              placeholder="Ej. 3c7b078b-47f5-475e-a6f5-d0fc32c30b16"
+              [value]="parameter()"
+              (input)="parameter.set($any($event.target).value)"
+            />
+          </label>
+        }
+
+        @if (selectedEndpoint().isMultipart) {
+          <label class="console-field">
+            <span>Archivo a enviar (<code>file</code>, máx. 10 MiB)</span>
+            <input type="file" (change)="onFileSelected($event)" />
+          </label>
+        }
+
+        @if (selectedEndpoint().requestBody !== undefined) {
+          <label class="console-field">
+            <span>Cuerpo JSON</span>
+            <textarea
+              rows="3"
+              [value]="body()"
+              (input)="customBody.set($any($event.target).value)"
+            ></textarea>
+          </label>
+        }
+      </div>
     </div>
 
     <!-- Snippet de Código del Playground -->
@@ -189,10 +238,10 @@
         <span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span>
         <div class="response-status-group">
           <span class="status-indicator"></span>
-          <span class="status-code">{{ responseStatusCode() }} OK</span>
+          <span class="status-code">{{ responseStatusCode() }} {{ responseStatusText() }}</span>
           <span class="latency-pill">{{ actualLatency() }} ms</span>
         </div>
-        <span class="format-indicator">application/json</span>
+        <span class="format-indicator">{{ responseContentType() }}</span>
       </div>
 
       <pre class="terminal-body response-body"><code>{{ formattedResponse() }}</code></pre>

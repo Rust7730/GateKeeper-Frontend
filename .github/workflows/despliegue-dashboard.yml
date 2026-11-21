@@ -1,0 +1,55 @@
+name: despliegue-dashboard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: despliegue-dashboard-main
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.3'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Verificar y compilar producción
+        run: npm run verify
+
+      - name: Publicar bundle estático en rama dist-main
+        env:
+          ORIGEN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          BUNDLE="$PWD/dist/gatekeeper-frontend/browser"
+          test -f "$BUNDLE/index.html"
+
+          TRABAJO="$(mktemp -d)"
+          cp -r "$BUNDLE"/. "$TRABAJO"/
+          rm -rf "$TRABAJO/.git"
+          printf '%s\n' "$ORIGEN_SHA" > "$TRABAJO/.commit-sha"
+
+          cd "$TRABAJO"
+          git init -q -b dist-main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "chore(release): build dashboard ${ORIGEN_SHA}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" dist-main:refs/heads/dist-main

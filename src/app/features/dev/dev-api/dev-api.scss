@@ -1,0 +1,112 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--gk-background-canvas);
+  color: var(--gk-text-primary);
+  font-family: var(--gk-font-ui);
+}
+
+.dev-api {
+  display: grid;
+  gap: var(--gk-space-16);
+  padding: var(--gk-space-24);
+}
+
+.dev-api__header h1 {
+  margin: 0;
+  font-size: var(--gk-text-h2);
+}
+
+.dev-api__header p,
+.dev-api__count,
+.dev-api__message {
+  margin: 0;
+  color: var(--gk-text-secondary);
+}
+
+.dev-api__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gk-space-16);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dev-api__filter {
+  display: flex;
+  gap: var(--gk-space-8);
+  align-items: center;
+}
+
+.dev-api__filter select,
+.dev-api__pager button {
+  padding: var(--gk-space-4) var(--gk-space-12);
+  border: 1px solid var(--gk-border-default);
+  border-radius: var(--gk-radius-8);
+  background: var(--gk-background-surface);
+  color: var(--gk-text-primary);
+  font: inherit;
+}
+
+.dev-api__pager button:disabled {
+  color: var(--gk-text-muted);
+}
+
+.dev-api__filter select:focus-visible,
+.dev-api__pager button:focus-visible {
+  outline: var(--gk-focus-width) solid var(--gk-focus-ring);
+  outline-offset: var(--gk-focus-width);
+}
+
+.dev-api__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--gk-border-default);
+  border-radius: var(--gk-radius-8);
+}
+
+.dev-api__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--gk-text-label);
+}
+
+.dev-api__table th,
+.dev-api__table td {
+  padding: var(--gk-space-8) var(--gk-space-12);
+  border-bottom: 1px solid var(--gk-border-default);
+  text-align: left;
+  vertical-align: top;
+}
+
+.dev-api__table th {
+  background: var(--gk-background-subtle);
+  color: var(--gk-text-secondary);
+  font-weight: var(--gk-weight-semibold);
+}
+
+.dev-api__caption {
+  padding: var(--gk-space-8) var(--gk-space-12);
+  color: var(--gk-text-secondary);
+  text-align: left;
+}
+
+.dev-api__name {
+  max-width: 24ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dev-api__mono {
+  font-family: var(--gk-font-mono);
+  white-space: nowrap;
+}
+
+.dev-api__muted {
+  color: var(--gk-text-muted);
+}
+
+.dev-api__pager {
+  display: flex;
+  gap: var(--gk-space-8);
+}

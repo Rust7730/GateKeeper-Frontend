@@ -683,9 +683,30 @@ dialog label[hidden] {
 
 .access-card {
   display: grid;
-  justify-items: start;
+  justify-items: stretch;
   gap: 0.7rem;
   padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.access-card form {
+  display: grid;
+  gap: 0.9rem;
+  width: 100%;
+  margin-block-start: 0.35rem;
+}
+
+.access-card label {
+  display: grid;
+  gap: 0.35rem;
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.access-card input {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
 }
 
 @media (width <= 52rem) {
