@@ -36,6 +36,7 @@ jobs:
       - name: Publicar bundle estático en rama dist-main
         env:
           ORIGEN_SHA: ${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           BUNDLE="$PWD/dist/gatekeeper-frontend/browser"
