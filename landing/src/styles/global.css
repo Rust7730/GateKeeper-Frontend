@@ -1475,6 +1475,42 @@ footer { border-top: var(--stroke); }
 }
 :root[data-motion='reduce'] :is(.sample-list details, .sample-list summary::after, .vector-filters button, .matrix tbody tr) { transition: none; }
 
+/* Escena de la portada con el lenguaje del logo: contornos gruesos, sombra sólida,
+   hoja lavanda detrás, barra de escaneo verde y destellos. Sin degradados ni brillos. */
+.art-ink { fill: var(--edge); }
+.stage-corners { stroke: var(--muted); stroke-opacity: .45; }
+.bug-disc { fill: #f6c8e0; stroke: #141318; stroke-width: 4; }
+.art-flag-fill, [data-state='open'] .art-flag-fill { filter: none; }
+[data-state='clean'] .art-copy { filter: none; }
+.fx-ring { stroke-opacity: 1; }
+
+/* Los bichos «rebotan» al aparecer y luego se mecen */
+[data-state='open'] .art-bug circle { animation: none; }
+[data-state='open'] .art-bug { transition: transform 620ms cubic-bezier(.34, 1.56, .64, 1), opacity 240ms var(--ease); }
+[data-state='open'] .art-bug use { animation: bug-wiggle 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes bug-wiggle { 50% { rotate: 10deg; } }
+
+/* La copia limpia entra con un rebote corto y el sello se estampa */
+[data-state='clean'] .art-copy { transition: transform 620ms cubic-bezier(.34, 1.56, .64, 1), opacity 260ms var(--ease); }
+[data-state='clean'] .shield-body { animation: stamp 560ms cubic-bezier(.34, 1.56, .64, 1) 320ms both; }
+@keyframes stamp { from { opacity: 0; transform: scale(1.6) rotate(-18deg); } }
+
+/* Destellos del logo: parpadeo suave y escalonado */
+.logo-spark { transform-box: fill-box; transform-origin: center; animation: logo-twinkle 2.4s ease-in-out infinite; }
+.logo-sparks > g:nth-child(2) .logo-spark { animation-delay: .25s; }
+.logo-sparks > g:nth-child(3) .logo-spark { animation-delay: .5s; }
+
+/* Contenido activo: la hoja blanca se aparta del todo para dejar ver la etiqueta */
+[data-state='open'] .art-cover { transform: translate(-150px, 36px) rotate(-12deg) scale(.7); opacity: 1; }
+@keyframes logo-twinkle { 0%, 100% { scale: 1; opacity: 1; } 50% { scale: .72; opacity: .55; } }
+[data-state='open'] .logo-sparks { opacity: 0; transition: opacity 240ms var(--ease); }
+.logo-sparks { transition: opacity 400ms var(--ease) 200ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-spark, .art-bug use, .shield-body { animation: none !important; }
+}
+:root[data-motion='reduce'] :is(.logo-spark, .art-bug use, .shield-body) { animation: none !important; }
+
 /* ═══════════════════════════════════════════════════════════════════
    Pantalla de carga: el logo se «escanea» mientras carga la página.
    Si el JavaScript no corre, se retira sola a los 3 s (animación CSS).
