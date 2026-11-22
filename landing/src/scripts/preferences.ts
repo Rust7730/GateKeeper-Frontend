@@ -97,3 +97,12 @@ if (preferences && theme && motion) {
     }
   });
 }
+
+// Idioma: el mismo selector que en el dashboard. Cada idioma es su propia página
+// (/ y /en/), así que cambiarlo navega conservando la sección (#ancla) actual.
+const languageSelect = document.querySelector<HTMLSelectElement>('[data-language-select]');
+languageSelect?.addEventListener('change', () => {
+  const target = languageSelect.value === 'en' ? '/en/' : '/';
+  storePreference('gatekeeper-language', languageSelect.value);
+  window.location.assign(target + window.location.hash);
+});

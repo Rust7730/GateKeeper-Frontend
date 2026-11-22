@@ -1626,6 +1626,17 @@ footer { border-top: var(--stroke); }
 :root[data-motion='reduce'] .sample-list details[open] :is(.sample-signature, .sample-content p, .sample-verdict) { animation: none; }
 :root[data-motion='reduce'] .sample-list details:hover { transform: none; }
 
+/* Menú de Ajustes igual al del dashboard: tema, idioma y reducir movimiento. */
+.preferences-panel .language { display: grid; gap: .3rem; }
+.preferences-panel .language select {
+  min-height: 2.4rem;
+  padding: .35rem .6rem;
+  border: var(--stroke);
+  border-radius: .5rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    Pantalla de carga minimalista: el logo con su barrido verde y una
    línea fina debajo. Si el JavaScript no corre, se retira sola a los 3 s.

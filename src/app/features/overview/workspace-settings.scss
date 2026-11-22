@@ -60,11 +60,11 @@
   gap: 0.65rem;
   width: max-content;
   max-width: calc(100vw - 2rem);
-  padding: 0.75rem;
-  border: 1px solid var(--line);
-  border-radius: 0.8rem;
-  background: var(--canvas);
-  box-shadow: 0 0.65rem 1.6rem var(--dialog-scrim);
+  padding: 1rem;
+  border: var(--stroke, 1px solid var(--line));
+  border-radius: 0.9rem;
+  background: var(--surface);
+  box-shadow: var(--pop, 0 0.65rem 1.6rem var(--dialog-scrim));
 }
 
 .pref-label {
@@ -79,7 +79,7 @@
 .language select {
   min-height: 2.4rem;
   padding: 0.4rem 0.65rem;
-  border: 1px solid var(--line);
+  border: var(--stroke, 1px solid var(--line));
   border-radius: 0.5rem;
   background: var(--surface);
   color: var(--ink);
@@ -133,8 +133,8 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   padding: 0.25rem;
-  border: 1px solid var(--line);
-  border-radius: var(--gk-radius-999);
+  border: var(--stroke, 1px solid var(--line));
+  border-radius: 0.6rem;
   background: var(--soft);
 }
 
@@ -142,8 +142,8 @@
   position: absolute;
   inset: 0.25rem auto 0.25rem 0.25rem;
   width: var(--thumb-w);
-  border: 1px solid var(--action-outline);
-  border-radius: var(--gk-radius-999);
+  border: 1.5px solid var(--action-outline);
+  border-radius: 0.45rem;
   background: var(--lime);
   transition: transform 420ms var(--ease);
 }
