@@ -133,9 +133,9 @@
         <a class="brand" routerLink="/app"
           ><span class="brand-mark" aria-hidden="true"></span> Gatekeeper</a
         >
-        @if (user(); as current) {
+        @if (user()) {
           <span class="demo-label">
-            {{ current.email }} · {{ administrator() ? t('Administrador') : t('Analista') }}
+            {{ administrator() ? t('Administrador') : t('Analista') }}
           </span>
         }
         <div class="top-actions">
