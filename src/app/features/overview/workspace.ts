@@ -87,20 +87,21 @@ function formatBytes(bytes: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-function formatTime(iso: string | null): string {
+type Language = 'es' | 'en';
+const LOCALE: Record<Language, string> = { es: 'es-MX', en: 'en-US' };
+
+/** Fecha y hora en la zona local del navegador (la misma que usa la gráfica para agrupar). */
+export function formatTime(iso: string | null, language: Language = 'es'): string {
   if (!iso) return '—';
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('es-MX', {
+  return date.toLocaleString(LOCALE[language], {
     month: 'short',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
   });
 }
-
-type Language = 'es' | 'en';
-const LOCALE: Record<Language, string> = { es: 'es-MX', en: 'en-US' };
 
 /** Días que muestra la gráfica de amenazas. */
 export const CHART_DAYS = 7;
@@ -200,14 +201,18 @@ function mapFile(record: FileRecord): FileDetailView {
     ? (record.originalName ?? `Archivo ${record.id.slice(0, 8)}`)
     : `Archivo ${record.id.slice(0, 8)} (K20)`;
   let reason = 'Metadatos restringidos por política de privacidad K20.';
+  let reasonEn: string | undefined;
   if (isFull) {
     const mal = record.layers.find((l) => l.signature !== null || l.vtDetections !== null);
     if (mal?.signature) {
       reason = `ClamAV detectó la firma ${mal.signature}.`;
+      reasonEn = `ClamAV detected the signature ${mal.signature}.`;
     } else if (mal?.vtDetections) {
-      reason = `VirusTotal reportó ${mal.vtDetections.positives}/${mal.vtDetections.total} motores maliciosos.`;
+      const { positives, total } = mal.vtDetections;
+      reason = `VirusTotal reportó ${positives}/${total} motores maliciosos.`;
+      reasonEn = `VirusTotal reported ${positives}/${total} engines as malicious.`;
     } else if (record.reason) {
-      reason = `Motivo: ${record.reason}.`;
+      reason = REASON_LABEL[record.reason] ?? REASON_LABEL['unknown'];
     } else {
       reason = 'Inspección registrada con detalle completo.';
     }
@@ -225,12 +230,13 @@ function mapFile(record: FileRecord): FileDetailView {
     type: record.detectedType ?? 'desconocido',
     status: STATUS_LABEL[record.status],
     size: formatBytes(record.sizeBytes),
-    time: formatTime(record.createdAt),
+    time: record.createdAt ?? '',
     reason,
+    reasonEn,
     disclosure: record.disclosure,
     appName: record.appName ?? '—',
     sha256: isFull ? record.sha256 : null,
-    quarantineExpiresAt: isFull ? formatTime(record.quarantineExpiresAt) : null,
+    quarantineExpiresAt: isFull ? record.quarantineExpiresAt : null,
     layers: isFull ? record.layers : [],
   };
 }
@@ -240,7 +246,7 @@ function mapAudit(entry: AuditEntry): AuditEvent {
     action: AUDIT_ACTION_LABEL[entry.action] ?? entry.action,
     resource: entry.resource ?? '—',
     actor: entry.actor.email || 'Sistema',
-    time: formatTime(entry.at),
+    time: entry.at ?? '',
     note: entry.reason ?? (entry.ip ? `IP: ${entry.ip}` : undefined),
   };
 }
@@ -354,6 +360,16 @@ export class Workspace implements OnInit {
     total: this.t('Total'),
   }));
 
+  /** Hora en el idioma actual; los textos fijos (datos de ejemplo) se traducen tal cual. */
+  readonly when = (value: string | null): string =>
+    value && !Number.isNaN(Date.parse(value))
+      ? formatTime(value, this.preferences.language())
+      : this.t(value || '—');
+
+  /** El backend guarda la nota de una clave nueva como «Aplicación: nombre (prefijo)». */
+  readonly auditNote = (note: string): string =>
+    note.startsWith('Aplicación: ') ? `${this.t('Aplicación')}: ${note.slice(12)}` : note;
+
   readonly describeDay = (point: ThreatPoint): string =>
     `${point.day}: ${point.quarantined}${this.t(' en cuarentena y ', ' quarantined and ')}${point.rejected}${this.t(' rechazos', ' rejections')}${point.errors ? `${this.t(' y ', ' and ')}${point.errors}${this.t(' errores de análisis', ' scan errors')}` : ''}`;
 
@@ -401,7 +417,7 @@ export class Workspace implements OnInit {
       type: ev.severity,
       status: ev.type === 'malware_detected' ? 'En cuarentena' : 'Rechazado',
       size: '—',
-      time: formatTime(ev.at),
+      time: ev.at ?? '',
       reason: EVENT_LABEL[ev.type] ?? 'Evento de seguridad',
     }));
     const fromFiles = this.files().filter(

@@ -72,8 +72,11 @@ export interface InspectedFile {
   type: string;
   status: FileStatus;
   size: string;
+  /** Hora ISO 8601 (se formatea al pintar, según el idioma) o texto fijo de los datos de ejemplo. */
   time: string;
   reason: string;
+  /** Versión en inglés de `reason` cuando lleva datos variables y no está en el diccionario. */
+  reasonEn?: string;
 }
 
 export const SAMPLE_FILES: InspectedFile[] = [

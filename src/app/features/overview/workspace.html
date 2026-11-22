@@ -30,7 +30,7 @@
               />
             </td>
             <td class="mono">{{ file.size }}</td>
-            <td class="mono">{{ file.time }}</td>
+            <td class="mono">{{ when(file.time) }}</td>
             @if (allowRelease) {
               <td>
                 <button
@@ -67,7 +67,7 @@
     <section class="panel access-card" aria-labelledby="access-title">
       <h2 id="access-title">{{ t('Acceso al dashboard') }}</h2>
       @if (authError()) {
-        <p class="permission" role="alert">{{ authError() }}</p>
+        <p class="permission" role="alert">{{ t(authError()) }}</p>
       }
       @if (mfaChallengeId()) {
         <p>{{ t('Ingresa el código de 6 dígitos de tu aplicación autenticadora.') }}</p>
@@ -320,7 +320,7 @@
                   [ngTemplateOutletContext]="{ $implicit: file.status }"
                 />
                 <h2>{{ file.name }}</h2>
-                <p>{{ t(file.reason) }}</p>
+                <p>{{ t(file.reason, file.reasonEn) }}</p>
                 <dl class="properties">
                   <div>
                     <dt>ID</dt>
@@ -336,7 +336,7 @@
                   </div>
                   <div>
                     <dt>{{ t('Hora de recepción') }}</dt>
-                    <dd>{{ file.time }}</dd>
+                    <dd>{{ when(file.time) }}</dd>
                   </div>
                   <div>
                     <dt>{{ t('Aplicación') }}</dt>
@@ -351,7 +351,7 @@
                   @if (file.quarantineExpiresAt) {
                     <div>
                       <dt>{{ t('Caducidad cuarentena') }}</dt>
-                      <dd>{{ file.quarantineExpiresAt }}</dd>
+                      <dd>{{ when(file.quarantineExpiresAt) }}</dd>
                     </div>
                   }
                 </dl>
@@ -373,7 +373,7 @@
                     }
                   </ol>
                 } @else {
-                  <p>{{ t(file.reason) }}</p>
+                  <p>{{ t(file.reason, file.reasonEn) }}</p>
                 }
               </section>
             } @else {
@@ -421,12 +421,12 @@
                       <a class="file-link" [routerLink]="['/app/archivos', file.id]">{{
                         file.name
                       }}</a>
-                      <p>{{ t(file.reason) }}</p>
+                      <p>{{ t(file.reason, file.reasonEn) }}</p>
                     </div>
                     <ng-container
                       [ngTemplateOutlet]="statusChip"
                       [ngTemplateOutletContext]="{ $implicit: file.status }"
-                    /><time>{{ file.time }}</time>
+                    /><time>{{ when(file.time) }}</time>
                   </li>
                 } @empty {
                   <li class="empty">{{ t('No hay detecciones recientes.') }}</li>
@@ -456,12 +456,12 @@
                         <td>
                           {{ t(event.action) }}
                           @if (event.note) {
-                            <small>{{ event.note }}</small>
+                            <small>{{ auditNote(event.note) }}</small>
                           }
                         </td>
                         <td>{{ event.resource }}</td>
                         <td>{{ t(event.actor) }}</td>
-                        <td>{{ t(event.time) }}</td>
+                        <td>{{ when(event.time) }}</td>
                       </tr>
                     }
                   </tbody>
@@ -695,7 +695,9 @@
   (close)="secret.set(''); copyStatus.set(''); keyName.value = ''"
 >
   <form (submit)="$event.preventDefault(); createKey(keyName.value)">
-    <h2 id="create-title">{{ secret() ? t('Clave de ejemplo creada') : t('Crear clave API') }}</h2>
+    <h2 id="create-title">
+      {{ secret() ? t('Clave de ejemplo creada') : t('Crear clave API') }}
+    </h2>
     <label [hidden]="!!secret()">
       {{ t('Nombre de la clave') }}
       <input

@@ -1,8 +1,14 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
+import {
+  TitleStrategy,
+  provideRouter,
+  withComponentInputBinding,
+  withInMemoryScrolling,
+} from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideApi } from './core/http/provide-api';
+import { WorkspaceTitleStrategy } from './features/overview/workspace-title';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -13,5 +19,6 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
     ),
+    { provide: TitleStrategy, useClass: WorkspaceTitleStrategy },
   ],
 };

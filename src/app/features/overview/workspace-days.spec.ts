@@ -1,4 +1,4 @@
-import { CHART_DAYS, chartWindowStart, groupThreatDays } from './workspace';
+import { CHART_DAYS, chartWindowStart, formatTime, groupThreatDays } from './workspace';
 
 // Estas pruebas corren con TZ=America/Mexico_City (UTC-6), como el navegador de QA.
 describe('Gráfica de amenazas por día', () => {
@@ -30,5 +30,7 @@ describe('Gráfica de amenazas por día', () => {
     expect(byKey['2026-11-19'].quarantined).toBe(1);
     expect(byKey['2026-11-20'].quarantined).toBe(0);
     expect(byKey['2026-11-21']).toMatchObject({ quarantined: 0, rejected: 1, errors: 1 });
+    expect(formatTime(createdAt, 'es')).toContain('19');
+    expect(formatTime(createdAt, 'en')).toMatch(/Nov 19.*PM/);
   });
 });
