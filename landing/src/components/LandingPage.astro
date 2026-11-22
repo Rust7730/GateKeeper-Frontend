@@ -143,7 +143,7 @@ const outcomes = {
           </div>
           <div class="sample-list" data-reveal>
             {DECLARATION_CASES.map((sample, index) => (
-              <details style={`--i: ${index}`} data-verdict={sample.verdict}>
+              <details name="ejemplos" style={`--i: ${index}`} data-verdict={sample.verdict}>
                 <summary>
                   <span>{localize(sample.label)}</span>
                   <code>{sample.declared.name}</code>
@@ -337,6 +337,18 @@ const outcomes = {
         motionQuery.addEventListener('change', arm);
         document.addEventListener('gatekeeper:motion-change', arm);
       }
+
+      // Ejemplos: solo uno abierto a la vez. `name` lo hace nativo en navegadores
+      // recientes; esto cubre a los que aún no lo soportan.
+      const samples = [...document.querySelectorAll<HTMLDetailsElement>('.sample-list details')];
+      samples.forEach((sample) => {
+        sample.addEventListener('toggle', () => {
+          if (!sample.open) return;
+          samples.forEach((other) => {
+            if (other !== sample && other.open) other.open = false;
+          });
+        });
+      });
 
       // Pantalla de carga: se retira al cargar todo, con un mínimo breve para que no parpadee.
       const loader = document.querySelector<HTMLElement>('[data-loader]');
