@@ -99,10 +99,15 @@ export class ThreatChart {
     return value;
   }
 
-  /** Mismo color con otra opacidad (los tokens resueltos llegan como rgb()). */
+  /**
+   * Mismo color con otra opacidad (los tokens resueltos llegan como rgb()).
+   * Debe ser `rgba(r, g, b, a)` con comas: el parser de zrender no entiende la sintaxis
+   * CSS 4 `rgb(r g b / a)`, devuelve `undefined` y la animación del degradado al resaltar
+   * una serie lanza `TypeError: Cannot read properties of undefined (reading 'length')`.
+   */
   private fade(color: string, alpha: number): string {
     const [r, g, b] = color.match(/[\d.]+/g)?.slice(0, 3) ?? ['128', '128', '128'];
-    return `rgb(${r} ${g} ${b} / ${alpha})`;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   private area(color: string) {
