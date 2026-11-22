@@ -1,7 +1,17 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  Injector,
+  OnInit,
+  afterNextRender,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { forkJoin } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
@@ -27,6 +37,7 @@ import {
   type DemoKey,
   type FileStatus,
   type InspectedFile,
+  type KeyActivity,
   type WorkspaceView,
 } from './workspace-data';
 
@@ -258,6 +269,9 @@ function mapKey(key: ApiKey): DemoKey {
     name: key.appName ?? key.appId.slice(0, 8),
     prefix: key.prefix ?? 'gk_',
     revoked: key.status === 'revoked',
+    appId: key.appId,
+    createdAt: key.createdAt,
+    lastUsedAt: key.lastUsedAt,
   };
 }
 
@@ -276,12 +290,14 @@ function mapKey(key: ApiKey): DemoKey {
   host: {
     '[attr.data-theme]': 'preferences.theme()',
     '[attr.data-motion]': 'preferences.reducedMotion() ? "reduce" : null',
+    '(document:keydown.escape)': 'onEscape()',
   },
 })
 export class Workspace implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
   private readonly auth = inject(AuthService);
   private readonly filesApi = inject(AdminFilesApi);
   private readonly metricsApi = inject(MetricsApi);
@@ -405,6 +421,13 @@ export class Workspace implements OnInit {
   readonly notice = signal('');
   readonly releaseTarget = signal('');
   readonly revokeTarget = signal<DemoKey | null>(null);
+
+  // Panel lateral de una clave: resumen del cliente y su actividad.
+  readonly selectedKey = signal<DemoKey | null>(null);
+  readonly keyActivity = signal<KeyActivity | null>(null);
+  readonly keyActivityError = signal(false);
+  readonly prefixCopied = signal(false);
+  private activityRequest = 0;
   readonly secret = signal('');
   readonly copyStatus = signal('');
 
@@ -566,10 +589,77 @@ export class Workspace implements OnInit {
           this.keys.update((keys) =>
             keys.map((key) => (key.id === target.id ? { ...key, revoked: true } : key)),
           );
+          if (this.selectedKey()?.id === target.id) {
+            this.selectedKey.update((key) => (key ? { ...key, revoked: true } : key));
+          }
           this.notice.set('Clave API revocada de inmediato.');
         },
         error: (err: unknown) => {
           this.notice.set(this.describeApiError(err, 'No se pudo revocar la clave API.'));
+        },
+      });
+  }
+
+  openKey(key: DemoKey): void {
+    if (this.selectedKey()?.id === key.id) {
+      this.closeKey();
+      return;
+    }
+    this.selectedKey.set(key);
+    this.prefixCopied.set(false);
+    this.loadKeyActivity(key);
+    // El foco va al título del panel para que el lector de pantalla anuncie el resumen.
+    afterNextRender(
+      () => document.getElementById('key-drawer-title')?.focus({ preventScroll: true }),
+      { injector: this.injector },
+    );
+  }
+
+  /** Escape cierra el panel de la clave, salvo que haya un diálogo abierto encima. */
+  onEscape(): void {
+    if (this.selectedKey() && !document.querySelector('dialog[open]')) this.closeKey();
+  }
+
+  closeKey(): void {
+    this.selectedKey.set(null);
+    this.activityRequest++;
+  }
+
+  async copyPrefix(prefix: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(prefix);
+      this.prefixCopied.set(true);
+    } catch {
+      this.prefixCopied.set(false);
+    }
+  }
+
+  /** Archivos recibidos y bloqueados de la aplicación (solo totales: piden 1 elemento). */
+  private loadKeyActivity(key: DemoKey): void {
+    const request = ++this.activityRequest;
+    this.keyActivity.set(null);
+    this.keyActivityError.set(false);
+    if (!key.appId) {
+      this.keyActivityError.set(true);
+      return;
+    }
+    const base = { page: 1, pageSize: 1, appId: key.appId } as const;
+    forkJoin({
+      all: this.filesApi.list({ ...base, sort: 'createdAt', dir: 'desc' }),
+      blocked: this.filesApi.list({ ...base, status: ['quarantined', 'rejected'] }),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ all, blocked }) => {
+          if (request !== this.activityRequest) return;
+          this.keyActivity.set({
+            received: all.total,
+            blocked: blocked.total,
+            lastFileAt: all.items[0]?.createdAt ?? null,
+          });
+        },
+        error: () => {
+          if (request === this.activityRequest) this.keyActivityError.set(true);
         },
       });
   }

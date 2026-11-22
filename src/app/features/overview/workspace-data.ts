@@ -160,6 +160,16 @@ export interface DemoKey {
   name: string;
   prefix: string;
   revoked: boolean;
+  appId?: string;
+  createdAt?: string | null;
+  lastUsedAt?: string | null;
+}
+
+/** Resumen de actividad de la aplicación de una clave (panel lateral de claves). */
+export interface KeyActivity {
+  received: number;
+  blocked: number;
+  lastFileAt: string | null;
 }
 
 export const SAMPLE_AUDIT: AuditEvent[] = [

@@ -998,6 +998,286 @@ dialog label[hidden] {
   }
 }
 
+/* Claves API: fila seleccionable y panel lateral con el resumen del cliente. */
+.key-row {
+  position: relative;
+  cursor: pointer;
+}
+
+/* El botón del nombre se extiende sobre toda la fila: un solo control para ratón y teclado. */
+.key-open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.key-row .button {
+  position: relative;
+  z-index: 1;
+}
+
+.key-row.selected td {
+  background: var(--pastel-lavender);
+  color: var(--on-pastel);
+}
+
+.key-row.selected code {
+  color: var(--on-pastel);
+}
+
+.key-open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+/* En pantallas anchas, el contenido deja libre la franja del panel en vez de quedar debajo. */
+@media (width > 64rem) {
+  .content:has(> .key-drawer) {
+    width: auto;
+    margin-inline: clamp(1rem, 2.5vw, 2rem) calc(min(24rem, 100vw - 2rem) + 2rem);
+  }
+}
+
+.key-drawer {
+  position: fixed;
+  z-index: 2;
+  inset: calc(var(--topbar-h) + 1rem) 1rem 1rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: min(24rem, calc(100vw - 2rem));
+  overflow-y: auto;
+  padding: 1.25rem;
+  border: 2px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--pop-lg);
+}
+
+/* Despliegue: entra deslizándose desde la derecha y sus bloques aparecen en cascada. */
+.key-drawer.drawer-enter {
+  animation: drawer-in 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.drawer-enter > * {
+  animation: gk-rise 380ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.drawer-enter > :nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.drawer-enter > :nth-child(3) {
+  animation-delay: 110ms;
+}
+
+.drawer-enter > :nth-child(n + 4) {
+  animation-delay: 160ms;
+}
+
+.key-drawer.drawer-leave {
+  animation: drawer-out 220ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + 1rem));
+  }
+}
+
+@keyframes drawer-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(100% + 1rem));
+  }
+}
+
+.key-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+
+.key-drawer-eyebrow {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.key-drawer h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.key-drawer h2:focus {
+  outline: none;
+}
+
+.key-drawer-close {
+  display: grid;
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  border: var(--stroke);
+  border-radius: 50%;
+  background: var(--pastel-pink);
+  box-shadow: var(--pop-sm);
+  color: var(--on-pastel);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.key-drawer-close:active {
+  transform: translateY(0.2rem);
+  box-shadow: none;
+}
+
+.key-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.key-stats div {
+  padding: 0.8rem;
+  border: var(--stroke);
+  border-radius: 0.7rem;
+  background: var(--pastel-mint);
+  color: var(--on-pastel);
+}
+
+.key-stats div + div {
+  background: var(--pastel-pink);
+}
+
+.key-stats dt {
+  font-size: 0.8rem;
+}
+
+.key-stats dd {
+  margin: 0;
+  font: 400 2rem / 1.05 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.key-stats[aria-busy='true'] dd {
+  animation: key-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes key-pulse {
+  to {
+    opacity: 0.35;
+  }
+}
+
+.key-facts {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.key-facts dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.key-facts dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.key-facts .hash {
+  font-family: var(--gk-font-mono);
+  font-size: 0.82rem;
+  word-break: break-all;
+}
+
+.key-copy {
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--edge);
+  border-radius: var(--gk-radius-999);
+  background: var(--pastel-yellow);
+  color: var(--on-pastel);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+/* Desplegable de identificadores: la flecha gira y el contenido crece de alto. */
+.key-more {
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+  interpolate-size: allow-keywords;
+}
+
+.key-more summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.key-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.key-more summary::after {
+  content: '›';
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.key-more[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.key-more::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  transition:
+    block-size 320ms cubic-bezier(0.23, 1, 0.32, 1),
+    content-visibility 320ms allow-discrete;
+}
+
+.key-more[open]::details-content {
+  block-size: auto;
+}
+
+.key-more > dl {
+  padding-top: 0.75rem;
+}
+
+.key-revoke {
+  margin-top: auto;
+  background: var(--pastel-pink);
+  color: var(--on-pastel);
+}
+
 /* Entrada escalonada del contenido al cargar cada página. */
 @keyframes gk-rise {
   from {
@@ -1012,7 +1292,7 @@ dialog label[hidden] {
   }
 }
 
-.content > *,
+.content > :not(.key-drawer),
 .metrics > div {
   animation: gk-rise 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }

@@ -503,8 +503,18 @@
                   </thead>
                   <tbody>
                     @for (key of keys(); track key.id) {
-                      <tr>
-                        <td>{{ key.id.startsWith('demo-') ? t(key.name) : key.name }}</td>
+                      <tr class="key-row" [class.selected]="selectedKey()?.id === key.id">
+                        <td>
+                          <button
+                            type="button"
+                            class="key-open"
+                            aria-controls="key-drawer"
+                            [attr.aria-expanded]="selectedKey()?.id === key.id"
+                            (click)="openKey(key)"
+                          >
+                            {{ key.id.startsWith('demo-') ? t(key.name) : key.name }}
+                          </button>
+                        </td>
                         <td>
                           <code>{{ key.prefix }}…</code>
                         </td>
@@ -522,7 +532,11 @@
                               class="button"
                               type="button"
                               [disabled]="!administrator()"
-                              (click)="revokeTarget.set(key); revokeDialog.showModal()"
+                              (click)="
+                                $event.stopPropagation();
+                                revokeTarget.set(key);
+                                revokeDialog.showModal()
+                              "
                             >
                               {{ t('Revocar') }}
                             </button>
@@ -534,6 +548,113 @@
                 </table>
               </div>
             </section>
+            @if (selectedKey(); as key) {
+              <aside
+                id="key-drawer"
+                class="key-drawer"
+                animate.enter="drawer-enter"
+                animate.leave="drawer-leave"
+                aria-labelledby="key-drawer-title"
+              >
+                <header class="key-drawer-head">
+                  <div>
+                    <span class="key-drawer-eyebrow">{{ t('Cliente', 'Client') }}</span>
+                    <h2 id="key-drawer-title" tabindex="-1">{{ key.name }}</h2>
+                  </div>
+                  <button
+                    type="button"
+                    class="key-drawer-close"
+                    [attr.aria-label]="t('Cerrar resumen', 'Close summary')"
+                    (click)="closeKey()"
+                  >
+                    ×
+                  </button>
+                </header>
+                <ng-container
+                  [ngTemplateOutlet]="statusChip"
+                  [ngTemplateOutletContext]="{ $implicit: key.revoked ? 'Revocada' : 'Activa' }"
+                />
+
+                <dl class="key-stats" [attr.aria-busy]="!keyActivity() && !keyActivityError()">
+                  <div>
+                    <dt>{{ t('Archivos recibidos', 'Files received') }}</dt>
+                    <dd>{{ keyActivity()?.received ?? '—' }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('Bloqueados', 'Blocked') }}</dt>
+                    <dd>{{ keyActivity()?.blocked ?? '—' }}</dd>
+                  </div>
+                </dl>
+                @if (keyActivityError()) {
+                  <p class="permission">
+                    {{
+                      t(
+                        'No se pudo cargar la actividad de este cliente.',
+                        'Could not load this client’s activity.'
+                      )
+                    }}
+                  </p>
+                }
+
+                <dl class="key-facts">
+                  <div>
+                    <dt>{{ t('Prefijo') }}</dt>
+                    <dd>
+                      <code>{{ key.prefix }}…</code>
+                      <button type="button" class="key-copy" (click)="copyPrefix(key.prefix)">
+                        {{ prefixCopied() ? t('Copiado', 'Copied') : t('Copiar', 'Copy') }}
+                      </button>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('Creada', 'Created') }}</dt>
+                    <dd>{{ when(key.createdAt ?? null) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('Último archivo', 'Last file') }}</dt>
+                    <dd>
+                      @if (keyActivity(); as activity) {
+                        {{ activity.lastFileAt ? when(activity.lastFileAt) : t('Ninguno', 'None') }}
+                      } @else {
+                        —
+                      }
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('Último uso de la clave', 'Key last used') }}</dt>
+                    <dd>
+                      {{
+                        key.lastUsedAt ? when(key.lastUsedAt) : t('Sin registro', 'Not recorded')
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+
+                <details class="key-more">
+                  <summary>{{ t('Identificadores', 'Identifiers') }}</summary>
+                  <dl class="key-facts">
+                    <div>
+                      <dt>{{ t('ID de la clave', 'Key ID') }}</dt>
+                      <dd class="hash">{{ key.id }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ t('ID de la aplicación', 'Application ID') }}</dt>
+                      <dd class="hash">{{ key.appId ?? '—' }}</dd>
+                    </div>
+                  </dl>
+                </details>
+
+                @if (!key.revoked && administrator()) {
+                  <button
+                    type="button"
+                    class="button key-revoke"
+                    (click)="revokeTarget.set(key); revokeDialog.showModal()"
+                  >
+                    {{ t('Revocar clave') }}
+                  </button>
+                }
+              </aside>
+            }
           }
           @case ('explorer') {
             <div class="console-host"><gk-console-page [showHead]="false" /></div>
