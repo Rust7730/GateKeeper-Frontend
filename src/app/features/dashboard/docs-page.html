@@ -1,0 +1,745 @@
+<ng-template #responseTable let-rows>
+  <ul class="dc-codes">
+    @for (row of rows; track $index) {
+      <li>
+        <span class="dc-status" [attr.data-tone]="tone(row.code)"
+          >{{ row.code }} {{ row.text }}</span
+        >
+        <span>{{ when(row) }}</span>
+      </li>
+    }
+  </ul>
+</ng-template>
+
+<div class="dc">
+  <nav class="dc-toc" [attr.aria-label]="t('Índice de la documentación', 'Documentation contents')">
+    <p class="dc-toc-title">{{ t('En esta guía', 'In this guide') }}</p>
+    <ol>
+      @for (section of sections; track section.id) {
+        <li>
+          <button type="button" (click)="goTo(section.id)">
+            {{ english() ? section.en : section.es }}
+          </button>
+        </li>
+      }
+    </ol>
+  </nav>
+
+  <div class="dc-body">
+    <!-- 1. Inicio rápido -->
+    <section id="doc-inicio" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Inicio rápido', 'Quick start') }}</p>
+      <h2>{{ t('Tu primer archivo en tres pasos', 'Your first file in three steps') }}</h2>
+      <p>
+        {{
+          t(
+            'Gatekeeper recibe los archivos que suben tus usuarios, comprueba su tipo real, los reconstruye sin contenido activo y te entrega una copia segura. Tu aplicación nunca descarga el original.',
+            'Gatekeeper receives the files your users upload, checks their real type, rebuilds them without active content and gives you a safe copy. Your application never downloads the original.'
+          )
+        }}
+      </p>
+      <div class="dc-base">
+        <span>{{ t('URL base', 'Base URL') }}</span>
+        <code>{{ baseUrl }}</code>
+        <button type="button" class="dc-copy" (click)="copy('base', baseUrl)">
+          {{ copied() === 'base' ? t('Copiada', 'Copied') : t('Copiar', 'Copy') }}
+        </button>
+      </div>
+      <ol class="dc-steps">
+        <li>
+          <h3>{{ t('Obtén una API key', 'Get an API key') }}</h3>
+          <p>
+            {{
+              t(
+                'Un administrador la crea en «Obtener clave API». Se muestra una sola vez: guárdala en una variable de entorno de tu servidor.',
+                'An administrator creates it in “Get API key”. It is shown only once: keep it in an environment variable on your server.'
+              )
+            }}
+          </p>
+          <a class="dc-link" routerLink="/app/claves"
+            >{{ t('Ir a Obtener clave API', 'Go to Get API key') }} →</a
+          >
+        </li>
+        <li>
+          <h3>{{ t('Sube el archivo', 'Upload the file') }}</h3>
+          <p>
+            {{
+              t(
+                'Responde 202 con un id para seguir el análisis.',
+                'Responds 202 with an id to track the analysis.'
+              )
+            }}
+          </p>
+          <pre class="dc-code"><code>{{ quickUpload() }}</code></pre>
+        </li>
+        <li>
+          <h3>{{ t('Consulta y descarga', 'Check and download') }}</h3>
+          <p>
+            {{
+              t(
+                'Consulta el estado hasta que deje de ser «pendiente». Si queda «limpio», descarga la copia reconstruida.',
+                'Check the status until it is no longer “pendiente”. If it ends “limpio”, download the reconstructed copy.'
+              )
+            }}
+          </p>
+          <pre class="dc-code"><code>{{ quickStatus() }}</code></pre>
+          <pre class="dc-code"><code>{{ quickDownload() }}</code></pre>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 2. Autenticación -->
+    <section id="doc-autenticacion" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Autenticación', 'Authentication') }}</p>
+      <h2>{{ t('Una API key por aplicación', 'One API key per application') }}</h2>
+      <p>
+        {{
+          t(
+            'Envía la clave en cada petición, en el encabezado Authorization con el esquema Bearer:',
+            'Send the key with every request, in the Authorization header using the Bearer scheme:'
+          )
+        }}
+      </p>
+      <pre class="dc-code"><code>Authorization: Bearer gk_0ef1493ec94b…</code></pre>
+      <ul class="dc-list">
+        <li>
+          {{
+            t(
+              'Cada clave pertenece a una aplicación. Una aplicación solo ve sus propios archivos: pedir el id de otra responde 404, igual que si no existiera.',
+              'Each key belongs to one application. An application only sees its own files: asking for another one’s id returns 404, just as if it did not exist.'
+            )
+          }}
+        </li>
+        <li>
+          {{
+            t(
+              'El servidor guarda solo un HMAC de la clave, nunca la clave. Si la pierdes, crea otra y revoca la anterior.',
+              'The server stores only an HMAC of the key, never the key itself. If you lose it, create a new one and revoke the old one.'
+            )
+          }}
+        </li>
+        <li>
+          {{
+            t(
+              'Revocar una clave es inmediato y no se puede deshacer: las peticiones con ella responden 401.',
+              'Revoking a key is immediate and cannot be undone: requests using it return 401.'
+            )
+          }}
+        </li>
+        <li>
+          {{
+            t(
+              'Nunca pongas la clave en código del navegador o de una app móvil: llama a Gatekeeper desde tu servidor.',
+              'Never put the key in browser or mobile app code: call Gatekeeper from your server.'
+            )
+          }}
+        </li>
+      </ul>
+    </section>
+
+    <!-- 3. Ciclo de un archivo -->
+    <section id="doc-flujo" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Ciclo de un archivo', 'File lifecycle') }}</p>
+      <h2>{{ t('Qué pasa después de subirlo', 'What happens after the upload') }}</h2>
+      <ol class="dc-flow">
+        <li>
+          <strong>{{ t('Recepción', 'Reception') }}</strong>
+          <span>{{
+            t(
+              'Antes de leer el cuerpo se validan la API key y el límite de peticiones. El archivo llega por streaming, se calcula su SHA-256 y recibe un UUID generado por el servidor.',
+              'Before reading the body, the API key and rate limit are checked. The file is streamed, its SHA-256 is computed and it gets a server-generated UUID.'
+            )
+          }}</span>
+        </li>
+        <li>
+          <strong>{{ t('Firma real', 'Real signature') }}</strong>
+          <span>{{
+            t(
+              'Se lee el tipo por los primeros bytes. El nombre, la extensión y el Content-Type no deciden nada. Solo pasan JPEG, PNG y PDF.',
+              'The type is read from the first bytes. The name, extension and Content-Type decide nothing. Only JPEG, PNG and PDF pass.'
+            )
+          }}</span>
+        </li>
+        <li>
+          <strong>{{ t('Reconstrucción (CDR)', 'Reconstruction (CDR)') }}</strong>
+          <span>{{
+            t(
+              'Un proceso aislado, sin red ni credenciales, rehace la imagen desde sus píxeles o limpia la estructura del PDF.',
+              'An isolated process, with no network or credentials, rebuilds the image from its pixels or cleans the PDF structure.'
+            )
+          }}</span>
+        </li>
+        <li>
+          <strong>{{ t('Veredicto', 'Verdict') }}</strong>
+          <span>{{
+            t(
+              'El archivo termina en limpio, rechazado, en_cuarentena o error. Un fallo o un tiempo agotado nunca termina en limpio.',
+              'The file ends as limpio, rechazado, en_cuarentena or error. A failure or timeout never ends as limpio.'
+            )
+          }}</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 4. Referencia: subir -->
+    <section id="doc-subir" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Referencia', 'Reference') }}</p>
+      <h2 class="dc-endpoint">
+        <span class="dc-method" data-method="POST">POST</span><code>/v1/files</code>
+      </h2>
+      <p>{{ t('Sube un archivo para inspeccionarlo.', 'Uploads a file for inspection.') }}</p>
+      <table class="dc-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t('Campo', 'Field') }}</th>
+            <th scope="col">{{ t('Dónde', 'Where') }}</th>
+            <th scope="col">{{ t('Descripción', 'Description') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>Authorization</code></td>
+            <td>{{ t('Encabezado', 'Header') }}</td>
+            <td>Bearer gk_…</td>
+          </tr>
+          <tr>
+            <td><code>file</code></td>
+            <td>multipart/form-data</td>
+            <td>
+              {{
+                t(
+                  'El archivo: JPEG, PNG o PDF de 1 byte a 10 MiB.',
+                  'The file: JPEG, PNG or PDF, 1 byte to 10 MiB.'
+                )
+              }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>{{ t('Respuesta', 'Response') }} 202</h3>
+      <pre class="dc-code"><code>{{ json(uploadResponses[0]?.body) }}</code></pre>
+      <h3>{{ t('Códigos posibles', 'Possible codes') }}</h3>
+      <ng-container
+        [ngTemplateOutlet]="responseTable"
+        [ngTemplateOutletContext]="{ $implicit: uploadResponses }"
+      />
+    </section>
+
+    <!-- 5. Referencia: consultar -->
+    <section id="doc-consultar" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Referencia', 'Reference') }}</p>
+      <h2 class="dc-endpoint">
+        <span class="dc-method" data-method="GET">GET</span><code>/v1/files/&#123;id&#125;</code>
+      </h2>
+      <p>
+        {{
+          t(
+            'Devuelve el estado del análisis, el tipo real detectado, el tamaño y el SHA-256.',
+            'Returns the analysis status, the real detected type, the size and the SHA-256.'
+          )
+        }}
+      </p>
+      <table class="dc-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t('Campo', 'Field') }}</th>
+            <th scope="col">{{ t('Descripción', 'Description') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>estado</code></td>
+            <td>pendiente · limpio · rechazado · en_cuarentena · error</td>
+          </tr>
+          <tr>
+            <td><code>tipo_detectado</code></td>
+            <td>
+              {{
+                t(
+                  'MIME real leído de la firma (no el que declaró el cliente).',
+                  'Real MIME read from the signature (not the one the client declared).'
+                )
+              }}
+            </td>
+          </tr>
+          <tr>
+            <td><code>tamano_bytes</code></td>
+            <td>{{ t('Tamaño del archivo recibido.', 'Size of the received file.') }}</td>
+          </tr>
+          <tr>
+            <td><code>sha256</code></td>
+            <td>
+              {{
+                t(
+                  'Huella del original, útil para deduplicar o auditar.',
+                  'Fingerprint of the original, useful to deduplicate or audit.'
+                )
+              }}
+            </td>
+          </tr>
+          <tr>
+            <td><code>creado_en</code> · <code>analizado_en</code></td>
+            <td>
+              {{
+                t(
+                  'Fechas ISO 8601 en UTC. analizado_en es null mientras está pendiente.',
+                  'ISO 8601 dates in UTC. analizado_en is null while pending.'
+                )
+              }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>{{ t('Respuesta', 'Response') }} 200</h3>
+      <pre class="dc-code"><code>{{ json(statusResponses[0]?.body) }}</code></pre>
+      <h3>{{ t('Códigos posibles', 'Possible codes') }}</h3>
+      <ng-container
+        [ngTemplateOutlet]="responseTable"
+        [ngTemplateOutletContext]="{ $implicit: statusResponses }"
+      />
+    </section>
+
+    <!-- 6. Referencia: descargar -->
+    <section id="doc-descargar" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Referencia', 'Reference') }}</p>
+      <h2 class="dc-endpoint">
+        <span class="dc-method" data-method="GET">GET</span
+        ><code>/v1/files/&#123;id&#125;/content</code>
+      </h2>
+      <p>
+        {{
+          t(
+            'Descarga la copia reconstruida. Solo funciona cuando el estado es «limpio»; llega como adjunto con el tipo detectado y su extensión.',
+            'Downloads the reconstructed copy. It only works when the status is “limpio”; it arrives as an attachment with the detected type and its extension.'
+          )
+        }}
+      </p>
+      <h3>{{ t('Códigos posibles', 'Possible codes') }}</h3>
+      <ng-container
+        [ngTemplateOutlet]="responseTable"
+        [ngTemplateOutletContext]="{ $implicit: downloadResponses }"
+      />
+    </section>
+
+    <!-- 7. Estados -->
+    <section id="doc-estados" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Estados', 'Statuses') }}</p>
+      <h2>
+        {{ t('Qué significa cada estado y qué hacer', 'What each status means and what to do') }}
+      </h2>
+      <table class="dc-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t('Estado', 'Status') }}</th>
+            <th scope="col">{{ t('Significado', 'Meaning') }}</th>
+            <th scope="col">{{ t('Qué hacer', 'What to do') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="dc-pill" data-tone="neutral">pendiente</span></td>
+            <td>{{ t('El análisis sigue en curso.', 'Analysis is still running.') }}</td>
+            <td>
+              {{ t('Vuelve a consultar en unos segundos.', 'Check again in a few seconds.') }}
+            </td>
+          </tr>
+          <tr>
+            <td><span class="dc-pill" data-tone="ok">limpio</span></td>
+            <td>
+              {{
+                t(
+                  'Pasó los controles y hay copia reconstruida.',
+                  'It passed the checks and a reconstructed copy exists.'
+                )
+              }}
+            </td>
+            <td>
+              {{
+                t(
+                  'Descarga la copia con /content y guárdala.',
+                  'Download the copy with /content and store it.'
+                )
+              }}
+            </td>
+          </tr>
+          <tr>
+            <td><span class="dc-pill" data-tone="error">rechazado</span></td>
+            <td>
+              {{
+                t(
+                  'No es JPEG, PNG ni PDF, o supera un límite (píxeles, páginas, descompresión…).',
+                  'It is not JPEG, PNG or PDF, or exceeds a limit (pixels, pages, decompression…).'
+                )
+              }}
+            </td>
+            <td>
+              {{
+                t(
+                  'Avisa al usuario que el archivo no se acepta.',
+                  'Tell the user the file is not accepted.'
+                )
+              }}
+            </td>
+          </tr>
+          <tr>
+            <td><span class="dc-pill" data-tone="warn">en_cuarentena</span></td>
+            <td>
+              {{
+                t(
+                  'Se detectó malware. Queda aislado 30 días.',
+                  'Malware was detected. It stays isolated for 30 days.'
+                )
+              }}
+            </td>
+            <td>
+              {{
+                t(
+                  'No lo uses. Un administrador puede liberarlo si es un falso positivo.',
+                  'Do not use it. An administrator can release it if it is a false positive.'
+                )
+              }}
+            </td>
+          </tr>
+          <tr>
+            <td><span class="dc-pill" data-tone="error">error</span></td>
+            <td>
+              {{
+                t(
+                  'El análisis falló o se agotó el tiempo. Nunca se trata como limpio.',
+                  'Analysis failed or timed out. It is never treated as clean.'
+                )
+              }}
+            </td>
+            <td>
+              {{ t('Pide al usuario que lo suba de nuevo.', 'Ask the user to upload it again.') }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 8. Límites -->
+    <section id="doc-limites" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Tipos y límites', 'Types and limits') }}</p>
+      <h2>{{ t('Qué acepta Gatekeeper', 'What Gatekeeper accepts') }}</h2>
+      <dl class="dc-facts">
+        <div>
+          <dt>{{ t('Tipos', 'Types') }}</dt>
+          <dd>JPEG · PNG · PDF</dd>
+        </div>
+        <div>
+          <dt>{{ t('Tamaño máximo', 'Maximum size') }}</dt>
+          <dd>10 MiB</dd>
+        </div>
+        <div>
+          <dt>{{ t('Tiempo de subida', 'Upload time') }}</dt>
+          <dd>60 s</dd>
+        </div>
+        <div>
+          <dt>{{ t('Peticiones por API key', 'Requests per API key') }}</dt>
+          <dd>120/min</dd>
+        </div>
+        <div>
+          <dt>{{ t('Ráfaga', 'Burst') }}</dt>
+          <dd>20</dd>
+        </div>
+        <div>
+          <dt>{{ t('Sin autenticar, por IP', 'Unauthenticated, per IP') }}</dt>
+          <dd>60/min</dd>
+        </div>
+        <div>
+          <dt>{{ t('En análisis a la vez', 'Analysing at once') }}</dt>
+          <dd>{{ t('20 por aplicación', '20 per application') }}</dd>
+        </div>
+        <div>
+          <dt>{{ t('Cuarentena', 'Quarantine') }}</dt>
+          <dd>{{ t('30 días', '30 days') }}</dd>
+        </div>
+      </dl>
+      <p class="dc-muted">
+        {{
+          t(
+            'SVG, ZIP, documentos de Office y otros formatos se rechazan. Un archivo que dice ser JPEG pero tiene otra firma también.',
+            'SVG, ZIP, Office documents and other formats are rejected. So is a file that claims to be JPEG but has a different signature.'
+          )
+        }}
+      </p>
+    </section>
+
+    <!-- 9. Errores -->
+    <section id="doc-errores" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Errores y reintentos', 'Errors and retries') }}</p>
+      <h2>{{ t('Cómo manejar los errores', 'How to handle errors') }}</h2>
+      <p>
+        {{
+          t(
+            'Los errores responden JSON con un campo detail. Los de validación (422) traen la lista de campos inválidos.',
+            'Errors respond with JSON containing a detail field. Validation errors (422) include the list of invalid fields.'
+          )
+        }}
+      </p>
+      <pre class="dc-code"><code>&#123; "detail": "Too Many Requests" &#125;</code></pre>
+      <ul class="dc-list">
+        <li>
+          <strong>429 {{ t('con', 'with') }} Retry-After:</strong>
+          {{
+            t(
+              'espera exactamente esos segundos antes de reintentar.',
+              'wait exactly that many seconds before retrying.'
+            )
+          }}
+        </li>
+        <li>
+          <strong>429 {{ t('sin', 'without') }} Retry-After:</strong>
+          {{
+            t(
+              'tu aplicación ya tiene 20 archivos en análisis. Reintenta cuando alguno termine.',
+              'your application already has 20 files being analysed. Retry when one finishes.'
+            )
+          }}
+        </li>
+        <li>
+          <strong>503:</strong>
+          {{
+            t(
+              'un servicio interno no responde y la API falla cerrada. Reintenta con espera creciente (por ejemplo 2, 4 y 8 s).',
+              'an internal service is not responding and the API fails closed. Retry with growing waits (for example 2, 4 and 8 s).'
+            )
+          }}
+        </li>
+        <li>
+          <strong>400, 401, 404, 409, 413, 415, 422:</strong>
+          {{
+            t('no reintentes igual: corrige la petición.', 'do not retry as is: fix the request.')
+          }}
+        </li>
+      </ul>
+    </section>
+
+    <!-- 10. CDR -->
+    <section id="doc-cdr" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Qué hace la reconstrucción', 'What reconstruction does') }}</p>
+      <h2>{{ t('Qué recibes en la copia', 'What you get in the copy') }}</h2>
+      <div class="dc-split">
+        <div>
+          <h3>{{ t('Imágenes (JPEG y PNG)', 'Images (JPEG and PNG)') }}</h3>
+          <p>
+            {{
+              t(
+                'Se decodifican y se vuelven a codificar desde los píxeles. Se pierden los metadatos EXIF (incluida la ubicación GPS) y cualquier dato escondido tras el final de la imagen.',
+                'They are decoded and re-encoded from the pixels. EXIF metadata (including GPS location) and any data hidden after the end of the image are dropped.'
+              )
+            }}
+          </p>
+        </div>
+        <div>
+          <h3>PDF</h3>
+          <p>
+            {{
+              t(
+                'Se limpia su estructura: se eliminan JavaScript, acciones automáticas, formularios, anotaciones, archivos incrustados, metadatos y enlaces externos. El texto, las fuentes y las imágenes de las páginas se conservan.',
+                'Its structure is cleaned: JavaScript, automatic actions, forms, annotations, embedded files, metadata and external links are removed. Page text, fonts and images are kept.'
+              )
+            }}
+          </p>
+        </div>
+      </div>
+      <p class="dc-note">
+        {{
+          t(
+            'Ten en cuenta: los PDF cifrados se rechazan, los marcadores que saltaban con una acción dejan de hacerlo, y la limpieza del PDF es estructural, así que no protege contra una vulnerabilidad del lector en las fuentes o imágenes.',
+            'Keep in mind: encrypted PDFs are rejected, bookmarks that jumped through an action stop doing so, and PDF cleaning is structural, so it does not protect against a reader vulnerability in fonts or images.'
+          )
+        }}
+      </p>
+    </section>
+
+    <!-- 11. Ejemplo completo -->
+    <section id="doc-ejemplo" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Ejemplo completo', 'Full example') }}</p>
+      <h2>{{ t('Subir, esperar y descargar', 'Upload, wait and download') }}</h2>
+      <p>
+        {{
+          t(
+            'Define GATEKEEPER_API_KEY en tu entorno y ejecuta el ejemplo. Espera el veredicto con pausas crecientes y respeta Retry-After.',
+            'Set GATEKEEPER_API_KEY in your environment and run the example. It waits for the verdict with growing pauses and honours Retry-After.'
+          )
+        }}
+      </p>
+      <div class="dc-code-bar">
+        <div class="dc-tabs" role="group" [attr.aria-label]="t('Lenguaje', 'Language')">
+          <button type="button" [attr.aria-pressed]="lang() === 'curl'" (click)="lang.set('curl')">
+            cURL
+          </button>
+          <button type="button" [attr.aria-pressed]="lang() === 'ts'" (click)="lang.set('ts')">
+            TypeScript
+          </button>
+          <button
+            type="button"
+            [attr.aria-pressed]="lang() === 'python'"
+            (click)="lang.set('python')"
+          >
+            Python
+          </button>
+        </div>
+        <button type="button" class="dc-copy" (click)="copy('full', fullExample())">
+          {{ copied() === 'full' ? t('Copiado', 'Copied') : t('Copiar', 'Copy') }}
+        </button>
+      </div>
+      <pre class="dc-code dc-code-tall"><code>{{ fullExample() }}</code></pre>
+    </section>
+
+    <!-- 12. Buenas prácticas -->
+    <section id="doc-practicas" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('Buenas prácticas', 'Best practices') }}</p>
+      <h2>{{ t('Antes de salir a producción', 'Before going to production') }}</h2>
+      <ul class="dc-checks">
+        <li>
+          {{
+            t(
+              'Guarda y sirve solo la copia de /content; descarta el archivo original del usuario.',
+              'Store and serve only the /content copy; discard the user’s original file.'
+            )
+          }}
+        </li>
+        <li>
+          {{
+            t(
+              'Guarda el id de Gatekeeper junto a tu registro para poder consultarlo o auditarlo.',
+              'Store the Gatekeeper id alongside your record so you can check or audit it later.'
+            )
+          }}
+        </li>
+        <li>
+          {{
+            t(
+              'Consulta el estado con pausas (2 s y luego más); no lo hagas en un bucle sin espera.',
+              'Check the status with pauses (2 s, then longer); never in a loop without waiting.'
+            )
+          }}
+        </li>
+        <li>
+          {{
+            t(
+              'Trata rechazado, en_cuarentena y error como «no entregar».',
+              'Treat rechazado, en_cuarentena and error as “do not deliver”.'
+            )
+          }}
+        </li>
+        <li>
+          {{
+            t(
+              'Usa una API key distinta por aplicación y entorno; revoca la que ya no uses.',
+              'Use a different API key per application and environment; revoke the ones you no longer use.'
+            )
+          }}
+        </li>
+        <li>
+          {{
+            t(
+              'No confíes en el nombre ni en la extensión que envía el usuario: usa tipo_detectado.',
+              'Do not trust the name or extension the user sends: use tipo_detectado.'
+            )
+          }}
+        </li>
+      </ul>
+    </section>
+
+    <!-- 13. API del dashboard -->
+    <section id="doc-admin" class="dc-card" tabindex="-1">
+      <p class="dc-eyebrow">{{ t('API del dashboard', 'Dashboard API') }}</p>
+      <h2>{{ t('Rutas de administración', 'Administration routes') }}</h2>
+      <p>
+        {{
+          t(
+            'Las usa este dashboard con la sesión de un usuario (no con API key). El token de acceso dura 15 minutos y se renueva solo; algunas rutas exigen el rol Administrador.',
+            'This dashboard uses them with a user session (not an API key). The access token lasts 15 minutes and renews itself; some routes require the Administrator role.'
+          )
+        }}
+      </p>
+      <table class="dc-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t('Ruta', 'Route') }}</th>
+            <th scope="col">{{ t('Para qué', 'Purpose') }}</th>
+            <th scope="col">{{ t('Rol', 'Role') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>GET /v1/admin/files</code></td>
+            <td>
+              {{
+                t(
+                  'Listar y buscar archivos de todas las aplicaciones',
+                  'List and search files from every application'
+                )
+              }}
+            </td>
+            <td>{{ t('Cualquiera', 'Any') }}</td>
+          </tr>
+          <tr>
+            <td><code>GET /v1/admin/files/&#123;id&#125;</code></td>
+            <td>{{ t('Detalle de un archivo', 'File detail') }}</td>
+            <td>{{ t('Cualquiera', 'Any') }}</td>
+          </tr>
+          <tr>
+            <td><code>POST /v1/admin/files/&#123;id&#125;/release</code></td>
+            <td>
+              {{
+                t(
+                  'Liberar de cuarentena con un motivo de 20 a 500 caracteres',
+                  'Release from quarantine with a 20 to 500 character reason'
+                )
+              }}
+            </td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><code>GET /v1/admin/metrics</code></td>
+            <td>
+              {{
+                t('Totales y amenazas de 24h, 7d o 30d', 'Totals and threats for 24h, 7d or 30d')
+              }}
+            </td>
+            <td>{{ t('Cualquiera', 'Any') }}</td>
+          </tr>
+          <tr>
+            <td><code>GET /v1/admin/audit</code></td>
+            <td>{{ t('Bitácora de acciones', 'Action log') }}</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><code>GET · POST /v1/admin/api-keys</code></td>
+            <td>{{ t('Listar y crear claves', 'List and create keys') }}</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><code>DELETE /v1/admin/api-keys/&#123;id&#125;</code></td>
+            <td>{{ t('Revocar una clave', 'Revoke a key') }}</td>
+            <td>Admin</td>
+          </tr>
+          <tr>
+            <td><code>GET /v1/admin/events</code></td>
+            <td>{{ t('Alertas en vivo (SSE)', 'Live alerts (SSE)') }}</td>
+            <td>{{ t('Cualquiera', 'Any') }}</td>
+          </tr>
+          <tr>
+            <td><code>GET /health</code></td>
+            <td>
+              {{
+                t('Comprobar que la API responde (pública)', 'Check the API is responding (public)')
+              }}
+            </td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="dc-actions">
+        <a class="dc-button" routerLink="/app/explorador"
+          >{{ t('Probar en la consola', 'Try it in the console') }} →</a
+        >
+      </div>
+    </section>
+  </div>
+</div>

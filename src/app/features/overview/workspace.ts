@@ -27,6 +27,7 @@ import { FileRecord, FileStatus as ApiFileStatus, LayerResult } from '../../core
 import { Metrics } from '../../core/models/metrics.model';
 import { SecurityEvent } from '../../core/models/security-event.model';
 import { ConsolePage } from '../dashboard/console-page';
+import { DocsPage } from '../dashboard/docs-page';
 import { ThreatChart, type ThreatPoint } from './threat-chart';
 import { WorkspacePreferences } from './workspace-preferences';
 import { WorkspaceSettings } from './workspace-settings';
@@ -282,6 +283,7 @@ function mapKey(key: ApiKey): DemoKey {
     RouterLinkActive,
     NgTemplateOutlet,
     ConsolePage,
+    DocsPage,
     ThreatChart,
     WorkspaceSettings,
   ],

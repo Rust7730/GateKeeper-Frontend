@@ -675,76 +675,7 @@
             <div class="console-host"><gk-console-page [showHead]="false" /></div>
           }
           @case ('docs') {
-            <section
-              class="panel detail docs"
-              [attr.aria-label]="t('Guía de integración', 'Integration guide')"
-            >
-              <h2>{{ t('Inspecciona tu primer archivo', 'Inspect your first file') }}</h2>
-              <p>
-                {{
-                  t(
-                    'Rutas de integración de referencia. La consola usa ejemplos locales con su propio catálogo de rutas.',
-                    'Reference integration routes. The console uses local examples with its own endpoint catalogue.'
-                  )
-                }}
-              </p>
-              <ol class="timeline">
-                <li>
-                  <strong>{{ t('Sube el archivo', 'Upload the file') }}</strong
-                  ><code>POST /v1/files</code
-                  ><span>{{
-                    t(
-                      'Envía el archivo como multipart/form-data. La respuesta 202 devuelve un ID para consultar el análisis.',
-                      'Send the file as multipart/form-data. A 202 response returns an ID for checking the scan.'
-                    )
-                  }}</span>
-                </li>
-                <li>
-                  <strong>{{ t('Consulta el estado', 'Check the status') }}</strong
-                  ><code>GET /v1/files/&#123;id&#125;</code
-                  ><span>{{
-                    t(
-                      'Consulta si la inspección sigue pendiente o si terminó con un resultado.',
-                      'Check whether inspection is still pending or has returned a result.'
-                    )
-                  }}</span>
-                </li>
-                <li>
-                  <strong>{{
-                    t('Descarga la copia reconstruida', 'Download the reconstructed copy')
-                  }}</strong
-                  ><code>GET /v1/files/&#123;id&#125;/content</code
-                  ><span>{{
-                    t(
-                      'Solicita la copia cuando el estado sea limpio.',
-                      'Request the copy once the status is clean.'
-                    )
-                  }}</span>
-                </li>
-              </ol>
-              <h2>{{ t('Autenticación', 'Authentication') }}</h2>
-              <p>
-                {{
-                  t(
-                    'Envía la clave API en el encabezado Authorization con el esquema Bearer (Authorization: Bearer gk_…). Es el mismo formato que usa la consola de pruebas.',
-                    'Send the API key in the Authorization header using the Bearer scheme (Authorization: Bearer gk_…). The test console uses the same format.'
-                  )
-                }}
-              </p>
-              <pre
-                class="doc-example"
-                tabindex="0"
-                [attr.aria-label]="t('Ejemplo de cURL', 'cURL example')"
-              ><code>curl -X POST https://35-168-228-65.sslip.io/v1/files \
-  -H "Authorization: Bearer $GATEKEEPER_API_KEY" \
-  -F "file=@foto.jpg"</code></pre>
-              <div class="doc-actions">
-                <a class="button primary" routerLink="/app/explorador">{{
-                  t('Abrir consola', 'Open console')
-                }}</a
-                ><a class="button" routerLink="/app/claves">{{ t('Obtener clave API') }}</a>
-              </div>
-            </section>
+            <gk-docs-page />
           }
           @case ('missing') {
             <a class="button primary" routerLink="/app"> {{ t('Volver al resumen') }} </a>
