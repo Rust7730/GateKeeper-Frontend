@@ -999,33 +999,33 @@ dialog label[hidden] {
 }
 
 /* Claves API: fila seleccionable y panel lateral con el resumen del cliente. */
-.key-row {
+.row-select {
   position: relative;
   cursor: pointer;
 }
 
 /* El botón del nombre se extiende sobre toda la fila: un solo control para ratón y teclado. */
-.key-open::after {
+.row-open::after {
   content: '';
   position: absolute;
   inset: 0;
 }
 
-.key-row .button {
+.row-select .button {
   position: relative;
   z-index: 1;
 }
 
-.key-row.selected td {
+.row-select.selected td {
   background: var(--pastel-lavender);
   color: var(--on-pastel);
 }
 
-.key-row.selected code {
+.row-select.selected code {
   color: var(--on-pastel);
 }
 
-.key-open {
+.row-open {
   padding: 0;
   border: 0;
   background: none;
@@ -1038,13 +1038,13 @@ dialog label[hidden] {
 
 /* En pantallas anchas, el contenido deja libre la franja del panel en vez de quedar debajo. */
 @media (width > 64rem) {
-  .content:has(> .key-drawer) {
+  .content:has(> .side-drawer) {
     width: auto;
     margin-inline: clamp(1rem, 2.5vw, 2rem) calc(min(24rem, 100vw - 2rem) + 2rem);
   }
 }
 
-.key-drawer {
+.side-drawer {
   position: fixed;
   z-index: 2;
   inset: calc(var(--topbar-h) + 1rem) 1rem 1rem auto;
@@ -1061,7 +1061,7 @@ dialog label[hidden] {
 }
 
 /* Despliegue: entra deslizándose desde la derecha y sus bloques aparecen en cascada. */
-.key-drawer.drawer-enter {
+.side-drawer.drawer-enter {
   animation: drawer-in 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
@@ -1081,7 +1081,7 @@ dialog label[hidden] {
   animation-delay: 160ms;
 }
 
-.key-drawer.drawer-leave {
+.side-drawer.drawer-leave {
   animation: drawer-out 220ms cubic-bezier(0.4, 0, 1, 1) both;
 }
 
@@ -1099,21 +1099,21 @@ dialog label[hidden] {
   }
 }
 
-.key-drawer-head {
+.drawer-head {
   display: flex;
   justify-content: space-between;
   align-items: start;
   gap: 1rem;
 }
 
-.key-drawer-eyebrow {
+.drawer-eyebrow {
   color: var(--muted);
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.key-drawer h2 {
+.side-drawer h2 {
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 400;
@@ -1122,11 +1122,11 @@ dialog label[hidden] {
   overflow-wrap: anywhere;
 }
 
-.key-drawer h2:focus {
+.side-drawer h2:focus {
   outline: none;
 }
 
-.key-drawer-close {
+.drawer-close {
   display: grid;
   flex: none;
   width: 2.2rem;
@@ -1145,19 +1145,19 @@ dialog label[hidden] {
     box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.key-drawer-close:active {
+.drawer-close:active {
   transform: translateY(0.2rem);
   box-shadow: none;
 }
 
-.key-stats {
+.drawer-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   margin: 0;
 }
 
-.key-stats div {
+.drawer-stats div {
   padding: 0.8rem;
   border: var(--stroke);
   border-radius: 0.7rem;
@@ -1165,21 +1165,21 @@ dialog label[hidden] {
   color: var(--on-pastel);
 }
 
-.key-stats div + div {
+.drawer-stats div + div {
   background: var(--pastel-pink);
 }
 
-.key-stats dt {
+.drawer-stats dt {
   font-size: 0.8rem;
 }
 
-.key-stats dd {
+.drawer-stats dd {
   margin: 0;
   font: 400 2rem / 1.05 var(--font-display);
   font-variant-numeric: tabular-nums;
 }
 
-.key-stats[aria-busy='true'] dd {
+.drawer-stats[aria-busy='true'] dd {
   animation: key-pulse 1s ease-in-out infinite alternate;
 }
 
@@ -1189,18 +1189,18 @@ dialog label[hidden] {
   }
 }
 
-.key-facts {
+.drawer-facts {
   display: grid;
   gap: 0.7rem;
   margin: 0;
 }
 
-.key-facts dt {
+.drawer-facts dt {
   color: var(--muted);
   font-size: 0.8rem;
 }
 
-.key-facts dd {
+.drawer-facts dd {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1208,13 +1208,13 @@ dialog label[hidden] {
   margin: 0;
 }
 
-.key-facts .hash {
+.drawer-facts .hash {
   font-family: var(--gk-font-mono);
   font-size: 0.82rem;
   word-break: break-all;
 }
 
-.key-copy {
+.drawer-copy {
   padding: 0.1rem 0.55rem;
   border: 1px solid var(--edge);
   border-radius: var(--gk-radius-999);
@@ -1226,13 +1226,13 @@ dialog label[hidden] {
 }
 
 /* Desplegable de identificadores: la flecha gira y el contenido crece de alto. */
-.key-more {
+.drawer-more {
   border-top: 1px solid var(--line);
   padding-top: 0.75rem;
   interpolate-size: allow-keywords;
 }
 
-.key-more summary {
+.drawer-more summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1241,22 +1241,22 @@ dialog label[hidden] {
   list-style: none;
 }
 
-.key-more summary::-webkit-details-marker {
+.drawer-more summary::-webkit-details-marker {
   display: none;
 }
 
-.key-more summary::after {
+.drawer-more summary::after {
   content: '›';
   font-size: 1.3rem;
   line-height: 1;
   transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.key-more[open] summary::after {
+.drawer-more[open] summary::after {
   transform: rotate(90deg);
 }
 
-.key-more::details-content {
+.drawer-more::details-content {
   block-size: 0;
   overflow-y: clip;
   transition:
@@ -1264,15 +1264,68 @@ dialog label[hidden] {
     content-visibility 320ms allow-discrete;
 }
 
-.key-more[open]::details-content {
+.drawer-more[open]::details-content {
   block-size: auto;
 }
 
-.key-more > dl {
+.drawer-more > dl {
   padding-top: 0.75rem;
 }
 
-.key-revoke {
+.row-select.selected .file-link,
+.row-select.selected small {
+  color: var(--on-pastel);
+}
+
+.side-drawer h2.drawer-title-file {
+  font-family: var(--font-body);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.drawer-stats dd.drawer-stat-small {
+  font: 600 1rem / 1.3 var(--font-body);
+  overflow-wrap: anywhere;
+}
+
+.drawer-note {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.drawer-more > .drawer-note {
+  padding-top: 0.75rem;
+}
+
+.drawer-layers {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.75rem 0 0 1.1rem;
+}
+
+.drawer-layers span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.drawer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: auto;
+}
+
+.drawer-actions .button {
+  flex: 1 1 auto;
+}
+
+.drawer-danger {
   margin-top: auto;
   background: var(--pastel-pink);
   color: var(--on-pastel);
@@ -1292,7 +1345,7 @@ dialog label[hidden] {
   }
 }
 
-.content > :not(.key-drawer),
+.content > :not(.side-drawer),
 .metrics > div {
   animation: gk-rise 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }

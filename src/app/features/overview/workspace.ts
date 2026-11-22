@@ -427,6 +427,9 @@ export class Workspace implements OnInit {
   readonly keyActivity = signal<KeyActivity | null>(null);
   readonly keyActivityError = signal(false);
   readonly prefixCopied = signal(false);
+  // Panel lateral de una fila de archivos o de auditoría.
+  readonly previewFile = signal<FileDetailView | null>(null);
+  readonly previewAudit = signal<AuditEvent | null>(null);
   private activityRequest = 0;
   readonly secret = signal('');
   readonly copyStatus = signal('');
@@ -552,6 +555,7 @@ export class Workspace implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
+          this.closeDrawer();
           this.notice.set('Archivo reencolado en el CDR para reconstrucción y liberación.');
           this.loadFiles({ status: ['quarantined'] });
         },
@@ -605,24 +609,56 @@ export class Workspace implements OnInit {
       this.closeKey();
       return;
     }
+    this.closeDrawer();
     this.selectedKey.set(key);
     this.prefixCopied.set(false);
     this.loadKeyActivity(key);
-    // El foco va al título del panel para que el lector de pantalla anuncie el resumen.
-    afterNextRender(
-      () => document.getElementById('key-drawer-title')?.focus({ preventScroll: true }),
-      { injector: this.injector },
-    );
+    this.focusDrawer();
   }
 
-  /** Escape cierra el panel de la clave, salvo que haya un diálogo abierto encima. */
+  openFile(file: FileDetailView): void {
+    if (this.previewFile()?.id === file.id) {
+      this.closeDrawer();
+      return;
+    }
+    this.closeDrawer();
+    this.previewFile.set(file);
+    this.focusDrawer();
+  }
+
+  openAudit(event: AuditEvent): void {
+    if (this.previewAudit() === event) {
+      this.closeDrawer();
+      return;
+    }
+    this.closeDrawer();
+    this.previewAudit.set(event);
+    this.focusDrawer();
+  }
+
+  /** Escape cierra el panel lateral, salvo que haya un diálogo abierto encima. */
   onEscape(): void {
-    if (this.selectedKey() && !document.querySelector('dialog[open]')) this.closeKey();
+    if (document.querySelector('dialog[open]')) return;
+    if (this.selectedKey() || this.previewFile() || this.previewAudit()) this.closeDrawer();
   }
 
   closeKey(): void {
+    this.closeDrawer();
+  }
+
+  /** Cierra cualquier panel lateral abierto (solo hay uno a la vez). */
+  closeDrawer(): void {
     this.selectedKey.set(null);
+    this.previewFile.set(null);
+    this.previewAudit.set(null);
     this.activityRequest++;
+  }
+
+  /** El foco va al título del panel para que el lector de pantalla anuncie el resumen. */
+  private focusDrawer(): void {
+    afterNextRender(() => document.getElementById('drawer-title')?.focus({ preventScroll: true }), {
+      injector: this.injector,
+    });
   }
 
   async copyPrefix(prefix: string): Promise<void> {

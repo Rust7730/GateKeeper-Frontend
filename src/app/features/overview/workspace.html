@@ -18,9 +18,16 @@
       </thead>
       <tbody>
         @for (file of rows; track file.id) {
-          <tr>
+          <tr class="row-select" [class.selected]="previewFile()?.id === file.id">
             <td>
-              <a class="file-link" [routerLink]="['/app/archivos', file.id]">{{ file.name }}</a
+              <button
+                type="button"
+                class="row-open file-link"
+                aria-controls="side-drawer"
+                [attr.aria-expanded]="previewFile()?.id === file.id"
+                (click)="openFile(file)"
+              >
+                {{ file.name }}</button
               ><small>{{ file.id }} · {{ file.type }}</small>
             </td>
             <td>
@@ -452,9 +459,17 @@
                   </thead>
                   <tbody>
                     @for (event of audit(); track event) {
-                      <tr>
+                      <tr class="row-select" [class.selected]="previewAudit() === event">
                         <td>
-                          {{ t(event.action) }}
+                          <button
+                            type="button"
+                            class="row-open"
+                            aria-controls="side-drawer"
+                            [attr.aria-expanded]="previewAudit() === event"
+                            (click)="openAudit(event)"
+                          >
+                            {{ t(event.action) }}
+                          </button>
                           @if (event.note) {
                             <small>{{ auditNote(event.note) }}</small>
                           }
@@ -503,12 +518,12 @@
                   </thead>
                   <tbody>
                     @for (key of keys(); track key.id) {
-                      <tr class="key-row" [class.selected]="selectedKey()?.id === key.id">
+                      <tr class="row-select" [class.selected]="selectedKey()?.id === key.id">
                         <td>
                           <button
                             type="button"
-                            class="key-open"
-                            aria-controls="key-drawer"
+                            class="row-open"
+                            aria-controls="side-drawer"
                             [attr.aria-expanded]="selectedKey()?.id === key.id"
                             (click)="openKey(key)"
                           >
@@ -550,20 +565,20 @@
             </section>
             @if (selectedKey(); as key) {
               <aside
-                id="key-drawer"
-                class="key-drawer"
+                id="side-drawer"
+                class="side-drawer"
                 animate.enter="drawer-enter"
                 animate.leave="drawer-leave"
-                aria-labelledby="key-drawer-title"
+                aria-labelledby="drawer-title"
               >
-                <header class="key-drawer-head">
+                <header class="drawer-head">
                   <div>
-                    <span class="key-drawer-eyebrow">{{ t('Cliente', 'Client') }}</span>
-                    <h2 id="key-drawer-title" tabindex="-1">{{ key.name }}</h2>
+                    <span class="drawer-eyebrow">{{ t('Cliente', 'Client') }}</span>
+                    <h2 id="drawer-title" tabindex="-1">{{ key.name }}</h2>
                   </div>
                   <button
                     type="button"
-                    class="key-drawer-close"
+                    class="drawer-close"
                     [attr.aria-label]="t('Cerrar resumen', 'Close summary')"
                     (click)="closeKey()"
                   >
@@ -575,7 +590,7 @@
                   [ngTemplateOutletContext]="{ $implicit: key.revoked ? 'Revocada' : 'Activa' }"
                 />
 
-                <dl class="key-stats" [attr.aria-busy]="!keyActivity() && !keyActivityError()">
+                <dl class="drawer-stats" [attr.aria-busy]="!keyActivity() && !keyActivityError()">
                   <div>
                     <dt>{{ t('Archivos recibidos', 'Files received') }}</dt>
                     <dd>{{ keyActivity()?.received ?? '—' }}</dd>
@@ -596,12 +611,12 @@
                   </p>
                 }
 
-                <dl class="key-facts">
+                <dl class="drawer-facts">
                   <div>
                     <dt>{{ t('Prefijo') }}</dt>
                     <dd>
                       <code>{{ key.prefix }}…</code>
-                      <button type="button" class="key-copy" (click)="copyPrefix(key.prefix)">
+                      <button type="button" class="drawer-copy" (click)="copyPrefix(key.prefix)">
                         {{ prefixCopied() ? t('Copiado', 'Copied') : t('Copiar', 'Copy') }}
                       </button>
                     </dd>
@@ -630,9 +645,9 @@
                   </div>
                 </dl>
 
-                <details class="key-more">
+                <details class="drawer-more">
                   <summary>{{ t('Identificadores', 'Identifiers') }}</summary>
-                  <dl class="key-facts">
+                  <dl class="drawer-facts">
                     <div>
                       <dt>{{ t('ID de la clave', 'Key ID') }}</dt>
                       <dd class="hash">{{ key.id }}</dd>
@@ -647,7 +662,7 @@
                 @if (!key.revoked && administrator()) {
                   <button
                     type="button"
-                    class="button key-revoke"
+                    class="button drawer-danger"
                     (click)="revokeTarget.set(key); revokeDialog.showModal()"
                   >
                     {{ t('Revocar clave') }}
@@ -734,6 +749,159 @@
           @case ('missing') {
             <a class="button primary" routerLink="/app"> {{ t('Volver al resumen') }} </a>
           }
+        }
+
+        @if (previewFile(); as file) {
+          <aside
+            id="side-drawer"
+            class="side-drawer"
+            animate.enter="drawer-enter"
+            animate.leave="drawer-leave"
+            aria-labelledby="drawer-title"
+          >
+            <header class="drawer-head">
+              <div>
+                <span class="drawer-eyebrow">{{ t('Archivo') }}</span>
+                <h2 id="drawer-title" class="drawer-title-file" tabindex="-1">{{ file.name }}</h2>
+              </div>
+              <button
+                type="button"
+                class="drawer-close"
+                [attr.aria-label]="t('Cerrar resumen', 'Close summary')"
+                (click)="closeDrawer()"
+              >
+                ×
+              </button>
+            </header>
+            <ng-container
+              [ngTemplateOutlet]="statusChip"
+              [ngTemplateOutletContext]="{ $implicit: file.status }"
+            />
+            <dl class="drawer-stats">
+              <div>
+                <dt>{{ t('Tamaño') }}</dt>
+                <dd>{{ file.size }}</dd>
+              </div>
+              <div>
+                <dt>{{ t('Capas', 'Layers') }}</dt>
+                <dd>{{ file.layers.length || '—' }}</dd>
+              </div>
+            </dl>
+            <p class="drawer-note">{{ t(file.reason, file.reasonEn) }}</p>
+            <dl class="drawer-facts">
+              <div>
+                <dt>{{ t('Tipo detectado') }}</dt>
+                <dd>{{ file.type }}</dd>
+              </div>
+              <div>
+                <dt>{{ t('Aplicación') }}</dt>
+                <dd>{{ file.appName }}</dd>
+              </div>
+              <div>
+                <dt>{{ t('Hora de recepción') }}</dt>
+                <dd>{{ when(file.time) }}</dd>
+              </div>
+              @if (file.quarantineExpiresAt) {
+                <div>
+                  <dt>{{ t('Caducidad cuarentena') }}</dt>
+                  <dd>{{ when(file.quarantineExpiresAt) }}</dd>
+                </div>
+              }
+            </dl>
+            @if (file.layers.length > 0) {
+              <details class="drawer-more">
+                <summary>{{ t('Capas de análisis') }}</summary>
+                <ol class="drawer-layers">
+                  @for (layer of file.layers; track $index) {
+                    <li>
+                      <strong>{{ layerLabel(layer) }} · {{ outcomeLabel(layer) }}</strong>
+                      <span>{{ layerDetail(layer) }}</span>
+                    </li>
+                  }
+                </ol>
+              </details>
+            }
+            <details class="drawer-more">
+              <summary>{{ t('Identificadores', 'Identifiers') }}</summary>
+              <dl class="drawer-facts">
+                <div>
+                  <dt>ID</dt>
+                  <dd class="hash">{{ file.id }}</dd>
+                </div>
+                @if (file.sha256) {
+                  <div>
+                    <dt>SHA-256</dt>
+                    <dd class="hash">{{ file.sha256 }}</dd>
+                  </div>
+                }
+              </dl>
+            </details>
+            <div class="drawer-actions">
+              <a class="button primary" [routerLink]="['/app/archivos', file.id]">{{
+                t('Ver detalle completo', 'Open full detail')
+              }}</a>
+              @if (file.status === 'En cuarentena' && administrator()) {
+                <button
+                  type="button"
+                  class="button drawer-danger"
+                  (click)="releaseTarget.set(file.id); releaseDialog.showModal()"
+                >
+                  {{ t('Liberar') }}
+                </button>
+              }
+            </div>
+          </aside>
+        }
+
+        @if (previewAudit(); as event) {
+          <aside
+            id="side-drawer"
+            class="side-drawer"
+            animate.enter="drawer-enter"
+            animate.leave="drawer-leave"
+            aria-labelledby="drawer-title"
+          >
+            <header class="drawer-head">
+              <div>
+                <span class="drawer-eyebrow">{{ t('Evento de auditoría', 'Audit event') }}</span>
+                <h2 id="drawer-title" tabindex="-1">{{ t(event.action) }}</h2>
+              </div>
+              <button
+                type="button"
+                class="drawer-close"
+                [attr.aria-label]="t('Cerrar resumen', 'Close summary')"
+                (click)="closeDrawer()"
+              >
+                ×
+              </button>
+            </header>
+            <dl class="drawer-stats">
+              <div>
+                <dt>{{ t('Hora') }}</dt>
+                <dd class="drawer-stat-small">{{ when(event.time) }}</dd>
+              </div>
+              <div>
+                <dt>{{ t('Origen') }}</dt>
+                <dd class="drawer-stat-small">{{ t(event.actor) }}</dd>
+              </div>
+            </dl>
+            <dl class="drawer-facts">
+              <div>
+                <dt>{{ t('Recurso') }}</dt>
+                <dd class="hash">{{ event.resource }}</dd>
+              </div>
+            </dl>
+            <details class="drawer-more" [open]="!!event.note">
+              <summary>{{ t('Detalle del evento', 'Event detail') }}</summary>
+              <p class="drawer-note">
+                {{
+                  event.note
+                    ? auditNote(event.note)
+                    : t('Sin detalle registrado.', 'No detail recorded.')
+                }}
+              </p>
+            </details>
+          </aside>
         }
       </main>
     </div>
