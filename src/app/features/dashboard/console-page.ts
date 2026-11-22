@@ -3,7 +3,7 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { isUuid } from '../../core/api/backend-adapter';
 import { TokenStore } from '../../core/auth/token-store';
 import { WorkspacePreferences } from '../overview/workspace-preferences';
-import { API_ENDPOINTS, ApiEndpoint, groupEndpoints } from './api-endpoints';
+import { API_ENDPOINTS, ApiEndpoint, FOLDER_LABELS, groupEndpoints } from './api-endpoints';
 
 interface RequestResult {
   readonly status: number;
@@ -109,10 +109,88 @@ export class ConsolePage {
     return endpoint.name.replace(/\.(get|post|put|delete)$/, '');
   }
 
+  /** Nombre corto del endpoint en el idioma elegido. */
+  endpointTitle(endpoint: ApiEndpoint): string {
+    return this.english() ? endpoint.titleEn : endpoint.title;
+  }
+
+  folderLabel(folder: string): string {
+    const label = FOLDER_LABELS[folder];
+    return label ? this.t(label.es, label.en) : folder;
+  }
+
+  /** Qué credencial usa la petición, en palabras. */
+  authLabel(endpoint: ApiEndpoint): string {
+    if (endpoint.authMode === 'api-key') return this.t('Usa tu API key', 'Uses your API key');
+    if (endpoint.authMode === 'jwt') return this.t('Usa tu sesión', 'Uses your session');
+    return this.t('Pública', 'Public');
+  }
+
+  /** Ya se ejecutó la petición: la respuesta es real y no el ejemplo. */
+  readonly hasResult = computed(() => this.result() !== null);
+
+  /** Color del código de estado: 2xx bien, 4xx aviso, 5xx/red error. */
+  readonly statusTone = computed<'ok' | 'warn' | 'error'>(() => {
+    const code = this.responseStatusCode();
+    if (code >= 200 && code < 300) return 'ok';
+    if (code >= 400 && code < 500) return 'warn';
+    return 'error';
+  });
+
+  /** La petición no pide ningún dato: basta con ejecutarla. */
+  readonly needsNoInput = computed(() => {
+    const endpoint = this.selectedEndpoint();
+    return (
+      endpoint.authMode !== 'api-key' &&
+      this.parameterName() === null &&
+      !endpoint.isMultipart &&
+      endpoint.requestBody === undefined
+    );
+  });
+
+  /** Respuesta de ejemplo del catálogo (se muestra aparte, nunca como si fuera real). */
+  readonly exampleResponse = computed(() =>
+    JSON.stringify(this.selectedEndpoint().responseExample, null, 2),
+  );
+  readonly exampleStatus = computed(() => {
+    const status = this.selectedEndpoint().responseStatus;
+    return status ? `${status.code} ${status.text}` : '200 OK';
+  });
+
+  readonly snippetCopied = signal(false);
+
+  async copySnippet(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.getSnippetCode());
+      this.snippetCopied.set(true);
+      setTimeout(() => this.snippetCopied.set(false), 1800);
+    } catch {
+      this.snippetCopied.set(false);
+    }
+  }
+
   selectEndpoint(endpoint: ApiEndpoint): void {
     this.selectedId.set(endpoint.id);
     this.customBody.set(endpoint.requestBody ?? '');
     this.result.set(null);
+    this.revealRequestOnNarrowScreens();
+  }
+
+  /** En pantallas angostas el menú queda arriba: baja hasta el paso 2 tras elegir. */
+  private revealRequestOnNarrowScreens(): void {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    if (!window.matchMedia('(width <= 60rem)').matches) return;
+    const still =
+      this.preferences.reducedMotion() ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(() => {
+      const card = document.querySelector('.cx-request');
+      if (!card) return;
+      // La barra superior es fija y en celular ocupa más alto: se descuenta su altura real.
+      const bar = document.querySelector('.topbar')?.getBoundingClientRect().height ?? 0;
+      const top = card.getBoundingClientRect().top + window.scrollY - bar - 12;
+      window.scrollTo({ top, behavior: still ? 'auto' : 'smooth' });
+    });
   }
 
   setSnippetLang(lang: 'curl' | 'ts' | 'python'): void {

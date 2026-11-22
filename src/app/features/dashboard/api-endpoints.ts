@@ -9,6 +9,9 @@ export interface ApiEndpoint {
   path: string;
   authMode: EndpointAuthMode;
   isMultipart?: boolean;
+  /** Nombre corto para la lista de la consola. */
+  title: string;
+  titleEn: string;
   summary: string;
   summaryEn: string;
   description: string;
@@ -23,6 +26,8 @@ export interface ApiEndpoint {
 export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'files-upload',
+    title: 'Subir un archivo',
+    titleEn: 'Upload a file',
     name: 'upload.post',
     folder: 'files',
     method: 'POST',
@@ -44,6 +49,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     id: 'files-status',
+    title: 'Consultar el estado',
+    titleEn: 'Check the status',
     name: 'status.get',
     folder: 'files',
     method: 'GET',
@@ -65,6 +72,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     id: 'files-download',
+    title: 'Descargar la copia limpia',
+    titleEn: 'Download the clean copy',
     name: 'content.get',
     folder: 'files',
     method: 'GET',
@@ -83,6 +92,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     id: 'quarantine-list',
+    title: 'Ver la cuarentena',
+    titleEn: 'View quarantine',
     name: 'list.get',
     folder: 'quarantine',
     method: 'GET',
@@ -104,6 +115,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     id: 'quarantine-release',
+    title: 'Liberar de cuarentena',
+    titleEn: 'Release from quarantine',
     name: 'release.post',
     folder: 'quarantine',
     method: 'POST',
@@ -132,6 +145,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     id: 'admin-files-list',
+    title: 'Listar archivos',
+    titleEn: 'List files',
     name: 'files.get',
     folder: 'admin',
     method: 'GET',
@@ -153,6 +168,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     id: 'admin-metrics',
+    title: 'Ver métricas',
+    titleEn: 'View metrics',
     name: 'metrics.get',
     folder: 'admin',
     method: 'GET',
@@ -172,6 +189,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     id: 'admin-api-keys',
+    title: 'Listar claves API',
+    titleEn: 'List API keys',
     name: 'api-keys.get',
     folder: 'admin',
     method: 'GET',
@@ -189,6 +208,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     id: 'system-health',
+    title: 'Estado de la API',
+    titleEn: 'API health',
     name: 'health.get',
     folder: 'system',
     method: 'GET',
@@ -211,6 +232,14 @@ export interface EndpointGroup {
 }
 
 /** Agrupa los endpoints por carpeta, conservando el orden del catálogo. */
+/** Nombre de cada grupo en la lista de la consola. */
+export const FOLDER_LABELS: Record<string, { es: string; en: string }> = {
+  files: { es: 'Archivos', en: 'Files' },
+  quarantine: { es: 'Cuarentena', en: 'Quarantine' },
+  admin: { es: 'Administración', en: 'Administration' },
+  system: { es: 'Sistema', en: 'System' },
+};
+
 export function groupEndpoints(folder?: string): EndpointGroup[] {
   const groups = new Map<string, ApiEndpoint[]>();
   for (const endpoint of API_ENDPOINTS) {
