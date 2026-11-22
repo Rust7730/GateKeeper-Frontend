@@ -373,8 +373,16 @@ h2 {
   background: var(--chart-quarantine);
 }
 
-.legend span + span::before {
+.legend [data-series='rejected']::before {
   background: var(--chart-rejected);
+}
+
+/* Errores: mismo trazo punteado que su línea, para no depender solo del color. */
+.legend [data-series='errors']::before {
+  height: 0;
+  border-top: 2px dashed var(--chart-error);
+  border-radius: 0;
+  background: none;
 }
 
 .legend b {

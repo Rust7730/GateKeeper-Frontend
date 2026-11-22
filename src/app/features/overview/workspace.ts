@@ -99,36 +99,61 @@ function formatTime(iso: string | null): string {
   });
 }
 
-/** Ventana de la gráfica de amenazas (coincide con `metricsApi.get('7d')`). */
-const CHART_DAYS = 7;
-const DAY_MS = 24 * 60 * 60 * 1000;
+type Language = 'es' | 'en';
+const LOCALE: Record<Language, string> = { es: 'es-MX', en: 'en-US' };
 
-/**
- * El backend agrupa por día calendario en UTC y manda `YYYY-MM-DD`. Se formatea en UTC:
- * con la zona local, `2026-11-20T00:00Z` en México (UTC-6) se mostraría como el día 19.
- */
-export function formatDayLabel(day: string, language: 'es' | 'en'): string {
-  const date = new Date(`${day}T00:00:00Z`);
-  if (Number.isNaN(date.getTime())) return day.slice(5, 10);
-  return date.toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX', {
-    weekday: 'short',
-    day: '2-digit',
-    timeZone: 'UTC',
-  });
+/** Días que muestra la gráfica de amenazas. */
+export const CHART_DAYS = 7;
+/** Tope de páginas al leer los archivos bloqueados de la semana (100 por página). */
+const THREAT_PAGES = 10;
+
+/** `YYYY-MM-DD` del día en la zona local. */
+function localDayKey(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-/** Últimos `CHART_DAYS` días (UTC), con ceros en los días sin actividad. */
-export function fillThreatDays(
-  rows: readonly { date: string; blocked: number; quarantined: number }[],
-  now = Date.now(),
-): { day: string; blocked: number; quarantined: number }[] {
-  const byDay = new Map(rows.map((row) => [row.date.slice(0, 10), row]));
-  const today = Math.floor(now / DAY_MS) * DAY_MS;
-  return Array.from({ length: CHART_DAYS }, (_, index) => {
-    const day = new Date(today - (CHART_DAYS - 1 - index) * DAY_MS).toISOString().slice(0, 10);
-    const row = byDay.get(day);
-    return { day, blocked: row?.blocked ?? 0, quarantined: row?.quarantined ?? 0 };
+/** Medianoche local de hace `CHART_DAYS - 1` días: inicio de la ventana de la gráfica. */
+export function chartWindowStart(now = new Date()): Date {
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() - (CHART_DAYS - 1));
+}
+
+export interface ThreatDay {
+  readonly key: string;
+  readonly date: Date;
+  readonly quarantined: number;
+  readonly rejected: number;
+  readonly errors: number;
+}
+
+/**
+ * Agrupa los archivos por día local de recepción: la misma zona horaria que la columna
+ * «Hora» de la lista, así un archivo de las 23:45 cuenta en el día que se ve en la lista.
+ * El último día es hoy (local); los días sin archivos quedan en cero.
+ */
+export function groupThreatDays(
+  files: readonly { status: ApiFileStatus; createdAt: string | null }[],
+  now = new Date(),
+): ThreatDay[] {
+  const start = chartWindowStart(now);
+  const days = Array.from({ length: CHART_DAYS }, (_, index) => {
+    const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + index);
+    return { key: localDayKey(date), date, quarantined: 0, rejected: 0, errors: 0 };
   });
+  const byKey = new Map(days.map((day) => [day.key, day]));
+  for (const file of files) {
+    if (!file.createdAt) continue;
+    const day = byKey.get(localDayKey(new Date(file.createdAt)));
+    if (!day) continue;
+    if (file.status === 'quarantined') day.quarantined++;
+    else if (file.status === 'rejected') day.rejected++;
+    else if (file.status === 'error') day.errors++;
+  }
+  return days;
+}
+
+export function formatDayLabel(date: Date, language: Language): string {
+  return date.toLocaleDateString(LOCALE[language], { weekday: 'short', day: '2-digit' });
 }
 
 const LAYER_LABEL: Record<string, string> = {
@@ -286,24 +311,38 @@ export class Workspace implements OnInit {
   readonly keys = signal<DemoKey[]>([]);
   readonly liveEvents = signal<SecurityEvent[]>([]);
 
+  /** Archivos bloqueados o con error de los últimos `CHART_DAYS` días locales (gráfica). */
+  readonly threatDays = signal<ThreatDay[] | null>(null);
+
   readonly series = computed<readonly ThreatPoint[]>(() => {
-    const m = this.metrics();
-    if (!m) return [];
+    const days = this.threatDays();
+    if (!days) return [];
     const language = this.preferences.language();
-    return fillThreatDays(m.threatsByDay).map((d) => ({
-      day: formatDayLabel(d.day, language),
+    return days.map((d) => ({
+      day: formatDayLabel(d.date, language),
       quarantined: d.quarantined,
-      rejected: Math.max(0, d.blocked - d.quarantined),
+      rejected: d.rejected,
+      errors: d.errors,
     }));
   });
+
+  /** Totales de la leyenda: salen de la misma serie que se dibuja. */
+  readonly chartTotals = computed(() =>
+    this.series().reduce(
+      (sum, day) => ({
+        quarantined: sum.quarantined + day.quarantined,
+        rejected: sum.rejected + day.rejected,
+        errors: sum.errors + day.errors,
+      }),
+      { quarantined: 0, rejected: 0, errors: 0 },
+    ),
+  );
 
   readonly totals = computed(() => {
     const m = this.metrics();
     return {
       totalFiles: m ? m.totals.processed + m.totals.pending : this.files().length,
       quarantined: m ? m.totals.quarantined : this.quarantine().length,
-      rejected: m ? m.totals.rejected : 0,
-      errors: m ? m.totals.error : 0,
       alertsCount: m ? m.totals.quarantined + m.totals.rejected : this.alerts().length,
     };
   });
@@ -311,11 +350,12 @@ export class Workspace implements OnInit {
   readonly chartLabels = computed(() => ({
     quarantine: this.t('Cuarentena'),
     rejected: this.t('Rechazos'),
+    errors: this.t('Errores de análisis', 'Scan errors'),
     total: this.t('Total'),
   }));
 
   readonly describeDay = (point: ThreatPoint): string =>
-    `${point.day}: ${point.quarantined}${this.t(' en cuarentena y ', ' quarantined and ')}${point.rejected}${this.t(' rechazos', ' rejections')}`;
+    `${point.day}: ${point.quarantined}${this.t(' en cuarentena y ', ' quarantined and ')}${point.rejected}${this.t(' rechazos', ' rejections')}${point.errors ? `${this.t(' y ', ' and ')}${point.errors}${this.t(' errores de análisis', ' scan errors')}` : ''}`;
 
   readonly statuses: readonly FileStatus[] = [
     'Limpio',
@@ -550,6 +590,7 @@ export class Workspace implements OnInit {
     switch (this.view) {
       case 'summary':
         this.loadMetrics();
+        this.loadThreats();
         this.loadFiles();
         break;
       case 'files':
@@ -629,6 +670,35 @@ export class Workspace implements OnInit {
         next: (m) => this.metrics.set(m),
         error: () => undefined,
       });
+  }
+
+  /**
+   * La gráfica se arma con los archivos (no con `amenazas_por_dia` de /metrics): el backend
+   * agrupa ese campo por día UTC y no da errores por día. Aquí se agrupa por día local.
+   */
+  private loadThreats(): void {
+    const from = chartWindowStart().toISOString();
+    const collected: FileRecord[] = [];
+    const fetchPage = (page: number): void => {
+      this.filesApi
+        .list({
+          page,
+          pageSize: 100,
+          status: ['quarantined', 'rejected', 'error'],
+          from,
+        })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (result) => {
+            collected.push(...result.items);
+            const more = page * result.pageSize < result.total && result.items.length > 0;
+            if (more && page < THREAT_PAGES) fetchPage(page + 1);
+            else this.threatDays.set(groupThreatDays(collected));
+          },
+          error: () => this.threatDays.set(groupThreatDays(collected)),
+        });
+    };
+    fetchPage(1);
   }
 
   private loadAudit(): void {

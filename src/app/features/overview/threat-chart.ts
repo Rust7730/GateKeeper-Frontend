@@ -21,11 +21,13 @@ export interface ThreatPoint {
   readonly day: string;
   readonly quarantined: number;
   readonly rejected: number;
+  readonly errors: number;
 }
 
 export interface ThreatChartLabels {
   readonly quarantine: string;
   readonly rejected: string;
+  readonly errors: string;
   readonly total: string;
 }
 
@@ -133,6 +135,7 @@ export class ThreatChart {
     const labels = this.labels();
     const quarantine = this.color('--chart-quarantine');
     const rejected = this.color('--chart-rejected');
+    const errors = this.color('--chart-error');
     const muted = this.color('--muted');
     const line = this.color('--stage-line');
     const surface = this.color('--surface');
@@ -189,8 +192,10 @@ export class ThreatChart {
                 <span>${dot(quarantine)}${labels.quarantine}</span><b>${point.quarantined}</b></div>
               <div style="display:flex;justify-content:space-between;gap:20px">
                 <span>${dot(rejected)}${labels.rejected}</span><b>${point.rejected}</b></div>
+              <div style="display:flex;justify-content:space-between;gap:20px">
+                <span>${dot(errors)}${labels.errors}</span><b>${point.errors}</b></div>
               <div style="display:flex;justify-content:space-between;gap:20px;margin-top:6px;padding-top:6px;border-top:1px solid ${line}">
-                <span>${labels.total}</span><b>${point.quarantined + point.rejected}</b></div>`;
+                <span>${labels.total}</span><b>${point.quarantined + point.rejected + point.errors}</b></div>`;
           },
         },
         series: [
@@ -218,6 +223,18 @@ export class ThreatChart {
             lineStyle: { width: 2.5, color: rejected, cap: 'round' },
             itemStyle: { color: rejected, borderColor: surface, borderWidth: 2 },
             areaStyle: this.area(rejected),
+            emphasis: { focus: 'series' },
+          },
+          {
+            name: labels.errors,
+            type: 'line',
+            smooth: 0.35,
+            symbol: 'circle',
+            symbolSize: 9,
+            showSymbol: false,
+            data: data.map((point) => point.errors),
+            lineStyle: { width: 2.5, color: errors, cap: 'round', type: [6, 4] },
+            itemStyle: { color: errors, borderColor: surface, borderWidth: 2 },
             emphasis: { focus: 'series' },
           },
         ],

@@ -229,16 +229,14 @@
                   <h2 id="trend-title">{{ t('Amenazas por día') }}</h2>
                 </div>
                 <div class="legend">
-                  <span>
-                    {{ t('Cuarentena') }} <b>{{ totals().quarantined }}</b> </span
-                  ><span>
-                    {{ t('Rechazos') }} <b>{{ totals().rejected }}</b>
+                  <span data-series="quarantine">
+                    {{ t('Cuarentena') }} <b>{{ chartTotals().quarantined }}</b> </span
+                  ><span data-series="rejected">
+                    {{ t('Rechazos') }} <b>{{ chartTotals().rejected }}</b> </span
+                  ><span data-series="errors">
+                    {{ t('Errores de análisis', 'Scan errors') }}
+                    <b>{{ chartTotals().errors }}</b>
                   </span>
-                  @if (totals().errors > 0) {
-                    <span>
-                      {{ t('Errores de análisis', 'Scan errors') }} <b>{{ totals().errors }}</b>
-                    </span>
-                  }
                 </div>
               </div>
               <gk-threat-chart
@@ -246,7 +244,9 @@
                 [labels]="chartLabels()"
                 [describe]="describeDay"
               />
-              <div class="chart-footer">{{ t('Datos en vivo', 'Live data') }}</div>
+              <div class="chart-footer">
+                {{ t('Días según tu hora local', 'Days in your local time') }}
+              </div>
             </section>
           }
         </header>
