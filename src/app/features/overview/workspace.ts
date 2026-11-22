@@ -119,6 +119,44 @@ export function fillThreatDays(
   });
 }
 
+const LAYER_LABEL: Record<string, string> = {
+  signature: 'Firma de tipo',
+  whitelist: 'Lista de tipos permitidos',
+  cdr: 'Reconstrucción (CDR)',
+  clamav: 'ClamAV',
+  virustotal: 'VirusTotal',
+  size_limit: 'Límite de tamaño',
+  pixel_limit: 'Límite de píxeles',
+  rate_limit: 'Límite de tasa',
+  encrypted_pdf: 'PDF cifrado',
+  unknown: 'Capa desconocida',
+};
+
+const OUTCOME_LABEL: Record<string, string> = {
+  passed: 'Superada',
+  failed: 'Bloqueó',
+  skipped: 'Omitida',
+  running: 'En curso',
+  not_evaluated: 'No evaluada',
+  unknown: 'Sin resultado',
+};
+
+const REASON_LABEL: Record<string, string> = {
+  type_not_allowed: 'Tipo de archivo no permitido',
+  pixel_limit: 'Supera el límite de píxeles',
+  page_limit: 'Supera el límite de páginas',
+  encrypted: 'Archivo cifrado',
+  decompression_limit: 'Supera el límite de descompresión',
+  output_too_large: 'La copia reconstruida es demasiado grande',
+  scan_limit: 'Supera el límite de escaneos',
+  invalid_stream: 'Flujo de datos inválido',
+  invalid_image: 'Imagen inválida',
+  invalid_pdf: 'PDF inválido',
+  timeout: 'Tiempo de análisis agotado',
+  internal: 'Error interno del analizador',
+  unknown: 'Motivo desconocido',
+};
+
 function mapFile(record: FileRecord): FileDetailView {
   const isFull = record.disclosure === 'full';
   const name = isFull
@@ -274,6 +312,22 @@ export class Workspace implements OnInit {
     'Error',
     'Pendiente',
   ];
+
+  readonly layerLabel = (layer: LayerResult): string =>
+    this.t(LAYER_LABEL[layer.layer] ?? LAYER_LABEL['unknown']);
+  readonly outcomeLabel = (layer: LayerResult): string =>
+    this.t(OUTCOME_LABEL[layer.outcome] ?? OUTCOME_LABEL['unknown']);
+  /** Detalle de una capa. Solo una capa superada se muestra como «OK». */
+  readonly layerDetail = (layer: LayerResult): string => {
+    if (layer.signature) return layer.signature;
+    if (layer.vtDetections) {
+      return `${layer.vtDetections.positives}/${layer.vtDetections.total} ${this.t('motores', 'engines')}`;
+    }
+    if (layer.reason) return this.t(REASON_LABEL[layer.reason] ?? REASON_LABEL['unknown']);
+    if (layer.outcome === 'passed') return 'OK';
+    if (layer.outcome === 'failed') return this.t('Sin detalle del motivo', 'No reason given');
+    return '—';
+  };
 
   readonly collapsed = signal(this.readCollapsed());
   readonly query = signal('');

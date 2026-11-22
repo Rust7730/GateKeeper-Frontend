@@ -361,18 +361,9 @@
                   <ol class="timeline">
                     @for (layer of file.layers; track layer.layer) {
                       <li>
-                        <strong>{{ layer.layer }} · {{ layer.outcome }}</strong>
+                        <strong>{{ layerLabel(layer) }} · {{ outcomeLabel(layer) }}</strong>
                         <span>
-                          @if (layer.signature) {
-                            {{ layer.signature }}
-                          } @else if (layer.vtDetections) {
-                            {{ layer.vtDetections.positives }}/{{ layer.vtDetections.total }}
-                            motores
-                          } @else if (layer.reason) {
-                            {{ layer.reason }}
-                          } @else {
-                            OK
-                          }
+                          {{ layerDetail(layer) }}
                           @if (layer.durationMs !== null) {
                             ({{ layer.durationMs }} ms)
                           }
