@@ -47,8 +47,10 @@ const outcomes = {
   </head>
   <body>
     <div class="loader" data-loader role="status" aria-live="polite">
-      <span class="loader-art"><img src="/logo.png" alt="" width="72" height="72" /></span>
-      <span class="loader-line" aria-hidden="true"></span>
+      <span class="loader-word" aria-hidden="true">
+        {[...'GATEKEEPER'].map((letter, index) => <span style={`--i: ${index}`}>{letter}</span>)}
+        <i class="loader-thread"></i>
+      </span>
       <span class="sr-only">{t('Cargando Gatekeeper…', 'Loading Gatekeeper…')}</span>
     </div>
     <div id="arriba" class="sr-only" tabindex="-1"></div>
@@ -359,7 +361,8 @@ const outcomes = {
         const reduce =
           document.documentElement.dataset.motion === 'reduce' ||
           window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const minimum = reduce ? 0 : 900;
+        // Tiempo para que la palabra termine de desenredarse en una línea.
+        const minimum = reduce ? 0 : 1750;
         const hide = () => {
           const wait = Math.max(0, minimum - performance.now());
           window.setTimeout(() => {
