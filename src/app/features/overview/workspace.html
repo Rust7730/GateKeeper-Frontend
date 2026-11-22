@@ -631,7 +631,11 @@
 <dialog #releaseDialog aria-labelledby="release-title">
   <form
     (submit)="
-      $event.preventDefault(); releaseFile(reason.value); reason.value = ''; releaseDialog.close()
+      $event.preventDefault();
+      releaseFile(reason.value);
+      reason.value = '';
+      reason.setCustomValidity('');
+      releaseDialog.close()
     "
   >
     <h2 id="release-title">{{ t('Liberar archivo') }}</h2>
@@ -644,10 +648,30 @@
     </p>
     <label>
       {{ t('Motivo') }}
-      <textarea #reason required minlength="20" maxlength="500" rows="3"></textarea>
+      <textarea
+        #reason
+        required
+        minlength="20"
+        maxlength="500"
+        rows="3"
+        (input)="
+          reason.setCustomValidity(
+            reason.value.trim().length < 20
+              ? t(
+                  'El motivo debe tener al menos 20 caracteres sin contar espacios al inicio o al final.',
+                  'The reason needs at least 20 characters, not counting leading or trailing spaces.'
+                )
+              : ''
+          )
+        "
+      ></textarea>
     </label>
     <div class="dialog-actions">
-      <button class="button" type="button" (click)="reason.value = ''; releaseDialog.close()">
+      <button
+        class="button"
+        type="button"
+        (click)="reason.value = ''; reason.setCustomValidity(''); releaseDialog.close()"
+      >
         {{ t('Cancelar') }}</button
       ><button class="button primary" type="submit">{{ t('Confirmar liberación') }}</button>
     </div>
@@ -662,7 +686,21 @@
   <form (submit)="$event.preventDefault(); createKey(keyName.value)">
     <h2 id="create-title">{{ secret() ? t('Clave de ejemplo creada') : t('Crear clave API') }}</h2>
     <label [hidden]="!!secret()">
-      {{ t('Nombre de la clave') }} <input #keyName required maxlength="70"
+      {{ t('Nombre de la clave') }}
+      <input
+        #keyName
+        required
+        maxlength="70"
+        (input)="
+          keyName.setCustomValidity(
+            keyName.value.trim()
+              ? ''
+              : t(
+                  'Escribe un nombre que no sea solo espacios.',
+                  'Enter a name that is not just spaces.'
+                )
+          )
+        "
     /></label>
     @if (secret()) {
       <p>{{ t('Esta clave de ejemplo se muestra solo en este paso.') }}</p>
