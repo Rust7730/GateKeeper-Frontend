@@ -53,8 +53,12 @@ export class ConsolePage {
   readonly isRunningRequest = signal(false);
 
   readonly body = computed(() => this.customBody() || this.selectedEndpoint().requestBody || '');
-  readonly responseStatusCode = computed(() => this.result()?.status ?? 200);
-  readonly responseStatusText = computed(() => this.result()?.statusText ?? 'OK');
+  readonly responseStatusCode = computed(
+    () => this.result()?.status ?? this.selectedEndpoint().responseStatus?.code ?? 200,
+  );
+  readonly responseStatusText = computed(
+    () => this.result()?.statusText ?? this.selectedEndpoint().responseStatus?.text ?? 'OK',
+  );
   readonly responseContentType = computed(() => this.result()?.contentType ?? 'application/json');
   readonly actualLatency = computed(
     () => this.result()?.latency ?? this.selectedEndpoint().latencyMs,

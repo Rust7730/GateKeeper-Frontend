@@ -13,6 +13,8 @@ export interface ApiEndpoint {
   description: string;
   requestBody?: string;
   responseExample: Record<string, unknown>;
+  /** Código HTTP del ejemplo de respuesta (200 si se omite). */
+  responseStatus?: { code: number; text: string };
   latencyMs: number;
 }
 
@@ -32,6 +34,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       id: '3c7b078b-47f5-475e-a6f5-d0fc32c30b16',
       estado: 'pendiente',
     },
+    responseStatus: { code: 202, text: 'Accepted' },
     latencyMs: 45,
   },
   {
@@ -107,6 +110,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       estado: 'en_cuarentena',
       reencolado: true,
     },
+    responseStatus: { code: 202, text: 'Accepted' },
     latencyMs: 25,
   },
   {
