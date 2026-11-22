@@ -739,3 +739,13 @@ gk-workspace .console-host {
   background: none;
   color-scheme: inherit;
 }
+
+// «Reducir movimiento» vive en el host del panel (gk-workspace[data-motion]), no en .console-host.
+gk-workspace[data-motion='reduce'] .console-host {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -12,3 +12,4 @@
 | `_reset.scss`        | Reset mínimo y reduced motion                                                      | M00    |
 | `_document.scss`     | Body, selección, foco, caret, scrollbar, skip link, utilidad visualmente oculta    | M01    |
 | `_dashboard-ui.scss` | Estilos globales del dashboard (Buddy, claro y oscuro) bajo `<gk-dashboard-shell>` | M10    |
+| `_transitions.scss`  | Transición entre páginas (View Transitions del router)                             | M14    |
