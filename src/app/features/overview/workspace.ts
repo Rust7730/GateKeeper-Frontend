@@ -87,10 +87,36 @@ function formatTime(iso: string | null): string {
   });
 }
 
-function formatDayLabel(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso.slice(5, 10);
-  return date.toLocaleDateString('es-MX', { weekday: 'short', day: '2-digit' });
+/** Ventana de la gráfica de amenazas (coincide con `metricsApi.get('7d')`). */
+const CHART_DAYS = 7;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * El backend agrupa por día calendario en UTC y manda `YYYY-MM-DD`. Se formatea en UTC:
+ * con la zona local, `2026-11-20T00:00Z` en México (UTC-6) se mostraría como el día 19.
+ */
+export function formatDayLabel(day: string, language: 'es' | 'en'): string {
+  const date = new Date(`${day}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return day.slice(5, 10);
+  return date.toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX', {
+    weekday: 'short',
+    day: '2-digit',
+    timeZone: 'UTC',
+  });
+}
+
+/** Últimos `CHART_DAYS` días (UTC), con ceros en los días sin actividad. */
+export function fillThreatDays(
+  rows: readonly { date: string; blocked: number; quarantined: number }[],
+  now = Date.now(),
+): { day: string; blocked: number; quarantined: number }[] {
+  const byDay = new Map(rows.map((row) => [row.date.slice(0, 10), row]));
+  const today = Math.floor(now / DAY_MS) * DAY_MS;
+  return Array.from({ length: CHART_DAYS }, (_, index) => {
+    const day = new Date(today - (CHART_DAYS - 1 - index) * DAY_MS).toISOString().slice(0, 10);
+    const row = byDay.get(day);
+    return { day, blocked: row?.blocked ?? 0, quarantined: row?.quarantined ?? 0 };
+  });
 }
 
 function mapFile(record: FileRecord): FileDetailView {
@@ -212,9 +238,10 @@ export class Workspace implements OnInit {
 
   readonly series = computed<readonly ThreatPoint[]>(() => {
     const m = this.metrics();
-    if (!m || m.threatsByDay.length === 0) return [];
-    return m.threatsByDay.map((d) => ({
-      day: formatDayLabel(d.date),
+    if (!m) return [];
+    const language = this.preferences.language();
+    return fillThreatDays(m.threatsByDay).map((d) => ({
+      day: formatDayLabel(d.day, language),
       quarantined: d.quarantined,
       rejected: Math.max(0, d.blocked - d.quarantined),
     }));
@@ -237,7 +264,7 @@ export class Workspace implements OnInit {
   }));
 
   readonly describeDay = (point: ThreatPoint): string =>
-    `${this.t(point.day)}: ${point.quarantined}${this.t(' en cuarentena y ', ' quarantined and ')}${point.rejected}${this.t(' rechazos', ' rejections')}`;
+    `${point.day}: ${point.quarantined}${this.t(' en cuarentena y ', ' quarantined and ')}${point.rejected}${this.t(' rechazos', ' rejections')}`;
 
   readonly statuses: readonly FileStatus[] = ['Limpio', 'En cuarentena', 'Rechazado', 'Pendiente'];
 
