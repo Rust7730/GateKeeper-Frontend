@@ -342,9 +342,9 @@
                     <dd>{{ file.appName }}</dd>
                   </div>
                   @if (file.sha256) {
-                    <div>
+                    <div class="wide">
                       <dt>SHA-256</dt>
-                      <dd class="mono">{{ file.sha256 }}</dd>
+                      <dd class="hash">{{ file.sha256 }}</dd>
                     </div>
                   }
                   @if (file.quarantineExpiresAt) {

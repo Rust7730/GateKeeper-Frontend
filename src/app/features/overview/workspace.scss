@@ -544,9 +544,19 @@ td:first-child {
 }
 
 .properties dd {
+  min-width: 0;
   margin: 0;
   font-family: var(--gk-font-mono);
   overflow-wrap: anywhere;
+}
+
+/* El SHA-256 (64 caracteres sin espacios) ocupa su propia fila y parte donde haga falta. */
+.properties .wide {
+  grid-column: 1 / -1;
+}
+
+.properties .hash {
+  word-break: break-all;
 }
 
 .timeline {
