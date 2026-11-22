@@ -4,6 +4,7 @@ import { isUuid } from '../../core/api/backend-adapter';
 import { TokenStore } from '../../core/auth/token-store';
 import { WorkspacePreferences } from '../overview/workspace-preferences';
 import { API_ENDPOINTS, ApiEndpoint, FOLDER_LABELS, groupEndpoints } from './api-endpoints';
+import { ENDPOINT_RESPONSES, ExampleResponse } from './api-responses';
 
 interface RequestResult {
   readonly status: number;
@@ -148,14 +149,27 @@ export class ConsolePage {
     );
   });
 
-  /** Respuesta de ejemplo del catálogo (se muestra aparte, nunca como si fuera real). */
-  readonly exampleResponse = computed(() =>
-    JSON.stringify(this.selectedEndpoint().responseExample, null, 2),
+  /** Todas las respuestas posibles del endpoint (catálogo), nunca mostradas como reales. */
+  readonly possibleResponses = computed<readonly ExampleResponse[]>(
+    () => ENDPOINT_RESPONSES[this.selectedEndpoint().id] ?? [],
   );
-  readonly exampleStatus = computed(() => {
-    const status = this.selectedEndpoint().responseStatus;
-    return status ? `${status.code} ${status.text}` : '200 OK';
-  });
+
+  responseWhen(response: ExampleResponse): string {
+    return this.english() ? response.whenEn : response.when;
+  }
+
+  responseBody(response: ExampleResponse): string {
+    return typeof response.body === 'string'
+      ? response.body
+      : JSON.stringify(response.body, null, 2);
+  }
+
+  /** Tono del código de una respuesta de ejemplo (mismos colores que la real). */
+  toneOf(code: number): 'ok' | 'warn' | 'error' {
+    if (code >= 200 && code < 300) return 'ok';
+    if (code >= 400 && code < 500) return 'warn';
+    return 'error';
+  }
 
   readonly snippetCopied = signal(false);
 

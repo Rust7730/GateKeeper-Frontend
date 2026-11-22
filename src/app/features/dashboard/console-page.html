@@ -190,10 +190,27 @@
         </p>
         <details class="cx-more">
           <summary>
-            {{ t('Ver respuesta de ejemplo', 'See an example response') }}
-            <span class="cx-meta">{{ exampleStatus() }}</span>
+            {{ t('Ver todas las respuestas posibles', 'See every possible response') }}
+            <span class="cx-meta">{{ possibleResponses().length }}</span>
           </summary>
-          <pre class="cx-code"><code>{{ exampleResponse() }}</code></pre>
+          <ul class="cx-responses">
+            @for (option of possibleResponses(); track $index) {
+              <li>
+                <details class="cx-response-option" name="respuestas-posibles">
+                  <summary>
+                    <span class="cx-status" [attr.data-tone]="toneOf(option.code)"
+                      >{{ option.code }} {{ option.text }}</span
+                    >
+                    <span class="cx-when">{{ responseWhen(option) }}</span>
+                  </summary>
+                  @if (option.header) {
+                    <p class="cx-meta">{{ option.header }}</p>
+                  }
+                  <pre class="cx-code"><code>{{ responseBody(option) }}</code></pre>
+                </details>
+              </li>
+            }
+          </ul>
         </details>
       }
     </article>
