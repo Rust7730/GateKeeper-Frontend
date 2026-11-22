@@ -1,36 +1,55 @@
+// Estilo del dashboard: fondo lavanda, tarjetas blancas con borde de tinta y sombra sólida,
+// acentos pastel y títulos condensados en mayúsculas (Anton). Texto en Jost.
 gk-workspace {
-  --canvas: light-dark(#fcfcfd, #151720);
-  --ink: light-dark(#1d2130, #fcfcfd);
-  --muted: light-dark(#474950, #c4c9d7);
-  --line: light-dark(#d5d9e8, #454e65);
-  --signal: light-dark(#164fbd, #9abfff);
-  --surface: light-dark(#fff, #1d2130);
-  --soft: light-dark(#ebeef7, #252d40);
-  --lime: #bfff5a;
-  --cobalt: #1a67fd;
-  --stage: #0a0d16;
-  --warm: #ffb59d;
-  --radius: 1.5rem;
-  --stage-glow: light-dark(#e3edff, #1c315e);
-  --stage-base: light-dark(#fcfcfd, #0a0d16);
-  --stage-line: light-dark(#c3d2ee, #344567);
-  --stage-shadow: light-dark(#1a67fd33, #1a67fd55);
-  --surface-shadow: #0a0d1644;
-  --chart-quarantine: light-dark(#4c7909, #bfff5a);
-  --chart-rejected: light-dark(#bb593e, #ffb59d);
-  --chart-error: light-dark(#6a52b8, #c9b8ff);
-  --brand-tile: light-dark(#fcfcfd, transparent);
-  --action-outline: #0b3d28;
-  --terminal-line: #34435f;
-  --terminal-top: #202d46;
-  --terminal-ink: #e1e7f5;
-  --terminal-blue: #b8d0ff;
-  --terminal-muted: #c4c9d7;
-  --status-quarantine-surface: light-dark(#fff0cf, #3b2e18);
-  --status-quarantine-ink: light-dark(#684100, #ffdb93);
-  --status-blocked-surface: light-dark(#ffe9e6, #442626);
-  --status-blocked-ink: light-dark(#912c25, #ffbeb2);
-  --post-surface: light-dark(#e1f6e6, #193b2b);
-  --post-ink: light-dark(#176035, #a7e9bc);
-  --dialog-scrim: #0a0d16b3;
+  --canvas: light-dark(#f6f3fc, #14121b);
+  --ink: light-dark(#141318, #f4f1fb);
+  --muted: light-dark(#4f4b5a, #c9c3d8);
+  --line: light-dark(#e2dcef, #3a3548);
+  --edge: light-dark(#141318, #e9e4f5);
+  --signal: light-dark(#5236c9, #cbbcff);
+  --surface: light-dark(#fff, #1f1c29);
+  --soft: light-dark(#f1ecfa, #2a2636);
+  --font-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
+  --font-body: 'Jost', 'IBM Plex Sans', var(--gk-font-ui);
+
+  // Acentos pastel: siempre con tinta oscura encima, en los dos temas.
+  --on-pastel: #141318;
+  --pastel-yellow: #ffeb9c;
+  --pastel-lavender: #d9cdf7;
+  --pastel-mint: #cdeec4;
+  --pastel-pink: #f6c8e0;
+  --pastel-teal: #aee3e5;
+
+  // Sombra sólida desplazada (sin difuminado), como un sello.
+  --pop-sm: 0 0.2rem 0 var(--edge);
+  --pop: 0 0.32rem 0 var(--edge);
+  --pop-lg: 0 0.45rem 0 var(--edge);
+  --stroke: 1.5px solid var(--edge);
+  --lime: var(--pastel-yellow);
+  --cobalt: #5236c9;
+  --stage: #141318;
+  --warm: var(--pastel-pink);
+  --radius: 0.9rem;
+  --stage-glow: light-dark(#fff6cf, #2c2738);
+  --stage-base: var(--surface);
+  --stage-line: var(--line);
+  --stage-shadow: transparent;
+  --surface-shadow: #14131844;
+  --chart-quarantine: light-dark(#5236c9, #cbbcff);
+  --chart-rejected: light-dark(#c2366f, #ff9ec6);
+  --chart-error: light-dark(#127a68, #8fe3d2);
+  --brand-tile: light-dark(#fff, transparent);
+  --action-outline: var(--edge);
+  --terminal-line: #3a3548;
+  --terminal-top: #26222f;
+  --terminal-ink: #ece8f6;
+  --terminal-blue: #cbbcff;
+  --terminal-muted: #c9c3d8;
+  --status-quarantine-surface: var(--pastel-yellow);
+  --status-quarantine-ink: var(--on-pastel);
+  --status-blocked-surface: var(--pastel-pink);
+  --status-blocked-ink: var(--on-pastel);
+  --post-surface: var(--pastel-mint);
+  --post-ink: var(--on-pastel);
+  --dialog-scrim: #141318b3;
 }

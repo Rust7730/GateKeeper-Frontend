@@ -17,11 +17,12 @@
 }
 
 .preferences summary {
-  min-height: 2.75rem;
-  padding-inline: 0.7rem;
-  border: 1px solid var(--line);
-  border-radius: var(--gk-radius-999);
-  font-weight: 600;
+  min-height: 2.5rem;
+  padding-inline: 0.75rem;
+  border: var(--stroke, 1px solid var(--line));
+  border-radius: 0.5rem;
+  background: var(--surface);
+  font-weight: 500;
   cursor: pointer;
   list-style: none;
 }
