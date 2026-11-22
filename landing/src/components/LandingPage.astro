@@ -46,6 +46,14 @@ const outcomes = {
     <meta name="description" content={t("API que verifica el tipo real de cada archivo, elimina contenido activo y entrega una copia reconstruida.", "An API that verifies the real file type, removes active content and delivers a reconstructed copy.")} />
   </head>
   <body>
+    <div class="loader" data-loader role="status" aria-live="polite">
+      <div class="loader-card">
+        <span class="loader-art"><img src="/logo.png" alt="" width="96" height="96" /></span>
+        <span class="loader-word">Gatekeeper</span>
+        <span class="loader-bar" aria-hidden="true"><i></i></span>
+        <span class="loader-text">{t('Inspeccionando la página…', 'Inspecting the page…')}</span>
+      </div>
+    </div>
     <div id="arriba" class="sr-only" tabindex="-1"></div>
     <a href="#inicio" class="skip-link">{t("Ir al contenido", "Skip to content")}</a>
     <header class="site-header" data-site-header>
@@ -298,6 +306,25 @@ const outcomes = {
 
     <script>
       import '../scripts/preferences';
+
+      // Pantalla de carga: se retira al cargar todo, con un mínimo breve para que no parpadee.
+      const loader = document.querySelector<HTMLElement>('[data-loader]');
+      if (loader) {
+        const reduce =
+          document.documentElement.dataset.motion === 'reduce' ||
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const minimum = reduce ? 0 : 900;
+        const hide = () => {
+          const wait = Math.max(0, minimum - performance.now());
+          window.setTimeout(() => {
+            loader.classList.add('is-done');
+            loader.setAttribute('aria-hidden', 'true');
+            window.setTimeout(() => loader.remove(), 600);
+          }, wait);
+        };
+        if (document.readyState === 'complete') hide();
+        else window.addEventListener('load', hide, { once: true });
+      }
 
       const header = document.querySelector<HTMLElement>('[data-site-header]');
       if (header) {
