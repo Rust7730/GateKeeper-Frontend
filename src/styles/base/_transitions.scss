@@ -26,3 +26,16 @@
     opacity: 0;
   }
 }
+
+// Cambio de tema (WorkspaceSettings.setTheme): sin el fundido de página; el tema nuevo
+// entra en un círculo animado desde JavaScript. La barra y el menú pierden su nombre
+// propio para cambiar de tema junto con el resto en lugar de saltar al final.
+html.theme-transition::view-transition-old(root),
+html.theme-transition::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html.theme-transition gk-workspace :is(.topbar, .section-nav) {
+  view-transition-name: none;
+}

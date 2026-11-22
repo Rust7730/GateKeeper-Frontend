@@ -72,7 +72,7 @@
           name="dashboard-theme"
           value="system"
           [checked]="preferences.theme() === 'system'"
-          (change)="preferences.theme.set('system')"
+          (change)="setTheme('system')"
         />
         <svg
           class="icon"
@@ -97,7 +97,7 @@
           name="dashboard-theme"
           value="light"
           [checked]="preferences.theme() === 'light'"
-          (change)="preferences.theme.set('light')"
+          (change)="setTheme('light')"
         />
         <svg
           class="icon"
@@ -124,7 +124,7 @@
           name="dashboard-theme"
           value="dark"
           [checked]="preferences.theme() === 'dark'"
-          (change)="preferences.theme.set('dark')"
+          (change)="setTheme('dark')"
         />
         <svg
           class="icon"
