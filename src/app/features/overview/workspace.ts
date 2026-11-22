@@ -46,6 +46,18 @@ const STATUS_LABEL: Record<ApiFileStatus, FileStatus> = {
   unknown: 'Pendiente',
 };
 
+/** Opción del filtro de Estado -> valor que entiende `GET /v1/admin/files`. */
+const STATUS_FILTER: ReadonlyMap<string, Exclude<ApiFileStatus, 'unknown'>> = new Map<
+  string,
+  Exclude<ApiFileStatus, 'unknown'>
+>([
+  ['Limpio', 'clean'],
+  ['En cuarentena', 'quarantined'],
+  ['Rechazado', 'rejected'],
+  ['Error', 'error'],
+  ['Pendiente', 'pending'],
+]);
+
 const AUDIT_ACTION_LABEL: Record<string, string> = {
   login: 'Inicio de sesión',
   logout: 'Cierre de sesión',
@@ -358,17 +370,30 @@ export class Workspace implements OnInit {
     return [...fromSse, ...fromFiles];
   });
 
-  readonly visibleFiles = computed(() => {
-    const query = this.query().trim().toLowerCase();
-    const status = this.status();
-    return this.files().filter(
-      (file) =>
-        (!status || file.status === status) &&
-        `${file.name} ${file.id} ${file.type}`.toLowerCase().includes(query),
-    );
-  });
+  /** Lo filtra el backend (búsqueda y estado sobre todos los archivos, no solo la 1.ª página). */
+  readonly visibleFiles = computed(() => this.files());
+  private searchTimer: ReturnType<typeof setTimeout> | undefined;
+  private filesRequest = 0;
+
+  setQuery(value: string): void {
+    this.query.set(value);
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.reloadFileSearch(), 300);
+  }
+
+  setStatusFilter(value: string): void {
+    this.status.set(value);
+    clearTimeout(this.searchTimer);
+    this.reloadFileSearch();
+  }
+
+  private reloadFileSearch(): void {
+    const status = STATUS_FILTER.get(this.status());
+    this.loadFiles({ status: status ? [status] : undefined, q: this.query().trim() || undefined });
+  }
 
   ngOnInit(): void {
+    this.destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
     if (
       this.view === 'login' ||
       this.view === 'docs' ||
@@ -554,17 +579,24 @@ export class Workspace implements OnInit {
     }
   }
 
-  private loadFiles(opts?: { status?: readonly Exclude<ApiFileStatus, 'unknown'>[] }): void {
+  private loadFiles(opts?: {
+    status?: readonly Exclude<ApiFileStatus, 'unknown'>[];
+    q?: string;
+  }): void {
+    const request = ++this.filesRequest;
     this.loading.set(true);
+    this.loadError.set('');
     this.filesApi
-      .list({ page: 1, pageSize: 50, status: opts?.status })
+      .list({ page: 1, pageSize: 50, status: opts?.status, q: opts?.q })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (page) => {
+          if (request !== this.filesRequest) return; // llegó una búsqueda más reciente
           this.files.set(page.items.map(mapFile));
           this.loading.set(false);
         },
         error: (err: unknown) => {
+          if (request !== this.filesRequest) return;
           this.loading.set(false);
           this.loadError.set(this.describeApiError(err, 'No se pudieron cargar los archivos.'));
         },

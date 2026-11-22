@@ -291,13 +291,14 @@
                   {{ t('Buscar archivos') }}
                   <input
                     type="search"
-                    [attr.placeholder]="t('Nombre, ID o tipo')"
+                    [attr.placeholder]="t('Nombre, ID o SHA-256', 'Name, ID or SHA-256')"
+                    maxlength="200"
                     [value]="query()"
-                    (input)="query.set($any($event.target).value)"
+                    (input)="setQuery($any($event.target).value)"
                 /></label>
                 <label>
                   {{ t('Estado') }}
-                  <select [value]="status()" (change)="status.set($any($event.target).value)">
+                  <select [value]="status()" (change)="setStatusFilter($any($event.target).value)">
                     <option value="">{{ t('Todos los estados') }}</option>
                     @for (item of statuses; track item) {
                       <option [value]="item">{{ t(item) }}</option>
