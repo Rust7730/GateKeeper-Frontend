@@ -47,12 +47,9 @@ const outcomes = {
   </head>
   <body>
     <div class="loader" data-loader role="status" aria-live="polite">
-      <div class="loader-card">
-        <span class="loader-art"><img src="/logo.png" alt="" width="96" height="96" /></span>
-        <span class="loader-word">Gatekeeper</span>
-        <span class="loader-bar" aria-hidden="true"><i></i></span>
-        <span class="loader-text">{t('Inspeccionando la página…', 'Inspecting the page…')}</span>
-      </div>
+      <span class="loader-art"><img src="/logo.png" alt="" width="72" height="72" /></span>
+      <span class="loader-line" aria-hidden="true"></span>
+      <span class="sr-only">{t('Cargando Gatekeeper…', 'Loading Gatekeeper…')}</span>
     </div>
     <div id="arriba" class="sr-only" tabindex="-1"></div>
     <a href="#inicio" class="skip-link">{t("Ir al contenido", "Skip to content")}</a>
