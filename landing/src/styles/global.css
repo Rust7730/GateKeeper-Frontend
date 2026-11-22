@@ -1555,6 +1555,77 @@ footer { border-top: var(--stroke); }
 @keyframes pipeline-pop { from { transform: scale(0) rotate(-90deg); } }
 @keyframes pipeline-unfold { from { opacity: 0; clip-path: inset(0 0 100% 0); } }
 
+/* «¿Qué pasa con otros archivos?»: aparición y despliegue de los ejemplos.
+   Aparición: las tarjetas suben en cascada con un leve giro alterno.
+   Despliegue: al abrir, el contenido crece de alto (::details-content), la firma se
+   «escribe» de izquierda a derecha y el veredicto cae como un sello. */
+.sample-list[data-animate] details { --step: 110ms; }
+.sample-list[data-animate='ready'] details { opacity: 0; transform: translateY(1.6rem) rotate(-1.5deg); box-shadow: none; }
+.sample-list[data-animate='ready'] details:nth-child(even) { transform: translateY(1.6rem) rotate(1.5deg); }
+.sample-list[data-animate='ready'] summary::after { transform: scale(0) rotate(-180deg); }
+.sample-list[data-animate='in'] details {
+  animation: sample-in 560ms cubic-bezier(.34, 1.4, .64, 1) both;
+  animation-delay: calc(var(--i) * var(--step));
+}
+.sample-list[data-animate='in'] details:nth-child(even) { animation-name: sample-in-even; }
+.sample-list[data-animate='in'] summary::after {
+  animation: pipeline-pop 480ms cubic-bezier(.34, 1.7, .64, 1) both;
+  animation-delay: calc(var(--i) * var(--step) + 220ms);
+}
+@keyframes sample-in {
+  0% { opacity: 0; transform: translateY(1.6rem) rotate(-1.5deg); box-shadow: none; }
+  60% { opacity: 1; box-shadow: none; }
+}
+@keyframes sample-in-even {
+  0% { opacity: 0; transform: translateY(1.6rem) rotate(1.5deg); box-shadow: none; }
+  60% { opacity: 1; box-shadow: none; }
+}
+
+/* Tarjeta: se eleva al pasar el cursor */
+@media (hover: hover) and (pointer: fine) {
+  .sample-list details:hover { transform: translateY(-2px); box-shadow: var(--pop); }
+}
+
+/* Abrir y cerrar con altura animada (navegadores con ::details-content) */
+.sample-list { interpolate-size: allow-keywords; }
+.sample-list details::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  transition: block-size 380ms cubic-bezier(.23, 1, .32, 1), content-visibility 380ms allow-discrete;
+}
+.sample-list details[open]::details-content { block-size: auto; }
+
+.sample-verdict {
+  display: inline-block;
+  margin-inline-end: .35rem;
+  padding: .02rem .55rem;
+  border: 1.5px solid var(--edge);
+  border-radius: 999px;
+  background: var(--pastel-pink);
+  color: var(--on-pastel);
+  font-weight: 600;
+}
+[data-verdict='clean'] .sample-verdict { background: var(--pastel-mint); }
+[data-verdict='quarantined'] .sample-verdict { background: var(--pastel-yellow); }
+
+.sample-list details[open] .sample-signature { display: inline-block; animation: sample-type 520ms steps(24, end) 120ms both; }
+.sample-list details[open] .sample-content p { animation: sample-rise 420ms cubic-bezier(.23, 1, .32, 1) both; }
+.sample-list details[open] .sample-content p:nth-of-type(1) { animation-delay: 200ms; }
+.sample-list details[open] .sample-content p:nth-of-type(2) { animation-delay: 300ms; }
+.sample-list details[open] .sample-verdict { animation: sample-stamp 520ms cubic-bezier(.34, 1.7, .64, 1) 380ms both; }
+@keyframes sample-type { from { clip-path: inset(0 100% 0 0); } }
+@keyframes sample-rise { from { opacity: 0; transform: translateY(.5rem); } }
+@keyframes sample-stamp { from { opacity: 0; transform: scale(1.8) rotate(-10deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sample-list details::details-content { transition: none; }
+  .sample-list details[open] :is(.sample-signature, .sample-content p, .sample-verdict) { animation: none; }
+  .sample-list details:hover { transform: none; }
+}
+:root[data-motion='reduce'] .sample-list details::details-content { transition: none; }
+:root[data-motion='reduce'] .sample-list details[open] :is(.sample-signature, .sample-content p, .sample-verdict) { animation: none; }
+:root[data-motion='reduce'] .sample-list details:hover { transform: none; }
+
 /* ═══════════════════════════════════════════════════════════════════
    Pantalla de carga minimalista: el logo con su barrido verde y una
    línea fina debajo. Si el JavaScript no corre, se retira sola a los 3 s.

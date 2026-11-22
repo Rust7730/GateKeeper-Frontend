@@ -119,7 +119,7 @@ const outcomes = {
             <h2 data-scroll-title>{t("Del archivo original a una ", "From the original file to a ")}<span class="brush">{t("copia", "copy")}</span>{t(" lista para usar.", " you can use.")}</h2>
             <p>{t('Quien sube un archivo controla su extensión y el encabezado', 'The uploader controls the file extension and the')} <code>Content-Type</code>{t('. Gatekeeper comprueba el contenido antes de permitir una descarga.', ' header. Gatekeeper checks the contents before allowing a download.')}</p>
           </div>
-          <ol class="pipeline" data-pipeline>
+          <ol class="pipeline" data-reveal>
             {STATIONS.map((station, index) => (
               <li style={`--i: ${index}`}>
                 <span class="pipeline-number" aria-hidden="true">0{index + 1}</span>
@@ -141,9 +141,9 @@ const outcomes = {
             <h2 data-scroll-title>{t("¿Qué pasa con otros ", "What about other ")}<span class="brush">{t("archivos", "files")}</span>?</h2>
             <p>{t("Abre un ejemplo para ver qué detecta Gatekeeper y por qué bloquea el archivo o permite descargar una copia.", "Open an example to see what Gatekeeper detects and why it blocks the file or makes a copy available.")}</p>
           </div>
-          <div class="sample-list">
-            {DECLARATION_CASES.map((sample) => (
-              <details>
+          <div class="sample-list" data-reveal>
+            {DECLARATION_CASES.map((sample, index) => (
+              <details style={`--i: ${index}`} data-verdict={sample.verdict}>
                 <summary>
                   <span>{localize(sample.label)}</span>
                   <code>{sample.declared.name}</code>
@@ -151,7 +151,7 @@ const outcomes = {
                 <div class="sample-content">
                   <code class="sample-signature">{sample.inspected.signature}</code>
                   <p>{localize(sample.inspected.signatureNote)}</p>
-                  <p><strong>{outcomes[sample.verdict]}.</strong> {localize(sample.reason)}</p>
+                  <p><strong class="sample-verdict">{outcomes[sample.verdict]}</strong> {localize(sample.reason)}</p>
                 </div>
               </details>
             ))}
@@ -304,32 +304,36 @@ const outcomes = {
     <script>
       import '../scripts/preferences';
 
-      // «Cómo funciona»: las etapas aparecen y se despliegan al entrar en pantalla, y se
-      // rearman al salir del todo. Sin JavaScript o con movimiento reducido se ven completas.
-      const pipeline = document.querySelector<HTMLElement>('[data-pipeline]');
-      if (pipeline) {
+      // Secciones con [data-reveal] («Cómo funciona», ejemplos de archivos): aparecen en
+      // cascada al entrar en pantalla y se rearman al salir del todo. Sin JavaScript o con
+      // movimiento reducido se ven completas desde el inicio.
+      const reveals = [...document.querySelectorAll<HTMLElement>('[data-reveal]')];
+      if (reveals.length) {
         const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
         const still = () =>
           motionQuery.matches || document.documentElement.dataset.motion === 'reduce';
         const arm = () => {
-          if (still()) delete pipeline.dataset.animate;
-          else if (pipeline.dataset.animate !== 'in') pipeline.dataset.animate = 'ready';
+          for (const element of reveals) {
+            if (still()) delete element.dataset.animate;
+            else if (element.dataset.animate !== 'in') element.dataset.animate = 'ready';
+          }
         };
         const observer = new IntersectionObserver(
           (entries) => {
             for (const entry of entries) {
+              const element = entry.target as HTMLElement;
               if (still()) continue;
               if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
-                pipeline.dataset.animate = 'in';
+                element.dataset.animate = 'in';
               } else if (!entry.isIntersecting) {
-                pipeline.dataset.animate = 'ready';
+                element.dataset.animate = 'ready';
               }
             }
           },
           { threshold: [0, 0.25] },
         );
         arm();
-        observer.observe(pipeline);
+        reveals.forEach((element) => observer.observe(element));
         motionQuery.addEventListener('change', arm);
         document.addEventListener('gatekeeper:motion-change', arm);
       }
