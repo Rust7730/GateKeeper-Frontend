@@ -1,28 +1,31 @@
 import { CHART_DAYS, chartWindowStart, formatTime, groupThreatDays } from './workspace';
 
-// Estas pruebas corren con TZ=America/Mexico_City (UTC-6), como el navegador de QA.
-describe('Gráfica de amenazas por día', () => {
-  // Sábado 21 de noviembre, 20:11 en México = domingo 22, 02:11 UTC.
-  const now = new Date('2026-11-22T02:11:00Z');
+// Las fechas se construyen en hora local para que las pruebas valgan en cualquier zona
+// (CI corre en UTC; QA usa America/Mexico_City).
+const local = (day: number, hour: number, minute = 0) => new Date(2026, 10, day, hour, minute);
 
-  it('termina en el día local de hoy, no en el día UTC', () => {
+describe('Gráfica de amenazas por día', () => {
+  // Sábado 21 de noviembre, 20:11 en la hora local del navegador.
+  const now = local(21, 20, 11);
+
+  it('termina en el día local de hoy', () => {
     const days = groupThreatDays([], now);
     expect(days).toHaveLength(CHART_DAYS);
     expect(days.at(-1)?.key).toBe('2026-11-21');
     expect(days[0].key).toBe('2026-11-15');
-    expect(chartWindowStart(now).toISOString()).toBe('2026-11-15T06:00:00.000Z');
+    expect(chartWindowStart(now).getTime()).toBe(local(15, 0).getTime());
   });
 
   it('cuenta cada archivo en el mismo día local que muestra la lista', () => {
-    // 19-nov 23:45 en México = 20-nov 05:45 UTC: el backend lo contaba el viernes 20.
-    const createdAt = '2026-11-20T05:45:00Z';
+    // Un archivo de las 23:45 del jueves 19 cuenta el 19, aunque en UTC ya sea otro día.
+    const createdAt = local(19, 23, 45).toISOString();
     const days = groupThreatDays(
       [
         { status: 'quarantined', createdAt },
-        { status: 'error', createdAt: '2026-11-21T18:00:00Z' },
-        { status: 'rejected', createdAt: '2026-11-21T18:00:00Z' },
-        { status: 'clean', createdAt: '2026-11-21T18:00:00Z' },
-        { status: 'quarantined', createdAt: '2026-11-01T00:00:00Z' },
+        { status: 'error', createdAt: local(21, 12).toISOString() },
+        { status: 'rejected', createdAt: local(21, 12).toISOString() },
+        { status: 'clean', createdAt: local(21, 12).toISOString() },
+        { status: 'quarantined', createdAt: local(1, 12).toISOString() },
       ],
       now,
     );
