@@ -17,6 +17,8 @@
 | `workspace-demo.ts`                                                           | Estado compartido y claves locales de la demostración                      | M06–M13 |
 | `workspace-preferences.ts`                                                    | Idioma, tema y preferencias de movimiento                                  | M14     |
 | `workspace-english.ts`                                                        | Traducciones de la interfaz al inglés                                      | M14     |
+| `preferences-sync.ts`                                                         | Lleva tema, idioma y movimiento entre la landing y el dashboard por la URL | M14     |
+| `preferences-sync.spec.ts`                                                    | Pruebas de la sincronización de preferencias                               | M14     |
 | `workspace-title.ts`                                                          | Título de la pestaña traducido al idioma elegido                           | M14     |
 | `workspace-days.spec.ts`                                                      | Pruebas de la gráfica por día local                                        | M10     |
 | `workspace-settings.ts`, `workspace-settings.html`, `workspace-settings.scss` | Menú de accesibilidad y selector de tema                                   | M14     |

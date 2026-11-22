@@ -65,7 +65,7 @@ const outcomes = {
           <a href="#como-funciona">{t("Cómo funciona", "How it works")}</a>
           <a href="#integracion">{t("Integración", "Integration")}</a>
           <a href="#pruebas">{t("Pruebas", "Test cases")}</a>
-          <a href={dashboardUrl} class="nav-dashboard">Dashboard</a>
+          <a href={dashboardUrl} class="nav-dashboard" data-dashboard-link>Dashboard</a>
         </nav>
         <div class="header-tools">
           <details class="preferences" data-preferences hidden>
@@ -109,7 +109,7 @@ const outcomes = {
               <label class="motion-control"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4" /></svg><input type="checkbox" data-motion-toggle /> {t('Reducir movimiento', 'Reduce motion')}</label>
             </div>
           </details>
-          <a class="button button-primary" href={dashboardUrl}>Dashboard <span aria-hidden="true">↗</span></a>
+          <a class="button button-primary" href={dashboardUrl} data-dashboard-link>Dashboard <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </header>
@@ -295,7 +295,7 @@ const outcomes = {
         <nav aria-label={t("Recursos", "Resources")}>
           <a href="https://cwe.mitre.org/top25/">MITRE CWE Top 25</a>
           <a href="https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html">{t("Guía de OWASP", "OWASP guide")}</a>
-          <a href={dashboardUrl}>{t('Entrar al dashboard', 'Open dashboard')} <span aria-hidden="true">↗</span></a>
+          <a href={dashboardUrl} data-dashboard-link>{t('Entrar al dashboard', 'Open dashboard')} <span aria-hidden="true">↗</span></a>
         </nav>
       </div>
     </footer>

@@ -1,4 +1,30 @@
 const root = document.documentElement;
+
+// Preferencias que llegan desde el dashboard (?tema=…&movimiento=…): el dashboard vive en
+// otro dominio y no comparte localStorage. Se guardan, se quitan de la URL y, más abajo,
+// se aplican como cualquier preferencia guardada. El idioma lo decide la ruta (/ o /en/).
+(() => {
+  const url = new URL(window.location.href);
+  const valid: Record<string, { key: string; values: readonly string[] }> = {
+    tema: { key: 'gatekeeper-theme', values: ['system', 'light', 'dark'] },
+    movimiento: { key: 'gatekeeper-motion', values: ['reduce', 'system'] },
+    idioma: { key: 'gatekeeper-language', values: ['es', 'en'] },
+  };
+  let found = false;
+  for (const [name, { key, values }] of Object.entries(valid)) {
+    const value = url.searchParams.get(name);
+    if (value === null) continue;
+    found = true;
+    url.searchParams.delete(name);
+    if (!values.includes(value)) continue;
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Sin almacenamiento, la página sigue con sus valores por defecto.
+    }
+  }
+  if (found) history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+})();
 const preferences = document.querySelector<HTMLDetailsElement>('[data-preferences]');
 const themeSwitch = document.querySelector<HTMLElement>('[data-theme-switch]');
 const radios = Array.from(themeSwitch?.querySelectorAll<HTMLInputElement>('input[type="radio"]') ?? []);
@@ -106,3 +132,20 @@ languageSelect?.addEventListener('change', () => {
   storePreference('gatekeeper-language', languageSelect.value);
   window.location.assign(target + window.location.hash);
 });
+
+// Enlaces al dashboard: llevan el tema, el idioma de esta página y el movimiento para que
+// el dashboard se abra igual. Se actualizan al cambiar cualquier preferencia.
+const dashboardLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-dashboard-link]')];
+const syncDashboardLinks = () => {
+  for (const link of dashboardLinks) {
+    link.dataset.base ??= link.href;
+    const url = new URL(link.dataset.base);
+    url.searchParams.set('tema', root.dataset.theme ?? 'system');
+    url.searchParams.set('idioma', root.lang === 'en' ? 'en' : 'es');
+    url.searchParams.set('movimiento', root.dataset.motion === 'reduce' ? 'reduce' : 'system');
+    link.href = url.toString();
+  }
+};
+syncDashboardLinks();
+document.addEventListener('gatekeeper:motion-change', syncDashboardLinks);
+new MutationObserver(syncDashboardLinks).observe(root, { attributes: true, attributeFilter: ['data-theme'] });

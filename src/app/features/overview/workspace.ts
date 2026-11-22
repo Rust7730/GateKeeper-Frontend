@@ -28,6 +28,7 @@ import { Metrics } from '../../core/models/metrics.model';
 import { SecurityEvent } from '../../core/models/security-event.model';
 import { ConsolePage } from '../dashboard/console-page';
 import { DocsPage } from '../dashboard/docs-page';
+import { withPreferences } from './preferences-sync';
 import { ThreatChart, type ThreatPoint } from './threat-chart';
 import { WorkspacePreferences } from './workspace-preferences';
 import { WorkspaceSettings } from './workspace-settings';
@@ -311,7 +312,15 @@ export class Workspace implements OnInit {
   readonly preferences = inject(WorkspacePreferences);
   readonly t = (text: string, english?: string) => this.preferences.text(text, english);
 
-  readonly landingUrl = environment.landingUrl;
+  /** Enlace a la landing en el idioma actual y con el tema y movimiento sincronizados. */
+  readonly landingUrl = computed(() => {
+    const english = this.preferences.language() === 'en';
+    return withPreferences(`${environment.landingUrl}${english ? 'en/' : ''}`, {
+      theme: this.preferences.theme(),
+      language: this.preferences.language(),
+      reducedMotion: this.preferences.reducedMotion(),
+    });
+  });
   readonly view = this.route.snapshot.data['view'] as WorkspaceView;
   readonly page = WORKSPACE_PAGES[this.view];
 
