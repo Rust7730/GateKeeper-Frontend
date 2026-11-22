@@ -1511,6 +1511,50 @@ footer { border-top: var(--stroke); }
 }
 :root[data-motion='reduce'] :is(.logo-spark, .art-bug use, .shield-body) { animation: none !important; }
 
+/* «Cómo funciona»: aparición y despliegue de las etapas.
+   ready → todo oculto en su posición inicial; in → entra en cascada (--i = índice).
+   Una línea punteada se dibuja detrás de las tarjetas uniendo los números. */
+.pipeline { position: relative; isolation: isolate; }
+.pipeline::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset-block: 2rem 2rem;
+  inset-inline-start: calc(1.1rem + 1.3rem - 1.5px);
+  width: 3px;
+  background: repeating-linear-gradient(to bottom, var(--edge) 0 .45rem, transparent .45rem .8rem);
+  transform-origin: top;
+}
+.pipeline[data-animate] li { --step: 280ms; }
+.pipeline[data-animate='ready']::before { transform: scaleY(0); }
+.pipeline[data-animate='ready'] li { opacity: 0; transform: translateX(2.5rem) rotate(2deg); box-shadow: none; }
+.pipeline[data-animate='ready'] .pipeline-number { transform: scale(0) rotate(-90deg); }
+.pipeline[data-animate='ready'] :is(li p, li > code) { opacity: 0; clip-path: inset(0 0 100% 0); }
+
+.pipeline[data-animate='in']::before { animation: pipeline-rail 1.3s cubic-bezier(.65, 0, .35, 1) 150ms both; }
+.pipeline[data-animate='in'] li {
+  animation: pipeline-card 620ms cubic-bezier(.34, 1.45, .64, 1) both;
+  animation-delay: calc(var(--i) * var(--step));
+}
+.pipeline[data-animate='in'] .pipeline-number {
+  animation: pipeline-pop 520ms cubic-bezier(.34, 1.7, .64, 1) both;
+  animation-delay: calc(var(--i) * var(--step) + 180ms);
+}
+.pipeline[data-animate='in'] :is(li p, li > code) {
+  animation: pipeline-unfold 480ms cubic-bezier(.23, 1, .32, 1) both;
+  animation-delay: calc(var(--i) * var(--step) + 340ms);
+}
+.pipeline[data-animate='in'] li > code { animation-delay: calc(var(--i) * var(--step) + 440ms); }
+
+@keyframes pipeline-rail { from { transform: scaleY(0); } }
+@keyframes pipeline-card {
+  0% { opacity: 0; transform: translateX(2.5rem) rotate(2deg); box-shadow: none; }
+  60% { opacity: 1; box-shadow: none; }
+  100% { opacity: 1; transform: none; box-shadow: var(--pop-sm); }
+}
+@keyframes pipeline-pop { from { transform: scale(0) rotate(-90deg); } }
+@keyframes pipeline-unfold { from { opacity: 0; clip-path: inset(0 0 100% 0); } }
+
 /* ═══════════════════════════════════════════════════════════════════
    Pantalla de carga minimalista: el logo con su barrido verde y una
    línea fina debajo. Si el JavaScript no corre, se retira sola a los 3 s.

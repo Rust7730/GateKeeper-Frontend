@@ -119,9 +119,9 @@ const outcomes = {
             <h2 data-scroll-title>{t("Del archivo original a una ", "From the original file to a ")}<span class="brush">{t("copia", "copy")}</span>{t(" lista para usar.", " you can use.")}</h2>
             <p>{t('Quien sube un archivo controla su extensión y el encabezado', 'The uploader controls the file extension and the')} <code>Content-Type</code>{t('. Gatekeeper comprueba el contenido antes de permitir una descarga.', ' header. Gatekeeper checks the contents before allowing a download.')}</p>
           </div>
-          <ol class="pipeline">
+          <ol class="pipeline" data-pipeline>
             {STATIONS.map((station, index) => (
-              <li>
+              <li style={`--i: ${index}`}>
                 <span class="pipeline-number" aria-hidden="true">0{index + 1}</span>
                 <div>
                   <h3>{localize(station.name)}</h3>
@@ -303,6 +303,36 @@ const outcomes = {
 
     <script>
       import '../scripts/preferences';
+
+      // «Cómo funciona»: las etapas aparecen y se despliegan al entrar en pantalla, y se
+      // rearman al salir del todo. Sin JavaScript o con movimiento reducido se ven completas.
+      const pipeline = document.querySelector<HTMLElement>('[data-pipeline]');
+      if (pipeline) {
+        const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const still = () =>
+          motionQuery.matches || document.documentElement.dataset.motion === 'reduce';
+        const arm = () => {
+          if (still()) delete pipeline.dataset.animate;
+          else if (pipeline.dataset.animate !== 'in') pipeline.dataset.animate = 'ready';
+        };
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (still()) continue;
+              if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+                pipeline.dataset.animate = 'in';
+              } else if (!entry.isIntersecting) {
+                pipeline.dataset.animate = 'ready';
+              }
+            }
+          },
+          { threshold: [0, 0.25] },
+        );
+        arm();
+        observer.observe(pipeline);
+        motionQuery.addEventListener('change', arm);
+        document.addEventListener('gatekeeper:motion-change', arm);
+      }
 
       // Pantalla de carga: se retira al cargar todo, con un mínimo breve para que no parpadee.
       const loader = document.querySelector<HTMLElement>('[data-loader]');
