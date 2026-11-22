@@ -46,7 +46,7 @@ export const WORKSPACE_PAGES = {
   },
   keys: {
     title: 'Obtener clave API',
-    description: 'Genera una clave local para practicar la autenticación en la consola de pruebas.',
+    description: 'Crea y revoca las claves con las que tus aplicaciones se autentican en la API.',
   },
   explorer: {
     title: 'Consola de pruebas',

@@ -279,6 +279,8 @@ export const ENGLISH: Readonly<Record<string, string>> = {
   'Servicio temporalmente no disponible.': 'Service temporarily unavailable.',
   'No se pudo conectar con el servidor de autenticación.':
     'Could not reach the authentication server.',
+  'Crea y revoca las claves con las que tus aplicaciones se autentican en la API.':
+    'Create and revoke the keys your apps use to authenticate with the API.',
   'API simulada': 'Mock API',
   Acceso: 'Sign in',
 };

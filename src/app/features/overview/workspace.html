@@ -470,7 +470,7 @@
             </section>
           }
           @case ('keys') {
-            <section class="panel" [attr.aria-label]="t('Claves API de ejemplo')">
+            <section class="panel" [attr.aria-label]="t('Claves API', 'API keys')">
               <div class="panel-heading">
                 <h2>{{ t('Claves registradas') }}</h2>
                 <button
@@ -696,7 +696,7 @@
 >
   <form (submit)="$event.preventDefault(); createKey(keyName.value)">
     <h2 id="create-title">
-      {{ secret() ? t('Clave de ejemplo creada') : t('Crear clave API') }}
+      {{ secret() ? t('Clave API creada', 'API key created') : t('Crear clave API') }}
     </h2>
     <label [hidden]="!!secret()">
       {{ t('Nombre de la clave') }}
@@ -716,7 +716,14 @@
         "
     /></label>
     @if (secret()) {
-      <p>{{ t('Esta clave de ejemplo se muestra solo en este paso.') }}</p>
+      <p>
+        {{
+          t(
+            'Copia la clave ahora: no se vuelve a mostrar.',
+            'Copy the key now: it will not be shown again.'
+          )
+        }}
+      </p>
       <code class="secret">{{ secret() }}</code>
       <div class="doc-actions">
         <button type="button" class="button" (click)="copyKey()">{{ t('Copiar clave') }}</button
@@ -741,8 +748,14 @@
   <form method="dialog" (submit)="revokeKey()">
     <h2 id="revoke-title">{{ t('Revocar clave') }}</h2>
     <p>
-      {{ t('Se revocará esta clave de ejemplo.', 'This demo key will be revoked.') }}
-      {{ revokeTarget()?.name }}
+      {{ t('Vas a revocar la clave de', 'You are about to revoke the key for') }}
+      <strong>{{ revokeTarget()?.name }}</strong> (<code>{{ revokeTarget()?.prefix }}…</code>).
+      {{
+        t(
+          'Las aplicaciones que la usen dejarán de autenticarse de inmediato. Esta acción no se puede deshacer: para volver a conectarlas tendrás que crear una clave nueva.',
+          'Apps using it will stop authenticating immediately. This cannot be undone: to reconnect them you will need to create a new key.'
+        )
+      }}
     </p>
     <div class="dialog-actions">
       <button class="button" type="button" (click)="revokeDialog.close()">
