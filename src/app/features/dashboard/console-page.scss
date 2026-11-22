@@ -37,3 +37,47 @@
   color: var(--muted, var(--gk-text-muted));
   font-size: 0.82rem;
 }
+
+.console-field input[aria-invalid='true'] {
+  border-color: var(--chart-rejected);
+  box-shadow: 0 0 0 0.15rem var(--pastel-pink);
+}
+
+.console-field-error {
+  color: var(--chart-rejected);
+  font-size: 0.78rem;
+  font-weight: 500;
+  animation: console-shake 280ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes console-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-3px);
+  }
+
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+.tree-panel .panel-heading {
+  text-transform: uppercase;
+}
+
+/* Cambio de endpoint y respuesta nueva: entran con un fundido corto. */
+.endpoint-header-card,
+.response-body {
+  animation: console-swap 280ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes console-swap {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+}

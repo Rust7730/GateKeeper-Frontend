@@ -10,7 +10,9 @@ export interface ApiEndpoint {
   authMode: EndpointAuthMode;
   isMultipart?: boolean;
   summary: string;
+  summaryEn: string;
   description: string;
+  descriptionEn: string;
   requestBody?: string;
   responseExample: Record<string, unknown>;
   /** Código HTTP del ejemplo de respuesta (200 si se omite). */
@@ -30,6 +32,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Subir archivo para inspección (CDR + ClamAV + VirusTotal)',
     description:
       'Recibe un archivo multipart (campo "file", máx. 10 MiB), calcula SHA-256 en streaming y responde 202 con el UUID para consultar el veredicto.',
+    summaryEn: 'Upload a file for inspection (CDR + ClamAV + VirusTotal)',
+    descriptionEn:
+      'Receives a multipart file ("file" field, max. 10 MiB), computes SHA-256 while streaming and responds 202 with the UUID to check the verdict.',
     responseExample: {
       id: '3c7b078b-47f5-475e-a6f5-d0fc32c30b16',
       estado: 'pendiente',
@@ -47,6 +52,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Consultar estado y veredicto del archivo',
     description:
       'Devuelve el estado actual (pendiente, limpio, rechazado, en_cuarentena o error), tipo MIME real detectado, tamaño y SHA-256.',
+    summaryEn: 'Check the file status and verdict',
+    descriptionEn:
+      'Returns the current status (pending, clean, rejected, quarantined or error), the real detected MIME type, size and SHA-256.',
     responseExample: {
       id: '3c7b078b-47f5-475e-a6f5-d0fc32c30b16',
       estado: 'limpio',
@@ -65,6 +73,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Descargar copia limpia reconstruida',
     description:
       'Solo responde 200 cuando el estado es "limpio" (copia reconstruida sin EXIF ni JS). En cualquier otro estado responde 409 Conflict.',
+    summaryEn: 'Download the reconstructed clean copy',
+    descriptionEn:
+      'Only responds 200 when the status is "limpio" (clean copy rebuilt without EXIF or JS). Any other status responds 409 Conflict.',
     responseExample: {
       nota: 'En 200 OK devuelve el binario reconstruido (Content-Disposition: attachment). En otro estado devuelve 409 Conflict.',
     },
@@ -80,6 +91,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Listar archivos en cuarentena (JWT dashboard)',
     description:
       'Consulta archivos aislados por ClamAV o VirusTotal con nombre original, SHA-256, caducidad (30 días) y detalle de capas (K20).',
+    summaryEn: 'List quarantined files (dashboard JWT)',
+    descriptionEn:
+      'Lists files isolated by ClamAV or VirusTotal with original name, SHA-256, expiry (30 days) and per-layer detail (K20).',
     responseExample: {
       elementos: [],
       pagina: 1,
@@ -98,6 +112,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Liberar archivo de cuarentena (solo admin, re-CDR)',
     description:
       'Exige motivo de 20 a 500 caracteres (K18), registra en bitácora inmutable y reencola en el CDR antes de marcar limpio.',
+    summaryEn: 'Release a file from quarantine (admin only, re-CDR)',
+    descriptionEn:
+      'Requires a reason of 20 to 500 characters (K18), records it in the immutable audit log and requeues the file in the CDR before marking it clean.',
     requestBody: JSON.stringify(
       {
         motivo: 'Falso positivo verificado manualmente por SecOps #ticket-01',
@@ -123,6 +140,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Listado de archivos del dashboard (K20)',
     description:
       'Devuelve metadatos mínimos en archivos sin malware y detalle completo únicamente en archivos en cuarentena o con detección maliciosa.',
+    summaryEn: 'Dashboard file list (K20)',
+    descriptionEn:
+      'Returns minimal metadata for files without malware and full detail only for quarantined files or files with a malicious detection.',
     responseExample: {
       elementos: [],
       pagina: 1,
@@ -141,6 +161,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     summary: 'Métricas de inspecciones y amenazas (7 días)',
     description:
       'Totales por estado, amenazas agrupadas por día, bloqueos por capa y top aplicaciones.',
+    summaryEn: 'Inspection and threat metrics (7 days)',
+    descriptionEn:
+      'Totals by status, threats grouped by day, blocks by layer and top applications.',
     responseExample: {
       periodo: '7d',
       totales: { pendiente: 0, limpio: 0, en_cuarentena: 0, rechazado: 0, error: 0, procesados: 0 },
@@ -156,6 +179,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     authMode: 'jwt',
     summary: 'Listado de API keys activas y revocadas (solo admin)',
     description: 'Devuelve el prefijo y estado de cada API key sin exponer nunca el secreto.',
+    summaryEn: 'Active and revoked API keys (admin only)',
+    descriptionEn:
+      'Returns the prefix and status of each API key without ever exposing the secret.',
     responseExample: {
       nota: 'Devuelve la lista JSON de API keys registradas.',
     },
@@ -170,6 +196,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     authMode: 'none',
     summary: 'Estado de disponibilidad de la API',
     description: 'Endpoint público de salud que responde 200 {"estado": "ok"}.',
+    summaryEn: 'API availability status',
+    descriptionEn: 'Public health endpoint that responds 200 {"estado": "ok"}.',
     responseExample: {
       estado: 'ok',
     },

@@ -1,6 +1,8 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 
+import { isUuid } from '../../core/api/backend-adapter';
 import { TokenStore } from '../../core/auth/token-store';
+import { WorkspacePreferences } from '../overview/workspace-preferences';
 import { API_ENDPOINTS, ApiEndpoint, groupEndpoints } from './api-endpoints';
 
 interface RequestResult {
@@ -23,6 +25,10 @@ interface RequestResult {
 })
 export class ConsolePage {
   private readonly tokens = inject(TokenStore);
+  private readonly preferences = inject(WorkspacePreferences);
+  /** Texto en el idioma elegido en Ajustes (la consola siempre trae las dos versiones). */
+  readonly t = (spanish: string, english: string) => this.preferences.text(spanish, english);
+  readonly english = computed(() => this.preferences.language() === 'en');
 
   // Datos de la ruta (se enlazan por withComponentInputBinding).
   readonly folder = input<string | undefined>(undefined);
@@ -71,6 +77,19 @@ export class ConsolePage {
     return typeof resp === 'string' ? resp : JSON.stringify(resp, null, 2);
   });
 
+  readonly summary = computed(() =>
+    this.english() ? this.selectedEndpoint().summaryEn : this.selectedEndpoint().summary,
+  );
+  readonly description = computed(() =>
+    this.english() ? this.selectedEndpoint().descriptionEn : this.selectedEndpoint().description,
+  );
+
+  /** El :id va en la URL: si no es un UUID se avisa aquí, sin mandar la petición. */
+  readonly parameterInvalid = computed(() => {
+    const value = this.parameter().trim();
+    return this.parameterName() !== null && value !== '' && !isUuid(value);
+  });
+
   readonly parameterName = computed<string | null>(() => {
     const match = this.selectedEndpoint().path.match(/:(\w+)/);
     return match ? match[1] : null;
@@ -111,24 +130,32 @@ export class ConsolePage {
     const endpoint = this.selectedEndpoint();
     const param = this.parameterName();
     if (param && !this.parameter().trim()) {
-      this.result.set({
-        status: 422,
-        statusText: 'Unprocessable Entity',
-        contentType: 'application/json',
-        latency: 0,
-        body: { detail: `Falta el parámetro :${param} (UUID del archivo).` },
-      });
+      this.localError(
+        this.t(
+          `Falta el parámetro :${param} (UUID del archivo).`,
+          `Missing the :${param} parameter (file UUID).`,
+        ),
+      );
+      return;
+    }
+
+    if (param && this.parameterInvalid()) {
+      this.localError(
+        this.t(
+          `El parámetro :${param} debe ser un UUID (p. ej. 3c7b078b-47f5-475e-a6f5-d0fc32c30b16). No se envió la petición.`,
+          `The :${param} parameter must be a UUID (e.g. 3c7b078b-47f5-475e-a6f5-d0fc32c30b16). The request was not sent.`,
+        ),
+      );
       return;
     }
 
     if (endpoint.isMultipart && !this.selectedFile()) {
-      this.result.set({
-        status: 422,
-        statusText: 'Unprocessable Entity',
-        contentType: 'application/json',
-        latency: 0,
-        body: { detail: 'Selecciona un archivo antes de ejecutar POST /v1/files.' },
-      });
+      this.localError(
+        this.t(
+          'Selecciona un archivo antes de ejecutar POST /v1/files.',
+          'Choose a file before running POST /v1/files.',
+        ),
+      );
       return;
     }
 
@@ -154,13 +181,12 @@ export class ConsolePage {
     } else if (endpoint.requestBody !== undefined) {
       const rawBody = this.body();
       if (!this.isJsonObject(rawBody)) {
-        this.result.set({
-          status: 422,
-          statusText: 'Unprocessable Entity',
-          contentType: 'application/json',
-          latency: 0,
-          body: { detail: 'El cuerpo debe ser un objeto JSON válido.' },
-        });
+        this.localError(
+          this.t(
+            'El cuerpo debe ser un objeto JSON válido.',
+            'The body must be a valid JSON object.',
+          ),
+        );
         return;
       }
       headers['Content-Type'] = 'application/json';
@@ -217,11 +243,27 @@ export class ConsolePage {
         statusText: 'Network Error',
         contentType: 'application/json',
         latency: Math.max(1, Math.round(performance.now() - start)),
-        body: { detail: 'No se pudo completar la petición HTTP.' },
+        body: {
+          detail: this.t(
+            'No se pudo completar la petición HTTP.',
+            'The HTTP request could not be completed.',
+          ),
+        },
       });
     } finally {
       this.isRunningRequest.set(false);
     }
+  }
+
+  /** Error de validación local: se muestra como 422 y no sale ninguna petición. */
+  private localError(detail: string): void {
+    this.result.set({
+      status: 422,
+      statusText: 'Unprocessable Entity',
+      contentType: 'application/json',
+      latency: 0,
+      body: { detail },
+    });
   }
 
   private isJsonObject(body: string): boolean {
