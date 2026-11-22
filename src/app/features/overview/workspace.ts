@@ -4,6 +4,7 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
 import { AdminFilesApi } from '../../core/api/admin-files.api';
 import { ApiKeysApi } from '../../core/api/api-keys.api';
 import { AuditApi } from '../../core/api/audit.api';
@@ -292,6 +293,7 @@ export class Workspace implements OnInit {
   readonly preferences = inject(WorkspacePreferences);
   readonly t = (text: string, english?: string) => this.preferences.text(text, english);
 
+  readonly landingUrl = environment.landingUrl;
   readonly view = this.route.snapshot.data['view'] as WorkspaceView;
   readonly page = WORKSPACE_PAGES[this.view];
 
