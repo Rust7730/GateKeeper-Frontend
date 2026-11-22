@@ -234,6 +234,11 @@
                   ><span>
                     {{ t('Rechazos') }} <b>{{ totals().rejected }}</b>
                   </span>
+                  @if (totals().errors > 0) {
+                    <span>
+                      {{ t('Errores de análisis', 'Scan errors') }} <b>{{ totals().errors }}</b>
+                    </span>
+                  }
                 </div>
               </div>
               <gk-threat-chart

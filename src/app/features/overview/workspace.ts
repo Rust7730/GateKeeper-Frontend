@@ -42,7 +42,7 @@ const STATUS_LABEL: Record<ApiFileStatus, FileStatus> = {
   quarantined: 'En cuarentena',
   rejected: 'Rechazado',
   pending: 'Pendiente',
-  error: 'Rechazado',
+  error: 'Error',
   unknown: 'Pendiente',
 };
 
@@ -253,6 +253,7 @@ export class Workspace implements OnInit {
       totalFiles: m ? m.totals.processed + m.totals.pending : this.files().length,
       quarantined: m ? m.totals.quarantined : this.quarantine().length,
       rejected: m ? m.totals.rejected : 0,
+      errors: m ? m.totals.error : 0,
       alertsCount: m ? m.totals.quarantined + m.totals.rejected : this.alerts().length,
     };
   });
@@ -266,7 +267,13 @@ export class Workspace implements OnInit {
   readonly describeDay = (point: ThreatPoint): string =>
     `${point.day}: ${point.quarantined}${this.t(' en cuarentena y ', ' quarantined and ')}${point.rejected}${this.t(' rechazos', ' rejections')}`;
 
-  readonly statuses: readonly FileStatus[] = ['Limpio', 'En cuarentena', 'Rechazado', 'Pendiente'];
+  readonly statuses: readonly FileStatus[] = [
+    'Limpio',
+    'En cuarentena',
+    'Rechazado',
+    'Error',
+    'Pendiente',
+  ];
 
   readonly collapsed = signal(this.readCollapsed());
   readonly query = signal('');

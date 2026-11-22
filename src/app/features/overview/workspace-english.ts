@@ -180,4 +180,5 @@ export const ENGLISH: Readonly<Record<string, string>> = {
   'Gestión de claves de autenticación': 'Manage authentication keys',
   'Administra tokens activos, scopes asignados y límites de tasa (rate limiting).':
     'Shows active tokens, assigned scopes and rate limits.',
+  Error: 'Error',
 };

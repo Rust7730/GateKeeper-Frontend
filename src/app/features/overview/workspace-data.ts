@@ -63,7 +63,8 @@ export const WORKSPACE_PAGES = {
 } as const;
 
 export type WorkspaceView = keyof typeof WORKSPACE_PAGES;
-export type FileStatus = 'Limpio' | 'En cuarentena' | 'Rechazado' | 'Pendiente' | 'Liberado';
+export type FileStatus =
+  'Limpio' | 'En cuarentena' | 'Rechazado' | 'Error' | 'Pendiente' | 'Liberado';
 
 export interface InspectedFile {
   id: string;

@@ -498,6 +498,7 @@ td:first-child {
 }
 
 .chip[data-status='Rechazado'],
+.chip[data-status='Error'],
 .chip[data-status='Revocada'] {
   background: var(--status-blocked-surface);
   color: var(--status-blocked-ink);
