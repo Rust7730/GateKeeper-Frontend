@@ -246,7 +246,7 @@
                 [labels]="chartLabels()"
                 [describe]="describeDay"
               />
-              <div class="chart-footer">{{ t('Datos en vivo') }}</div>
+              <div class="chart-footer">{{ t('Datos en vivo', 'Live data') }}</div>
             </section>
           }
         </header>
@@ -255,7 +255,7 @@
           <p class="notice" role="status">{{ t(notice()) }}</p>
         }
         @if (loadError()) {
-          <p class="permission" role="alert">{{ loadError() }}</p>
+          <p class="permission" role="alert">{{ t(loadError()) }}</p>
         }
 
         @switch (view) {
@@ -378,7 +378,11 @@
               </section>
             } @else {
               <section class="panel empty">
-                {{ loading() ? t('Cargando...') : t('Archivo no encontrado.') }}
+                @if (loading()) {
+                  {{ t('Cargando...') }}
+                } @else if (!loadError()) {
+                  {{ t('Archivo no encontrado.') }}
+                }
               </section>
             }
           }
@@ -392,7 +396,8 @@
                 <p class="permission">
                   {{
                     t(
-                      'El rol Analista puede consultar los archivos. Selecciona Administrador en el selector de demostración para probar una liberación.'
+                      'El rol Analista puede consultar los archivos. Solo un Administrador puede liberarlos.',
+                      'Analysts can view files. Only an Administrator can release them.'
                     )
                   }}
                 </p>
@@ -478,7 +483,12 @@
               </div>
               @if (!administrator()) {
                 <p class="permission">
-                  {{ t('Selecciona el rol Administrador de ejemplo para revocar claves.') }}
+                  {{
+                    t(
+                      'Solo un Administrador puede crear o revocar claves.',
+                      'Only an Administrator can create or revoke keys.'
+                    )
+                  }}
                 </p>
               }
               <div class="table-wrap">

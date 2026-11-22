@@ -208,4 +208,23 @@ export const ENGLISH: Readonly<Record<string, string>> = {
   'Tiempo de análisis agotado': 'Scan timed out',
   'Error interno del analizador': 'Internal scanner error',
   'Motivo desconocido': 'Unknown reason',
+  'Recurso no encontrado.': 'Resource not found.',
+  'Archivo no encontrado.': 'File not found.',
+  'Cargando...': 'Loading...',
+  'No tienes permisos de administrador para esta acción.':
+    'You need administrator permissions for this action.',
+  'El archivo ya no está en cuarentena.': 'The file is no longer quarantined.',
+  'Límite de peticiones alcanzado. Intenta en unos segundos.':
+    'Request limit reached. Try again in a few seconds.',
+  'No se pudieron cargar los archivos.': 'Could not load files.',
+  'No se pudo cargar la bitácora.': 'Could not load the audit log.',
+  'No se pudieron cargar las claves API.': 'Could not load API keys.',
+  'No se pudo liberar el archivo.': 'Could not release the file.',
+  'No se pudo crear la clave API.': 'Could not create the API key.',
+  'No se pudo revocar la clave API.': 'Could not revoke the API key.',
+  'El motivo debe tener al menos 20 caracteres.': 'The reason must be at least 20 characters long.',
+  'Archivo reencolado en el CDR para reconstrucción y liberación.':
+    'File queued in the CDR for reconstruction and release.',
+  'Clave API creada correctamente.': 'API key created.',
+  'Clave API revocada de inmediato.': 'API key revoked immediately.',
 };
