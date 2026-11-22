@@ -134,7 +134,7 @@ export const STATIONS = [
 ] as const;
 
 const SAMPLE_ID = '3f2b9c1e-7a41-4c0e-9d2b-5e8f1a6c0d47';
-const SAMPLE_URL = 'https://gatekeeper.example/v1/files';
+const SAMPLE_URL = 'https://35-168-228-65.sslip.io/v1/files';
 
 export const INTEGRATION_STEPS = [
   {
@@ -147,27 +147,27 @@ export const INTEGRATION_STEPS = [
       bash: {
         command: [
           `curl -i -X POST ${SAMPLE_URL} \\`,
-          '  -H "X-API-Key: $GATEKEEPER_API_KEY" \\',
+          '  -H "Authorization: Bearer $GATEKEEPER_API_KEY" \\',
           '  -F "file=@foto.jpg"',
         ],
         output: [
           'HTTP/1.1 202 Accepted',
           'content-type: application/json',
           '',
-          `{"id":"${SAMPLE_ID}","status":"pending"}`,
+          `{"id":"${SAMPLE_ID}","estado":"pendiente"}`,
         ],
       },
       powershell: {
         command: [
           `Invoke-RestMethod -Method Post -Uri ${SAMPLE_URL} \``,
-          '  -Headers @{ "X-API-Key" = $env:GATEKEEPER_API_KEY } `',
+          '  -Headers @{ "Authorization" = "Bearer $env:GATEKEEPER_API_KEY" } `',
           '  -Form @{ file = Get-Item .\\foto.jpg }',
         ],
         output: [
           '',
-          'id                                   status',
+          'id                                   estado',
           '--                                   ------',
-          `${SAMPLE_ID} pending`,
+          `${SAMPLE_ID} pendiente`,
           '',
         ],
       },
@@ -183,26 +183,26 @@ export const INTEGRATION_STEPS = [
       bash: {
         command: [
           `curl -s ${SAMPLE_URL}/${SAMPLE_ID} \\`,
-          '  -H "X-API-Key: $GATEKEEPER_API_KEY" | jq',
+          '  -H "Authorization: Bearer $GATEKEEPER_API_KEY" | jq',
         ],
         output: [
           '{',
           `  "id": "${SAMPLE_ID}",`,
-          '  "status": "clean",',
-          '  "detectedType": "image/jpeg"',
+          '  "estado": "limpio",',
+          '  "tipo_detectado": "image/jpeg"',
           '}',
         ],
       },
       powershell: {
         command: [
           `Invoke-RestMethod -Uri ${SAMPLE_URL}/${SAMPLE_ID} \``,
-          '  -Headers @{ "X-API-Key" = $env:GATEKEEPER_API_KEY }',
+          '  -Headers @{ "Authorization" = "Bearer $env:GATEKEEPER_API_KEY" }',
         ],
         output: [
           '',
-          'id                                   status detectedType',
-          '--                                   ------ ------------',
-          `${SAMPLE_ID} clean  image/jpeg`,
+          'id                                   estado tipo_detectado',
+          '--                                   ------ --------------',
+          `${SAMPLE_ID} limpio image/jpeg`,
           '',
         ],
       },
@@ -218,7 +218,7 @@ export const INTEGRATION_STEPS = [
       bash: {
         command: [
           `curl -s ${SAMPLE_URL}/${SAMPLE_ID}/content \\`,
-          '  -H "X-API-Key: $GATEKEEPER_API_KEY" \\',
+          '  -H "Authorization: Bearer $GATEKEEPER_API_KEY" \\',
           '  -o foto-limpia.jpg -w "%{http_code}\\n"',
         ],
         output: ['200'],
@@ -226,7 +226,7 @@ export const INTEGRATION_STEPS = [
       powershell: {
         command: [
           `Invoke-WebRequest -Uri ${SAMPLE_URL}/${SAMPLE_ID}/content \``,
-          '  -Headers @{ "X-API-Key" = $env:GATEKEEPER_API_KEY } `',
+          '  -Headers @{ "Authorization" = "Bearer $env:GATEKEEPER_API_KEY" } `',
           '  -OutFile foto-limpia.jpg',
         ],
         output: [],

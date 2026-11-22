@@ -54,3 +54,32 @@ jobs:
           git add -A
           git commit -q -m "chore(release): build dashboard ${ORIGEN_SHA}"
           git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" dist-main:refs/heads/dist-main
+
+      - name: Instalar y compilar Landing (Astro)
+        env:
+          PUBLIC_DASHBOARD_URL: https://35-168-228-65.sslip.io/
+        run: |
+          npm --prefix landing ci
+          npm --prefix landing run build
+
+      - name: Publicar bundle estático de Landing en rama dist-landing
+        env:
+          ORIGEN_SHA: ${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          BUNDLE="$PWD/landing/dist"
+          test -f "$BUNDLE/index.html"
+
+          TRABAJO="$(mktemp -d)"
+          cp -r "$BUNDLE"/. "$TRABAJO"/
+          rm -rf "$TRABAJO/.git"
+          printf '%s\n' "$ORIGEN_SHA" > "$TRABAJO/.commit-sha"
+
+          cd "$TRABAJO"
+          git init -q -b dist-landing
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "chore(release): build landing ${ORIGEN_SHA}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" dist-landing:refs/heads/dist-landing
