@@ -140,7 +140,19 @@ Endpoints que consume este frontend (la especificación completa de los 22 endpo
 
 #### Interfaz de Usuario (Frontend)
 
-Capturas tomadas con el backend simulado del entorno de desarrollo (datos de demostración, incluidos nombres de archivo hostiles).
+**Con el backend real.** El 23/11/2026 se levantó el sistema completo en local (API, `coordinator`, `worker` con CDR aislado, PostgreSQL 16, los dos Redis y ClamAV con la firma de prueba EICAR) y se sirvió el _build_ de producción del dashboard en el mismo origen que la API. Todos los datos de estas capturas vienen de esa API: el inicio de sesión usa contraseña y un código TOTP real.
+
+| Vista                                                                            | Captura                                                                            |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Segundo factor TOTP después de la contraseña                                     | ![Paso TOTP](docs/evidencias/09-dashboard-login-totp.png)                          |
+| Resumen: 33 archivos recibidos, 1 en cuarentena y la gráfica de amenazas por día | ![Resumen con backend real](docs/evidencias/10-dashboard-resumen-backend-real.png) |
+| Archivos: búsqueda, filtro por estado y nombres reducidos por K20                | ![Archivos](docs/evidencias/11-dashboard-archivos.png)                             |
+| Cuarentena: el EICAR detectado por ClamAV, con su resumen lateral                | ![Cuarentena con EICAR](docs/evidencias/12-dashboard-cuarentena-eicar.png)         |
+| Alertas: dos rechazos por firma y la cuarentena                                  | ![Alertas](docs/evidencias/13-dashboard-alertas.png)                               |
+| Auditoría: el intento con un código TOTP reutilizado queda como «Inicio fallido» | ![Auditoría](docs/evidencias/14-dashboard-auditoria-totp-reutilizado.png)          |
+| Tema oscuro                                                                      | ![Tema oscuro](docs/evidencias/15-dashboard-tema-oscuro.png)                       |
+
+**Con el backend simulado.** Estas vistas usan los datos de demostración del entorno de desarrollo, que incluyen nombres de archivo hostiles.
 
 | Vista                                     | Captura                                                                                         |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -153,46 +165,57 @@ Capturas tomadas con el backend simulado del entorno de desarrollo (datos de dem
 | Dashboard: consola de pruebas             | ![Consola de pruebas con respuestas posibles](docs/evidencias/07-dashboard-consola-pruebas.png) |
 | Dashboard: documentación de integración   | ![Documentación de integración](docs/evidencias/08-dashboard-documentacion.png)                 |
 
-En la captura de cuarentena, los nombres `foto.jpg .php` y `<script>alert(1)</script>.jpg` aparecen como texto plano: el contenido hostil no se ejecuta.
+En la captura de cuarentena simulada, los nombres `foto.jpg .php` y `<script>alert(1)</script>.jpg` aparecen como texto plano: el contenido hostil no se ejecuta.
 
 #### Peticiones y Respuestas de la API
 
-La **Consola de pruebas** del dashboard ejecuta peticiones reales contra la API y muestra el código de estado, la latencia y el cuerpo JSON. Para cada endpoint también lista todas las respuestas posibles. Ejemplo de la secuencia de ingesta:
+Las peticiones se capturaron con **Swagger UI** (sobre el `/openapi.json` de la API) y con **curl**, contra el mismo backend local. Las 18 capturas están en la carpeta [`evidencias/`](https://github.com/Rust7730/GateKeeper-API/tree/main/evidencias) de GateKeeper-API y se describen en [su README](https://github.com/Rust7730/GateKeeper-API#52-evidencias-de-funcionamiento-capturas-de-pantalla). Tres de ellas:
+
+| Petición                                                                                                | Captura                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Swagger UI: `GET /v1/admin/files/{id}` del EICAR, con las capas `firma`, `cdr`, `clamav` y `virustotal` | ![Detalle de administración](https://raw.githubusercontent.com/Rust7730/GateKeeper-API/main/evidencias/09-admin-detalle-cuarentena.png) |
+| curl: `413`, `415`, ejecutable ELF disfrazado de `.jpg` → `rechazado`, y `409` al descargarlo           | ![Errores y rechazo](https://raw.githubusercontent.com/Rust7730/GateKeeper-API/main/evidencias/13-curl-413-415-rechazado-409.png)       |
+| curl: la copia que entrega el CDR ya no tiene EXIF ni coordenadas GPS                                   | ![CDR sin metadatos](https://raw.githubusercontent.com/Rust7730/GateKeeper-API/main/evidencias/15-curl-cdr-sin-metadatos.png)           |
+
+Respuestas reales de la secuencia de ingesta (la misma que ejecuta la **Consola de pruebas** del dashboard):
 
 ```json
 // POST /v1/files -> 202 Accepted
-{ "id": "3c7b078b-47f5-475e-a6f5-d0fc32c30b16", "estado": "pendiente" }
+{ "id": "34e032c3-4ae3-4b24-9994-2557a8337fe8", "estado": "pendiente" }
 
-// GET /v1/files/3c7b078b-47f5-475e-a6f5-d0fc32c30b16 -> 200 OK
+// GET /v1/files/34e032c3-4ae3-4b24-9994-2557a8337fe8 -> 200 OK
 {
-  "id": "3c7b078b-47f5-475e-a6f5-d0fc32c30b16",
+  "id": "34e032c3-4ae3-4b24-9994-2557a8337fe8",
   "estado": "limpio",
   "tipo_detectado": "image/jpeg",
-  "tamano_bytes": 48213,
-  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "creado_en": "2026-11-21T18:12:04Z",
-  "analizado_en": "2026-11-21T18:12:06Z"
+  "tamano_bytes": 5133,
+  "sha256": "d5ac7f57c06ca9b4e0491ddc187e5e6cacd0e03687a9c09d57dc52862ba812a1",
+  "creado_en": "2026-11-23T00:41:57.543078-06:00",
+  "analizado_en": "2026-11-23T00:41:58.739171-06:00"
 }
 
-// GET /v1/files/{id}/content con un archivo en cuarentena -> 409 Conflict
+// GET /v1/files/{id}/content de un archivo rechazado -> 409 Conflict
 { "detail": "Conflict" }
 ```
 
 #### Pruebas de Seguridad / Análisis
 
-En cada commit, Husky corre lint-staged, la revisión de índices y el escáner de seguridad. GitHub Actions corre la verificación completa (`npm run verify`) antes de publicar cada build:
+En cada commit, Husky corre lint-staged, la revisión de índices y el escáner de seguridad (`check-security`: prohíbe `innerHTML`, `bypassSecurityTrust*`, tokens en `localStorage`, entre otros). GitHub Actions corre la verificación completa antes de publicar cada build.
 
-```text
-$ npm run verify
-All files pass linting.                      # ESLint + Stylelint
-✔ Índices de carpetas al día
-✔ Sin patrones de seguridad prohibidos       # check-security: innerHTML, bypassSecurityTrust, tokens en storage…
- Test Files  10 passed (10)
-      Tests  87 passed (87)                  # Vitest
-Application bundle generation complete.      # build de producción
-```
+| Herramienta                                                                          | Resultado                                                                                                        | Captura                                                                                                    |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (ESLint, Stylelint, índices, patrones de seguridad, Vitest y build) | Sin errores; **87/87 pruebas**; build correcto (un aviso de presupuesto de estilos en `workspace.scss`)          | [16-frontend-npm-verify.png](docs/evidencias/16-frontend-npm-verify.png)                                   |
+| `npm audit` del dashboard                                                            | **0** vulnerabilidades en producción; 9 moderadas solo en herramientas de desarrollo (`minimatch` vía ESLint)    | [17-frontend-npm-audit.png](docs/evidencias/17-frontend-npm-audit.png)                                     |
+| `npm audit` de la landing                                                            | 5 avisos en Astro 5 y sus dependencias de compilación; ninguno alcanza al sitio estático publicado (ver la nota) | [17-frontend-npm-audit.png](docs/evidencias/17-frontend-npm-audit.png)                                     |
+| Prueba manual contra el backend real                                                 | Un código TOTP reutilizado se rechaza y queda en la auditoría                                                    | [14-dashboard-auditoria-totp-reutilizado.png](docs/evidencias/14-dashboard-auditoria-totp-reutilizado.png) |
 
-Las pruebas unitarias cubren el adaptador del backend (validación de cada DTO, K20, valores hostiles), el backend simulado con nombres hostiles, los interceptores, la consola, la agrupación de la gráfica por día local y la sincronización de preferencias. Las pruebas de seguridad del backend (matriz de 526 ataques, Bandit, OWASP ZAP y Trivy) están documentadas en el README de [GateKeeper-API](https://github.com/Rust7730/GateKeeper-API).
+![npm run verify](docs/evidencias/16-frontend-npm-verify.png)
+
+![npm audit](docs/evidencias/17-frontend-npm-audit.png)
+
+> **Nota sobre la landing.** El aviso crítico de Astro afecta a `define:vars` y a los parámetros de _server islands_; la landing no usa ninguno y se compila como sitio estático sin adaptador. Los avisos altos (`sharp`/libvips y `zod`) y el bajo (`esbuild`) solo se ejecutan al compilar o en el servidor de desarrollo. Aun así, la actualización a Astro 7 queda en el trabajo futuro.
+
+Las pruebas unitarias cubren el adaptador del backend (validación de cada DTO, K20, valores hostiles), el backend simulado con nombres hostiles, los interceptores, la consola, la agrupación de la gráfica por día local y la sincronización de preferencias. Las pruebas de seguridad del backend (2078 pruebas en la CI, matriz de ataques, Bandit, `pip-audit`, OWASP ZAP y Trivy) están documentadas en el README de [GateKeeper-API](https://github.com/Rust7730/GateKeeper-API).
 
 ## Conclusiones y Trabajo Futuro
 
@@ -203,6 +226,8 @@ Las pruebas unitarias cubren el adaptador del backend (validación de cada DTO, 
   3. Registrar en el backend el último uso de cada API key para mostrarlo en el resumen del cliente.
   4. Que el endpoint de métricas acepte la zona horaria del usuario, para no tener que agrupar la gráfica en el navegador.
   5. Webhooks firmados hacia las aplicaciones cliente, mostrados en el dashboard, para no depender del _polling_.
+  6. Actualizar la landing a Astro 7 para cerrar los avisos de `npm audit`, aunque hoy no afecten al sitio publicado.
+  7. Reducir el CSS de `workspace.scss` por debajo del presupuesto de 16 kB que marca el build.
 
 ---
 
