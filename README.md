@@ -27,7 +27,6 @@ Este repositorio contiene la parte web de **Gatekeeper**: el **Dashboard SecOps*
 | **Repositorio de Código Fuente (Backend)**  | `https://github.com/Rust7730/GateKeeper-API`      | Público (rama `main`).                                                                                     |
 | **Aplicación Web / Dashboard SecOps + API** | `https://35-168-228-65.sslip.io/`                 | AWS EC2 con HTTPS (Let's Encrypt). Requiere usuario del equipo con TOTP.                                   |
 | **Landing Page pública**                    | `https://34-231-193-98.sslip.io/`                 | AWS EC2 aislada con HTTPS. Español en `/` e inglés en `/en/`.                                              |
-| **Video Demostrativo (3-5 min)**            | Pendiente                                         | Se agregará el enlace al publicarlo.                                                                       |
 
 ## Sección II: Declaración de Licencia de Software
 
